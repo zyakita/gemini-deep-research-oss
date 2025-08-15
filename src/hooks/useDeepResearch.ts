@@ -171,10 +171,13 @@ function useDeepResearch() {
               return { taskId: task.id, success: true };
             } catch (error) {
               taskStore.updateResearchTask({ ...task, processing: false });
-              throw new ResearchError(`Failed to process research task: ${task.title}`, {
-                code: 'TASK_PROCESSING_FAILED',
-                taskId: task.id,
-              });
+              throw new ResearchError(
+                `Failed to process research task: ${task.title}, ${error.message}`,
+                {
+                  code: 'TASK_PROCESSING_FAILED',
+                  taskId: task.id,
+                }
+              );
             }
           },
           maxConcurrency
@@ -385,7 +388,7 @@ function createSmoothStreamingHandler(
     streamingInterval = setInterval(() => {
       if (buffer.length === 0) return;
 
-      let chunkSize = adaptiveSpeed
+      const chunkSize = adaptiveSpeed
         ? Math.min(
             maxChunkSize,
             Math.max(

@@ -1,6 +1,5 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { useState } from 'react';
 import SettingDialog from './components/Dialog/SettingDialog';
 import Header from './components/Internal/Header';
 import ResearchQnA from './components/Research/QnA';
@@ -11,8 +10,6 @@ import ResearchStepper from './components/Research/ResearchStepper';
 import ResearchTasks from './components/Research/Tasks';
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-screen-lg px-4 max-lg:max-w-screen-md">

@@ -6,7 +6,7 @@ import { useGlobalStore } from '../../stores/global';
 import { useTaskStore } from '../../stores/task';
 
 function Header() {
-  const { setOpenHistory, setOpenSetting } = useGlobalStore();
+  const { setOpenSetting } = useGlobalStore();
   const { reset } = useTaskStore();
 
   const handleReset = () => {

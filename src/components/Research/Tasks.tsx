@@ -43,10 +43,9 @@ function ResearchTasks() {
   const expectedTotalTasks = depth * wide;
 
   const completedTasks = researchTasks?.filter(task => task.learning) || [];
-  const processingTasks = researchTasks?.filter(task => task.processing && !task.learning) || [];
-  const pendingTasks = researchTasks?.filter(task => !task.processing && !task.learning) || [];
 
   // Group tasks by tier (depth level)
+  // eslint-disable-next-line
   const tasksByTier = new Map<number, any>();
   researchTasks?.forEach(task => {
     const tier = task.tier || 1;
@@ -57,7 +56,6 @@ function ResearchTasks() {
   });
 
   const currentTier = Math.max(...Array.from(tasksByTier.keys()), 0);
-  const isCurrentTierComplete = tasksByTier.get(currentTier)?.every(task => task.learning) || false;
   const hasMoreTiers = currentTier < depth;
 
   // Calculate progress percentage

@@ -6,7 +6,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import Box from '@mui/material/Box';
 import Step from '@mui/material/Step';
 import StepConnector from '@mui/material/StepConnector';
-import StepIcon from '@mui/material/StepIcon';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import Typography from '@mui/material/Typography';
@@ -15,22 +14,12 @@ import { useEffect, useState } from 'react';
 import { useTaskStore } from '../../stores/task';
 
 // Custom styled connector
-const CustomConnector = styled(StepConnector)(({ theme }) => ({
+const CustomConnector = styled(StepConnector)(() => ({
   '&.Mui-active .MuiStepConnector-line': {
     background: 'linear-gradient(95deg, #3b82f6 0%, #10b981 100%)',
   },
   '&.Mui-completed .MuiStepConnector-line': {
     background: 'linear-gradient(95deg, #10b981 0%, #10b981 100%)',
-  },
-}));
-
-// Custom step icon
-const CustomStepIcon = styled(StepIcon)(({ theme }) => ({
-  '&.Mui-active': {
-    color: '#3b82f6',
-  },
-  '&.Mui-completed': {
-    color: '#10b981',
   },
 }));
 
@@ -166,7 +155,7 @@ function ResearchStepper() {
                 <StepLabel
                   onClick={() => handleStepClick(step.sectionId)}
                   className="cursor-pointer"
-                  StepIconComponent={props => (
+                  StepIconComponent={() => (
                     <div
                       className={`flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 ${
                         isCompact ? 'h-8 w-8' : 'h-12 w-12'

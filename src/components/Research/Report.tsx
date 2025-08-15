@@ -11,12 +11,10 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import useDeepResearch from '../../hooks/useDeepResearch';
 import { useTaskStore } from '../../stores/task';
 
 function ResearchReport() {
   const { finalReport, isGeneratingFinalReport } = useTaskStore();
-  const { startResearchTasks } = useDeepResearch();
 
   const isCompleted = finalReport && finalReport.length > 0 && !isGeneratingFinalReport;
   const isLoading = isGeneratingFinalReport;
