@@ -8,7 +8,7 @@ import runResearchLeadAgent from '../agents/research-lead';
 import runResearcherAgent from '../agents/researcher';
 import { useSettingStore } from '../stores/setting';
 import { useTaskStore } from '../stores/task';
-import type { ResearchError, ResearchTask } from '../types';
+import type { ResearchTask } from '../types';
 
 function useDeepResearch() {
   const taskStore = useTaskStore();
@@ -51,7 +51,7 @@ function useDeepResearch() {
       qnas.forEach(qna => taskStore.addQnA(qna));
     } catch (error) {
       console.error('Failed to generate Q&As:', error);
-      throw new ResearchError('Failed to generate Q&As', { code: 'QNA_GENERATION_FAILED' });
+      throw error;
     } finally {
       taskStore.setIsGeneratingQnA(false);
     }
@@ -85,7 +85,7 @@ function useDeepResearch() {
       });
     } catch (error) {
       console.error('Failed to generate report plan:', error);
-      throw new ResearchError('Failed to generate report plan', { code: 'REPORT_PLAN_FAILED' });
+      throw error;
     } finally {
       streamingHandler?.finish();
       taskStore.setIsGeneratingReportPlan(false);
@@ -129,10 +129,7 @@ function useDeepResearch() {
         researchTasks.forEach(task => taskStore.addResearchTask(task));
       } catch (error) {
         console.error(`Failed to generate research tasks for tier ${tier}:`, error);
-        throw new ResearchError(`Failed to generate research tasks for tier ${tier}`, {
-          code: 'TASK_GENERATION_FAILED',
-          tier,
-        });
+        throw error;
       }
     },
     [commonAgentParams, taskStore, settingStore.wide]
@@ -171,13 +168,7 @@ function useDeepResearch() {
               return { taskId: task.id, success: true };
             } catch (error) {
               taskStore.updateResearchTask({ ...task, processing: false });
-              throw new ResearchError(
-                `Failed to process research task: ${task.title}, ${error.message}`,
-                {
-                  code: 'TASK_PROCESSING_FAILED',
-                  taskId: task.id,
-                }
-              );
+              throw error;
             }
           },
           maxConcurrency
@@ -244,7 +235,7 @@ function useDeepResearch() {
       });
     } catch (error) {
       console.error('Failed to generate final report:', error);
-      throw new ResearchError('Failed to generate final report', { code: 'FINAL_REPORT_FAILED' });
+      throw error;
     } finally {
       streamingHandler?.finish();
       taskStore.setIsGeneratingFinalReport(false);
@@ -348,8 +339,8 @@ function createSmoothStreamingHandler(
   let buffer = '';
   let displayedText = ''; // Cache the displayed text instead of joining arrays
   let isStreaming = false;
-  let streamingInterval: NodeJS.Timeout | null = null;
-  let debounceTimeout: NodeJS.Timeout | null = null;
+  let streamingInterval: number | null = null;
+  let debounceTimeout: number | null = null;
   let lastUpdateTime = 0;
 
   const scheduleUpdate = (text: string) => {

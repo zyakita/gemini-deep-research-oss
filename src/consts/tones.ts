@@ -1,5 +1,12 @@
 const tones = [
   {
+    slug: 'journalist-tone',
+    name: 'Journalist Tone',
+    describe:
+      'This tone is objective, factual, and authoritative, demonstrating a commitment to thoroughness and accuracy. The language is clear and concise, focusing on presenting evidence without bias to allow readers to form their own conclusions.',
+    usage: 'Investigative reports, in-depth articles, and fact-finding research.',
+  },
+  {
     slug: 'formal-tone',
     name: 'Formal Tone',
     describe:
@@ -19,13 +26,6 @@ const tones = [
     describe:
       'This tone involves a critical and logical examination of a topic to foster a deeper understanding. It systematically breaks down complex information, evaluates evidence, and explores relationships between different points to draw reasoned conclusions.',
     usage: 'Research papers, case studies, critical reviews, and financial analysis reports.',
-  },
-  {
-    slug: 'journalist-tone',
-    name: 'Journalist Tone',
-    describe:
-      'This tone is objective, factual, and authoritative, demonstrating a commitment to thoroughness and accuracy. The language is clear and concise, focusing on presenting evidence without bias to allow readers to form their own conclusions.',
-    usage: 'Investigative reports, in-depth articles, and fact-finding research.',
   },
   {
     slug: 'persuasive-tone',

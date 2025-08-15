@@ -22,6 +22,7 @@ import remarkGfm from 'remark-gfm';
 import useDeepResearch from '../../hooks/useDeepResearch';
 import { useSettingStore } from '../../stores/setting';
 import { useTaskStore } from '../../stores/task';
+import type { ResearchTask } from '../../types';
 
 function ResearchTasks() {
   const {
@@ -34,10 +35,10 @@ function ResearchTasks() {
   const { depth, wide } = useSettingStore();
   const { generateFinalReport } = useDeepResearch();
 
-  const isCompleted = finalReport && finalReport.length > 0;
-  const isLoading = isGeneratingFinalReport;
-  const isGeneratingTasks = isGeneratingResearchTasks;
-  const hasTasks = researchTasks && researchTasks.length > 0;
+  const isCompleted: boolean = finalReport.length > 0;
+  const isLoading: boolean = isGeneratingFinalReport;
+  const isGeneratingTasks: boolean = isGeneratingResearchTasks;
+  const hasTasks: boolean = researchTasks && researchTasks.length > 0;
 
   // Calculate expected total tasks based on depth and wide settings
   const expectedTotalTasks = depth * wide;
@@ -164,7 +165,7 @@ function ResearchTasks() {
                   {Array.from(tasksByTier.entries())
                     .sort(([a], [b]) => a - b)
                     .map(([tier, tasks]) => {
-                      const tierCompleted = tasks.filter(t => t.learning).length;
+                      const tierCompleted = tasks.filter((t: ResearchTask) => t.learning).length;
                       const tierProgress = (tierCompleted / tasks.length) * 100;
                       return (
                         <div key={tier} className="flex items-center gap-2 text-xs">
@@ -252,10 +253,11 @@ function ResearchTasks() {
                     variant="subtitle2"
                     className="sticky top-0 rounded-lg border bg-gray-50 px-3 py-2 font-semibold text-gray-700"
                   >
-                    Tier {tier} Research Tasks ({tierTasks.filter(t => t.learning).length}/
-                    {tierTasks.length} completed)
+                    Tier {tier} Research Tasks (
+                    {tierTasks.filter((t: ResearchTask) => t.learning).length}/{tierTasks.length}{' '}
+                    completed)
                   </Typography>
-                  {tierTasks.map((task, index) => {
+                  {tierTasks.map((task: ResearchTask, index: number) => {
                     const isTaskCompleted = task.learning;
                     const isTaskProcessing = task.processing && !task.learning;
                     const isTaskPending = !task.processing && !task.learning;

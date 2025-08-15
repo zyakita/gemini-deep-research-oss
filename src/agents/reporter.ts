@@ -69,7 +69,7 @@ type reporterAgentInput = {
   googleGenAI: GoogleGenAI;
   model: string;
   thinkingBudget: number;
-  onStreaming: (callback: (data: string) => void) => void;
+  onStreaming: (data: string) => void;
 };
 
 async function runReporterAgent({
@@ -85,8 +85,7 @@ async function runReporterAgent({
   onStreaming,
 }: reporterAgentInput) {
   // Find the selected tone from the tones list, fallback to 'journalist-tone'
-  const selectedTone =
-    tones.find(t => t.slug === tone) || tones.find(t => t.slug === 'journalist-tone');
+  const selectedTone = tones.find(t => t.slug === tone) || tones[0];
 
   const response = await googleGenAI.models.generateContentStream({
     model,
@@ -120,7 +119,9 @@ async function runReporterAgent({
   });
 
   for await (const chunk of response) {
-    onStreaming(chunk.text);
+    if (typeof chunk.text !== 'undefined') {
+      onStreaming(chunk.text);
+    }
   }
 }
 

@@ -122,7 +122,7 @@ async function runQuestionAndAnswerAgent({
     contents: `<QUERY>\n${query}\n</QUERY>`,
   });
 
-  return JSON.parse(response.text) as qnaAgentResponse;
+  return JSON.parse(response.text || '') as qnaAgentResponse;
 }
 
 export default runQuestionAndAnswerAgent;

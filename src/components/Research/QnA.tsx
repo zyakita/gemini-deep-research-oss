@@ -16,7 +16,7 @@ function ResearchQnA() {
   const { qna, updateQnA, reportPlan, isGeneratingReportPlan, setCurrentStep } = useTaskStore();
   const { generateReportPlan } = useDeepResearch();
 
-  const isCompleted = reportPlan && reportPlan.length > 0 && !isGeneratingReportPlan;
+  const isCompleted = reportPlan.length > 0 && !isGeneratingReportPlan;
   const isLoading = isGeneratingReportPlan;
   const hasQuestions = qna.length > 0;
   const allAnswered = qna.every(item => item.a.trim().length > 0);

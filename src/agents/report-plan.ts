@@ -37,7 +37,7 @@ type reportPlanAgentInput = {
   model: string;
   thinkingBudget: number;
   maxSections: number;
-  onStreaming: (callback: (data: string) => void) => void;
+  onStreaming: (data: string) => void;
 };
 
 async function runReportPlanAgent({
@@ -71,7 +71,9 @@ async function runReportPlanAgent({
   });
 
   for await (const chunk of response) {
-    onStreaming(chunk.text);
+    if (typeof chunk.text !== 'undefined') {
+      onStreaming(chunk.text);
+    }
   }
 }
 

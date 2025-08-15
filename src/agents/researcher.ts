@@ -42,8 +42,9 @@ async function runResearcherAgent({
   });
 
   return {
-    learning: response.text,
-    groundingChunks: response.candidates[0]?.groundingMetadata?.groundingChunks || [],
+    learning: response.text || '',
+    groundingChunks:
+      (response?.candidates && response?.candidates[0]?.groundingMetadata?.groundingChunks) || [],
   };
 }
 

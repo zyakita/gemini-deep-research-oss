@@ -196,18 +196,6 @@ export const useTaskStore = create(
     }),
     {
       name: 'research',
-      // Improve persistence performance by only persisting essential data
-      partialize: state => ({
-        id: state.id,
-        query: state.query,
-        qna: state.qna,
-        reportPlan: state.reportPlan,
-        reportPlanFeedback: state.reportPlanFeedback,
-        researchTasks: state.researchTasks,
-        finalReport: state.finalReport,
-        sources: state.sources,
-        currentStep: state.currentStep,
-      }),
     }
   )
 );

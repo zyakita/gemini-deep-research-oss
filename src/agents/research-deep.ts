@@ -113,7 +113,7 @@ async function runResearchDeepAgent({
     ],
   });
 
-  return JSON.parse(response.text) as researchDeepAgentResponse;
+  return JSON.parse(response.text || '') as researchDeepAgentResponse;
 }
 
 export default runResearchDeepAgent;

@@ -97,7 +97,7 @@ async function runResearchLeadAgent({
     ],
   });
 
-  return JSON.parse(response.text) as researchLeadAgentResponse;
+  return JSON.parse(response.text || '') as researchLeadAgentResponse;
 }
 
 export default runResearchLeadAgent;
