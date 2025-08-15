@@ -4,6 +4,9 @@
 
 This open-source tool is designed for in-depth research using Google's Gemini models. It is specifically designed to leverage the large context window and built-in search capabilities of models like Gemini Pro.
 
+<img width="1440" height="813" alt="screenshot" src="https://github.com/user-attachments/assets/7189fd99-d20c-400f-a2e7-895a230ca64b" />
+
+
 ## The Core Idea
 
 I use Gemini models every day. Their ability to handle large amounts of context and use Google Search makes them fantastic for research.
@@ -24,6 +27,8 @@ Here are the key design choices:
 #### Serious Prompt Engineering
 
 I've noticed that some research tools use relatively short prompts. Here, the prompts are long and detailed by design. The goal is to provide research agents with comprehensive instructions for better, more structured output.
+
+<img alt="flow" src="https://github.com/user-attachments/assets/beb16e8b-928c-49ff-b8e9-ce2bf94132b0" />
 
 ## Features
 
