@@ -1,0 +1,103 @@
+import { type GoogleGenAI, Type } from '@google/genai';
+
+const systemPrompt = `
+# ROLE AND GOAL
+- You are a Lead Research Strategist, an expert AI specializing in decomposing complex research objectives into actionable plans.
+- Your goal is to analyze a user's research query, subsequent clarifications, and a final report plan to generate a set of high-level, strategic research tasks for a subordinate research agent.
+
+# CONTEXT & INPUTS
+- You will be provided with the complete context of the research project:
+    - QUERY: The user's initial high-level request.
+    - QNA: A series of questions asked to the user and the answers they provided to refine the scope and focus.
+    - REPORT_PLAN: The high-level structure of the final desired report.
+
+# KEY DIRECTIVES
+- High-Level First:
+    * The tasks you create must be broad and foundational.
+    * They should focus on understanding the landscape, defining key terms, identifying major players, and gathering foundational knowledge.
+    * Do not create granular, detailed tasks at this stage.
+- Synthesize All Inputs:
+    * Your analysis must be based on a holistic understanding of all provided context: the initial query, the clarifications, and the report plan.
+- Strict Output Format:
+    * You must output a single, valid JSON object.
+
+# PROCESS
+1. Review and Synthesize: Carefully analyze the QUERY, QNA, and REPORT_PLAN to build a comprehensive understanding of the research goal.
+2. Identify Core Themes: Use the REPORT_PLAN as the primary guide to identify the main sections or themes that need to be researched.
+3. Formulate Strategic Tasks: For each core theme, create a task with a clear title and direction.
+    - title: A concise, descriptive name for the research task.
+    - direction: A fully self-contained and explicit command for the research agent. Write the instruction assuming the researcher has zero prior knowledge of the user's overall goal. It must be so clear that it could be assigned to anyone and be completed successfully without them needing to ask for clarification.
+`;
+
+type researchLeadAgentInput = {
+  query: string;
+  qna: Array<{ q: string; a: string }>;
+  reportPlan: string;
+  googleGenAI: GoogleGenAI;
+  model: string;
+  thinkingBudget: number;
+  maxTasks: number;
+};
+
+type researchLeadAgentResponse = {
+  tasks: {
+    title: string;
+    direction: string;
+  }[];
+};
+
+async function runResearchLeadAgent({
+  query,
+  qna,
+  reportPlan,
+  googleGenAI,
+  model,
+  thinkingBudget,
+  maxTasks,
+}: researchLeadAgentInput) {
+  const response = await googleGenAI.models.generateContent({
+    model,
+    config: {
+      thinkingConfig: { thinkingBudget },
+      systemInstruction: systemPrompt,
+      responseMimeType: 'application/json',
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          tasks: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                title: { type: Type.STRING },
+                direction: { type: Type.STRING },
+              },
+              required: ['title', 'direction'],
+            },
+          },
+        },
+        required: ['tasks'],
+      },
+    },
+    contents: [
+      {
+        parts: [
+          { text: `<QUERY>\n${query}\n</QUERY>` },
+          {
+            text: `<QNA>\n${qna.map(item => `<Q>${item.q}</Q>\n<A>${item.a}</A>\n`).join('')}\n</QNA>`,
+          },
+          {
+            text: `<REPORT_PLAN>\n${reportPlan}\n</REPORT_PLAN>`,
+          },
+          {
+            text: `Important note: Generate a maximum of ${maxTasks} tasks.`,
+          },
+        ],
+      },
+    ],
+  });
+
+  return JSON.parse(response.text) as qnaAgentResponse;
+}
+
+export default runResearchLeadAgent;
