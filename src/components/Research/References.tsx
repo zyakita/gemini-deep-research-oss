@@ -85,11 +85,37 @@ function ResearchReferences() {
   const getDisplayUrl = (url: string) => {
     try {
       const urlObj = new URL(url);
-      const path =
-        urlObj.pathname.length > 50 ? urlObj.pathname.substring(0, 47) + '...' : urlObj.pathname;
-      return urlObj.hostname + path;
+      const pathAndQuery = urlObj.pathname + urlObj.search;
+
+      // Decode the URL components for better readability
+      const decodedPathAndQuery = decodeURIComponent(pathAndQuery);
+
+      // If the combined path and query is too long, truncate intelligently
+      if (decodedPathAndQuery.length > 50) {
+        // Try to keep important query parameters if possible
+        const decodedSearch = decodeURIComponent(urlObj.search);
+        const decodedPathname = decodeURIComponent(urlObj.pathname);
+
+        if (decodedSearch && decodedPathname.length < 30) {
+          // If pathname is short, show more of the query string
+          const truncatedQuery =
+            decodedSearch.length > 25 ? decodedSearch.substring(0, 22) + '...' : decodedSearch;
+          return urlObj.hostname + decodedPathname + truncatedQuery;
+        } else {
+          // If pathname is long, truncate the whole thing
+          return urlObj.hostname + decodedPathAndQuery.substring(0, 47) + '...';
+        }
+      }
+
+      return urlObj.hostname + decodedPathAndQuery;
     } catch {
-      return url.length > 60 ? url.substring(0, 57) + '...' : url;
+      // Fallback: try to decode the entire URL if possible
+      try {
+        const decoded = decodeURIComponent(url);
+        return decoded.length > 60 ? decoded.substring(0, 57) + '...' : decoded;
+      } catch {
+        return url.length > 60 ? url.substring(0, 57) + '...' : url;
+      }
     }
   };
 
