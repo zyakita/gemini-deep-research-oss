@@ -168,8 +168,11 @@ function useDeepResearch() {
                 groundingChunks,
               });
 
-              for (const chunk of groundingChunks) {
-                await taskStore.addSource(chunk?.web?.uri || '');
+              // Add sources to the task store if we have resolver
+              if (import.meta.env.VITE_VERTEXAISEARCH_RESOLVER) {
+                for (const chunk of groundingChunks) {
+                  taskStore.addSource(chunk?.web?.uri || '');
+                }
               }
 
               return { taskId: task.id, success: true };

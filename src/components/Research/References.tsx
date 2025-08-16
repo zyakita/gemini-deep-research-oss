@@ -1,4 +1,5 @@
 import type { GroundingChunk } from '@google/genai';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -27,7 +28,7 @@ import { useTaskStore } from '../../stores/task';
 import type { ResearchTask } from '../../types';
 
 function ResearchReferences() {
-  const { sources, researchTasks } = useTaskStore();
+  const { sources, sourceQueue, researchTasks } = useTaskStore();
   const [copyButtonText, setCopyButtonText] = useState('Copy List');
 
   const references = sources.length
@@ -109,15 +110,20 @@ function ResearchReferences() {
             </Typography>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              size="small"
-              startIcon={<ContentCopyIcon />}
-              onClick={handleCopyReferences}
-              variant="outlined"
-              className="text-xs"
-            >
-              {copyButtonText}
-            </Button>
+            {sourceQueue.length > 0 ? (
+              <AutorenewIcon className="animate-spin text-gray-400" />
+            ) : (
+              <Button
+                size="small"
+                startIcon={<ContentCopyIcon />}
+                onClick={handleCopyReferences}
+                variant="outlined"
+                className="text-xs"
+              >
+                {copyButtonText}
+              </Button>
+            )}
+
             <Chip label={`${totalSites} sites`} size="small" color="primary" variant="outlined" />
             <Chip label={`${totalLinks} links`} size="small" color="primary" variant="outlined" />
           </div>

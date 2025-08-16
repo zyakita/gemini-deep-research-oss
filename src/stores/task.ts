@@ -22,6 +22,8 @@ export interface TaskStore {
   finalReportError: string | null;
   sources: string[];
   currentStep: number;
+  sourceQueue: string[];
+  isProcessingSourceQueue: boolean;
 }
 
 interface TaskActions {
@@ -58,6 +60,7 @@ interface TaskActions {
 
   // Sources and Navigation actions
   addSource: (vertexUri: string) => void;
+  processSourceQueue: () => Promise<void>;
   setCurrentStep: (step: number) => void;
 
   // Utility actions
@@ -89,6 +92,8 @@ const defaultValues: TaskStore = {
   finalReportError: null,
   sources: [],
   currentStep: 0,
+  sourceQueue: [],
+  isProcessingSourceQueue: false,
 };
 
 export const useTaskStore = create(
@@ -144,15 +149,69 @@ export const useTaskStore = create(
       setFinalReportError: (finalReportError: string | null) => set({ finalReportError }),
 
       // Sources and Navigation actions
-      addSource: async (vertexUri: string) => {
-        // get the final URL from the Vertex AI search
-        const finalUrl = await getFinalUrlFromVertexAIsearch(vertexUri);
-        // add to sources if not existing
-        if (finalUrl) {
-          if (!get().sources.includes(finalUrl)) {
-            set(state => ({ sources: [...state.sources, finalUrl] }));
+      addSource: (vertexUri: string) => {
+        // Add to queue if not already present
+        const state = get();
+        if (!state.sourceQueue.includes(vertexUri)) {
+          set(state => ({ sourceQueue: [...state.sourceQueue, vertexUri] }));
+          // Start processing queue if not already processing
+          if (!state.isProcessingSourceQueue) {
+            get().processSourceQueue();
           }
         }
+      },
+      processSourceQueue: async () => {
+        const state = get();
+        if (state.isProcessingSourceQueue || state.sourceQueue.length === 0) {
+          return;
+        }
+
+        set({ isProcessingSourceQueue: true });
+
+        while (true) {
+          const currentState = get();
+          if (currentState.sourceQueue.length === 0) {
+            break;
+          }
+
+          // Take up to 3 items from the queue for concurrent processing
+          const batchSize = Math.min(3, currentState.sourceQueue.length);
+          const batch = currentState.sourceQueue.slice(0, batchSize);
+
+          try {
+            // Process all items in the batch concurrently
+            const results = await Promise.allSettled(
+              batch.map(async vertexUri => {
+                const finalUrl = await getFinalUrlFromVertexAIsearch(vertexUri);
+                return { vertexUri, finalUrl };
+              })
+            );
+
+            // Process results and add to sources if not duplicate
+            for (const result of results) {
+              if (result.status === 'fulfilled' && result.value.finalUrl) {
+                const { finalUrl } = result.value;
+                const currentSources = get().sources;
+
+                // Only add if finalUrl doesn't already exist in sources
+                if (!currentSources.includes(finalUrl)) {
+                  set(state => ({ sources: [...state.sources, finalUrl] }));
+                }
+              } else if (result.status === 'rejected') {
+                console.error('Error processing vertex URI in batch:', result.reason);
+              }
+            }
+          } catch (error) {
+            console.error('Error processing batch:', error);
+          }
+
+          // Remove the processed items from the queue
+          set(state => ({
+            sourceQueue: state.sourceQueue.slice(batchSize),
+          }));
+        }
+
+        set({ isProcessingSourceQueue: false });
       },
       setCurrentStep: (currentStep: number) => set({ currentStep }),
 
@@ -167,6 +226,8 @@ export const useTaskStore = create(
           finalReport: '',
           sources: [],
           currentStep: 0,
+          sourceQueue: [],
+          isProcessingSourceQueue: false,
           // Clear all error states
           qnaError: null,
           reportPlanError: null,
