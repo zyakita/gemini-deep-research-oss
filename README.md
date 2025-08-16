@@ -8,6 +8,10 @@ This open-source tool is designed for in-depth research using Google's Gemini mo
 
 <img width="1440" height="813" alt="screenshot" src="https://github.com/user-attachments/assets/7189fd99-d20c-400f-a2e7-895a230ca64b" />
 
+### Demo
+
+https://gemini-deep-research.oss.jqkat.com/
+
 ## The Core Idea
 
 I use Gemini models every day. Their ability to handle large amounts of context and use Google Search makes them fantastic for research.
