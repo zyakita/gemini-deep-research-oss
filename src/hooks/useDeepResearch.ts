@@ -9,6 +9,7 @@ import runResearcherAgent from '../agents/researcher';
 import { useSettingStore } from '../stores/setting';
 import { useTaskStore } from '../stores/task';
 import type { ResearchTask } from '../types';
+import { wakeUpResolver } from '../utils/vertexaisearch';
 
 function useDeepResearch() {
   const taskStore = useTaskStore();
@@ -37,6 +38,8 @@ function useDeepResearch() {
 
   const generateQnAs = useCallback(async () => {
     try {
+      wakeUpResolver();
+
       taskStore.setIsGeneratingQnA(true);
 
       const { questions } = await runQuestionAndAnswerAgent(commonAgentParams);
@@ -164,6 +167,10 @@ function useDeepResearch() {
                 learning,
                 groundingChunks,
               });
+
+              for (const chunk of groundingChunks) {
+                await taskStore.addSource(chunk?.web?.uri || '');
+              }
 
               return { taskId: task.id, success: true };
             } catch (error) {

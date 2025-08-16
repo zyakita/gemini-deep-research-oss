@@ -1,4 +1,4 @@
-// Shared type definitions for the research application
+import type { GroundingChunk } from '@google/genai';
 
 export interface QnA {
   id: string;
@@ -13,14 +13,11 @@ export interface ResearchTask {
   direction: string;
   learning: string;
   processing?: boolean;
-  groundingChunks?: unknown;
+  groundingChunks?: GroundingChunk[];
 }
 
 export interface Source {
   url: string;
-  title: string;
-  content: string;
-  relevanceScore?: number;
 }
 
 export interface ResearchError extends Error {

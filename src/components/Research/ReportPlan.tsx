@@ -81,17 +81,17 @@ function ResearchReportPlan() {
             <Chip label="Completed" size="small" color="success" variant="outlined" />
           )}
           {hasPlan && !isCompleted && !isEditing && (
-            <div className="flex gap-2">
-              <Chip label="Ready to execute" size="small" color="primary" variant="outlined" />
+            <div className="flex items-center gap-2">
               <Button
                 size="small"
                 startIcon={<EditDocumentIcon className="" />}
                 onClick={handleEditPlan}
-                variant="text"
-                className="ml-2"
+                variant="outlined"
+                className="text-xs"
               >
                 Edit
               </Button>
+              <Chip label="Ready to execute" size="small" color="primary" variant="outlined" />
             </div>
           )}
           {isEditing && (

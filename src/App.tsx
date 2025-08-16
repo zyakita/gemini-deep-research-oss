@@ -4,6 +4,7 @@ import SettingDialog from './components/Dialog/SettingDialog';
 import Header from './components/Internal/Header';
 import ResearchQnA from './components/Research/QnA';
 import ResearchQuery from './components/Research/Query';
+import ResearchReferences from './components/Research/References';
 import ResearchReport from './components/Research/Report';
 import ResearchReportPlan from './components/Research/ReportPlan';
 import ResearchStepper from './components/Research/ResearchStepper';
@@ -36,6 +37,7 @@ function App() {
           <ResearchReportPlan />
           <ResearchTasks />
           <ResearchReport />
+          <ResearchReferences />
         </div>
 
         {/* Dialogs */}

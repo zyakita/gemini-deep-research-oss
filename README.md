@@ -33,7 +33,7 @@ I've noticed that some research tools use relatively short prompts. Here, the pr
 
 ## Features
 
-- **Gemini-Native:** Built from the ground up for the Gemini API. No compromises for other models.
+- **Gemini-Native:** Built from the ground up for the Gemini API. No compromises for other providers.
 - **Research Pipeline:** First, go broad. Then, go deep.
 - **Detailed Prompting:** Uses extensive prompt engineering for high-quality results.
 - **Customizable Reports:** Control the tone (e.g., 'academic', 'casual') and length/depth of the final report through simple setting.
@@ -42,9 +42,7 @@ I've noticed that some research tools use relatively short prompts. Here, the pr
 
 ### Prerequisites
 
-You will need a Google GenAI API key to access the AI models.
-
-1.  Get your key at [Google AI Studio](https://aistudio.google.com/).
+You will need a Google GenAI API key to access the AI models. Get your key at [Google AI Studio](https://aistudio.google.com/).
 
 ### Local Installation
 
@@ -63,6 +61,33 @@ Require Node 20+
     ```bash
     yarn dev
     ```
+
+### [Optional] Config the Grounding URL Fixer
+
+When using the Gemini API with Google Search grounding, the API returns censored `uri` values that look like this:
+
+```json
+"groundingChunks": [
+  {
+    "web": {
+      "uri": "https://vertexaisearch.cloud.google.com/...",
+      "title": "example.com"
+    }
+  }
+]
+```
+
+Trying to fetch this `uri` from a browser fails due to CORS issues, which is a dead end for finding the real destination.
+
+#### The Fix
+
+I developed [a tiny app](https://github.com/zyakita/vertexaisearch-uri-resolver) to fix this problem.
+
+You can deploy it anywhere, then set `VITE_VERTEXAISEARCH_RESOLVER` to this project's `env`
+
+## Deployment
+
+This is a simple SPA application built with Vite, you can deploy it anywhere using Vite's official guide: https://vite.dev/guide/static-deploy.html
 
 ## Contributing
 

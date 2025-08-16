@@ -45,7 +45,7 @@ type researchDeepAgentInput = {
   query: string;
   qna: Array<{ q: string; a: string }>;
   reportPlan: string;
-  findings: Array<{ title: string; learning: string }>;
+  findings: Array<{ title: string; direction: string; learning: string }>;
   googleGenAI: GoogleGenAI;
   model: string;
   thinkingBudget: number;
@@ -114,7 +114,7 @@ async function runResearchDeepAgent({
             text: `<REPORT_PLAN>\n${reportPlan}\n</REPORT_PLAN>`,
           },
           {
-            text: `<FINDINGS>\n${findings.map(item => `<TITLE>${item.title}</TITLE><DIRECTION>${item.direction}</DIRECTION>\n<LEARNING>${item.learning}</LEARNING>\n`).join('')}\n</FINDINGS>`,
+            text: `<FINDINGS>\n${findings.map(item => `<TITLE>${item.title}</TITLE>\n<DIRECTION>${item.direction}</DIRECTION>\n<LEARNING>${item.learning}</LEARNING>\n`).join('')}\n</FINDINGS>`,
           },
           {
             text: `Important note: Generate a maximum of ${maxTasks} tasks.`,

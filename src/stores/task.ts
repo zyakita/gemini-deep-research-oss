@@ -1,7 +1,8 @@
 import { pick } from 'radash';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { QnA, ResearchTask, Source } from '../types';
+import type { QnA, ResearchTask } from '../types';
+import { getFinalUrlFromVertexAIsearch } from '../utils/vertexaisearch';
 
 export interface TaskStore {
   id: string;
@@ -19,7 +20,7 @@ export interface TaskStore {
   finalReport: string;
   isGeneratingFinalReport: boolean;
   finalReportError: string | null;
-  sources: Source[];
+  sources: string[];
   currentStep: number;
 }
 
@@ -56,7 +57,7 @@ interface TaskActions {
   setFinalReportError: (error: string | null) => void;
 
   // Sources and Navigation actions
-  setSources: (sources: Source[]) => void;
+  addSource: (vertexUri: string) => void;
   setCurrentStep: (step: number) => void;
 
   // Utility actions
@@ -143,7 +144,16 @@ export const useTaskStore = create(
       setFinalReportError: (finalReportError: string | null) => set({ finalReportError }),
 
       // Sources and Navigation actions
-      setSources: (sources: Source[]) => set({ sources }),
+      addSource: async (vertexUri: string) => {
+        // get the final URL from the Vertex AI search
+        const finalUrl = await getFinalUrlFromVertexAIsearch(vertexUri);
+        // add to sources if not existing
+        if (finalUrl) {
+          if (!get().sources.includes(finalUrl)) {
+            set(state => ({ sources: [...state.sources, finalUrl] }));
+          }
+        }
+      },
       setCurrentStep: (currentStep: number) => set({ currentStep }),
 
       // Utility actions
