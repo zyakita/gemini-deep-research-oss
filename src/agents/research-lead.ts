@@ -1,4 +1,5 @@
 import { type GoogleGenAI, Type } from '@google/genai';
+import moment from 'moment';
 
 const systemPrompt = `
 # ROLE AND GOAL
@@ -59,7 +60,17 @@ async function runResearchLeadAgent({
     model,
     config: {
       thinkingConfig: { thinkingBudget },
-      systemInstruction: systemPrompt,
+      systemInstruction: {
+        parts: [
+          { text: systemPrompt },
+          {
+            text: `Current datetime is: ${moment().format('lll')}`,
+          },
+          {
+            text: 'Respond to the user in the language they used to make the request.',
+          },
+        ],
+      },
       responseMimeType: 'application/json',
       responseSchema: {
         type: Type.OBJECT,

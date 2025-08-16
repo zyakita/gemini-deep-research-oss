@@ -1,4 +1,5 @@
 import { type GoogleGenAI } from '@google/genai';
+import moment from 'moment';
 import tones from '../consts/tones';
 
 const systemPrompt = `
@@ -96,6 +97,12 @@ async function runReporterAgent({
           { text: systemPrompt },
           {
             text: `The user has a specific expectation for the tone of the report, expecting it to be written in the style of ${selectedTone.name} (${selectedTone.describe}). Additionally, they have a minimum requirement for the word count, setting it at ${minWords} words.`,
+          },
+          {
+            text: `Current datetime is: ${moment().format('lll')}`,
+          },
+          {
+            text: 'Respond to the user in the language they used to make the request.',
           },
         ],
       },

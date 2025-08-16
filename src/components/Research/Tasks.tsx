@@ -129,7 +129,8 @@ function ResearchTasks() {
         </div>
 
         <Typography variant="body2" className="mb-4 text-gray-600">
-          Gathering information from various sources in {depth} rounds, up to {wide} tasks per round. First, go broad. Then, go deep.
+          Gathering information from various sources in {depth} rounds, up to {wide} tasks per
+          round. First, go broad. Then, go deep.
         </Typography>
 
         <Divider className="mb-4" />

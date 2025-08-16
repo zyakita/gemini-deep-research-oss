@@ -1,4 +1,5 @@
 import { type GoogleGenAI, Type } from '@google/genai';
+import moment from 'moment';
 
 const systemPrompt = `
 # ROLE AND GOAL
@@ -72,7 +73,17 @@ async function runResearchDeepAgent({
     model,
     config: {
       thinkingConfig: { thinkingBudget },
-      systemInstruction: systemPrompt,
+      systemInstruction: {
+        parts: [
+          { text: systemPrompt },
+          {
+            text: `Current datetime is: ${moment().format('lll')}`,
+          },
+          {
+            text: 'Respond to the user in the language they used to make the request.',
+          },
+        ],
+      },
       responseMimeType: 'application/json',
       responseSchema: {
         type: Type.OBJECT,
@@ -103,7 +114,7 @@ async function runResearchDeepAgent({
             text: `<REPORT_PLAN>\n${reportPlan}\n</REPORT_PLAN>`,
           },
           {
-            text: `<FINDINGS>\n${findings.map(item => `<TITLE>${item.title}</TITLE>\n<LEARNING>${item.learning}</LEARNING>\n`).join('')}\n</FINDINGS>`,
+            text: `<FINDINGS>\n${findings.map(item => `<TITLE>${item.title}</TITLE><DIRECTION>${item.direction}</DIRECTION>\n<LEARNING>${item.learning}</LEARNING>\n`).join('')}\n</FINDINGS>`,
           },
           {
             text: `Important note: Generate a maximum of ${maxTasks} tasks.`,

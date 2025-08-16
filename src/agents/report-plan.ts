@@ -1,4 +1,5 @@
 import { type GoogleGenAI } from '@google/genai';
+import moment from 'moment';
 
 const systemPrompt = `
 # MISSION: CRAFT STRATEGIC REPORT BLUEPRINTS
@@ -53,7 +54,17 @@ async function runReportPlanAgent({
     model,
     config: {
       thinkingConfig: { thinkingBudget },
-      systemInstruction: systemPrompt,
+      systemInstruction: {
+        parts: [
+          { text: systemPrompt },
+          {
+            text: `Current datetime is: ${moment().format('lll')}`,
+          },
+          {
+            text: 'Respond to the user in the language they used to make the request.',
+          },
+        ],
+      },
     },
     contents: [
       {
