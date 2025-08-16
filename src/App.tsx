@@ -22,7 +22,7 @@ function App() {
           </Typography>
           <Typography variant="body1" className="leading-relaxed text-gray-600">
             Follow this structured research process to get comprehensive insights on any topic. Each
-            step builds upon the previous one to ensure thorough and accurate research.
+            step builds on the previous one to ensure thorough and accurate research.
           </Typography>
         </Box>
 

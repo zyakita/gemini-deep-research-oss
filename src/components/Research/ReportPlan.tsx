@@ -119,7 +119,7 @@ function ResearchReportPlan() {
         </div>
 
         <Typography variant="body2" className="mb-4 text-gray-600">
-          A structured plan based on your research query and clarifications
+          A structured plan based on your research query and clarifications.
         </Typography>
 
         <Divider className="mb-4" />

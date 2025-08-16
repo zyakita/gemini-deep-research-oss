@@ -68,9 +68,12 @@ function ResearchQnA() {
           )}
         </div>
 
+        <Typography variant="body2" className="mb-1 text-gray-600">
+          Review the answers to the clarification questions. This will help the agent create a more
+          targeted research plan.
+        </Typography>
         <Typography variant="body2" className="mb-4 text-gray-600">
-          To help create a more targeted research plan, please review the answers to these
-          questions. If you are unsure, just answer with "I don't know" or "I'm not sure."
+          If you're unsure, answer with "I don't know" or "I'm not sure."
         </Typography>
 
         <Divider className="mb-4" />

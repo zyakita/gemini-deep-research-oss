@@ -83,7 +83,7 @@ function ResearchReport() {
         </div>
 
         <Typography variant="body2" className="mb-4 text-gray-600">
-          Comprehensive research report based on all collected information
+          A comprehensive research report based on all the collected information.
         </Typography>
 
         <Divider className="mb-4" />

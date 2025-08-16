@@ -75,7 +75,7 @@ function ResearchQuery() {
         </div>
 
         <Typography variant="body2" className="mb-4 text-gray-600">
-          Enter your research question to begin the deep research process
+          Start the in-depth research process now by entering your research question.
         </Typography>
 
         <Divider className="mb-4" />

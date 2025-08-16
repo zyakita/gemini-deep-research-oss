@@ -245,8 +245,8 @@ function SettingDialog() {
                   color="text.secondary"
                   sx={{ mb: 2, display: 'block' }}
                 >
-                  Maximum tokens the AI can use for internal reasoning before generating the final
-                  response
+                  This is the maximum number of tokens that the AI can use for internal reasoning
+                  before generating the final response.
                 </Typography>
                 <Slider
                   value={thinkingBudget}
@@ -285,8 +285,8 @@ function SettingDialog() {
                   color="text.secondary"
                   sx={{ mb: 2, display: 'block' }}
                 >
-                  Number of simultaneous search queries executed in parallel to speed up information
-                  gathering
+                  The number of simultaneous search queries executed in parallel to speed up the
+                  gathering of information.
                 </Typography>
                 <Slider
                   value={parallelSearch}
@@ -325,7 +325,8 @@ function SettingDialog() {
                   color="text.secondary"
                   sx={{ mb: 2, display: 'block' }}
                 >
-                  How many rounds of research are needed to discover new information?
+                  What is the ideal number of research rounds to ensure a thorough coverage of a
+                  query? First, go broad. Then, go deep.
                 </Typography>
                 <Slider
                   value={depth}
@@ -365,7 +366,9 @@ function SettingDialog() {
                   color="text.secondary"
                   sx={{ mb: 2, display: 'block' }}
                 >
-                  How many research tasks are there for each research round?
+                  What is the ideal number of distinct sources to consult{' '}
+                  <span className="font-semibold">in each round</span> to ensure a broad
+                  understanding of a query?
                 </Typography>
                 <Slider
                   value={wide}
