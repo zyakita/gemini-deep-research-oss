@@ -129,7 +129,7 @@ function ResearchTasks() {
         </div>
 
         <Typography variant="body2" className="mb-4 text-gray-600">
-          Gathering information from various sources in {depth} tiers, up to {wide} tasks per tier
+          Gathering information from various sources in {depth} rounds, up to {wide} tasks per round. First, go broad. Then, go deep.
         </Typography>
 
         <Divider className="mb-4" />
@@ -159,7 +159,7 @@ function ResearchTasks() {
             {tasksByTier.size > 1 && (
               <Box className="mt-3">
                 <Typography variant="caption" className="mb-2 block text-gray-600">
-                  Progress by Tier:
+                  Progress by Round:
                 </Typography>
                 <div className="space-y-1">
                   {Array.from(tasksByTier.entries())
@@ -169,7 +169,7 @@ function ResearchTasks() {
                       const tierProgress = (tierCompleted / tasks.length) * 100;
                       return (
                         <div key={tier} className="flex items-center gap-2 text-xs">
-                          <span className="w-12 text-gray-500">Tier {tier}:</span>
+                          <span className="w-16 text-gray-500">Round {tier}:</span>
                           <div className="h-1 flex-1 rounded-full bg-gray-200">
                             <div
                               className="h-1 rounded-full bg-blue-400 transition-all duration-300"
@@ -230,11 +230,11 @@ function ResearchTasks() {
                     variant="caption"
                     className="block py-2 text-center font-medium text-blue-500"
                   >
-                    Generating Tier 1 tasks...
+                    Generating Round 1 tasks...
                   </Typography>
                 ) : (
                   <Typography variant="caption" className="block py-2 text-center text-gray-400">
-                    Tier {tierIndex + 1} tasks will be generated after tier {tierIndex} completes
+                    Round {tierIndex + 1} tasks will be generated after round {tierIndex} completes
                   </Typography>
                 )}
               </div>
@@ -253,7 +253,7 @@ function ResearchTasks() {
                     variant="subtitle2"
                     className="sticky top-0 rounded-lg border bg-gray-50 px-3 py-2 font-semibold text-gray-700"
                   >
-                    Tier {tier} Research Tasks (
+                    Round {tier} Research Tasks (
                     {tierTasks.filter((t: ResearchTask) => t.learning).length}/{tierTasks.length}{' '}
                     completed)
                   </Typography>
