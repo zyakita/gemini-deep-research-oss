@@ -1,4 +1,5 @@
 import AutorenewIcon from '@mui/icons-material/Autorenew';
+import GitHubIcon from '@mui/icons-material/GitHub';
 import SettingsIcon from '@mui/icons-material/Settings';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
@@ -16,7 +17,11 @@ function Header() {
   };
 
   return (
-    <header className="flex items-center justify-end py-6 max-sm:py-4 print:hidden">
+    <header className="flex items-center justify-between py-6 max-sm:py-4 print:hidden">
+      <a href="https://github.com/zyakita/gemini-deep-research-oss" target="_blank">
+        <GitHubIcon className="text-gray-600 hover:text-gray-800" />
+      </a>
+
       {/* <Typography className="font-medium">Gemini Deep Research</Typography> */}
       <ButtonGroup disableElevation size="small" variant="outlined">
         <Button size="small" color="warning" startIcon={<AutorenewIcon />} onClick={handleReset}>

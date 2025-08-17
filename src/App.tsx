@@ -47,6 +47,8 @@ function App() {
         {/* Process Logs */}
         <ProcessLogs />
       </div>
+
+      <footer className="h-6 bg-gray-100"></footer>
     </div>
   );
 }
