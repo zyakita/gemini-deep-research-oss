@@ -1,5 +1,6 @@
-import { type GoogleGenAI, Type } from '@google/genai';
-import moment from 'moment';
+import { Type } from '@google/genai';
+import { type AgentInput } from '../types';
+import { currentDateTimePrompt, languageRequirementPrompt } from '../utils/system-instructions';
 
 const systemPrompt = `
 # ROLE AND GOAL
@@ -76,13 +77,6 @@ Your Output:
 Your final output MUST be only the valid JSON object. Do not output any other text, explanation, or commentary.
 `;
 
-type qnaAgentInput = {
-  query: string;
-  googleGenAI: GoogleGenAI;
-  model: string;
-  thinkingBudget: number;
-};
-
 type qnaAgentResponse = {
   questions: {
     question: string;
@@ -91,24 +85,23 @@ type qnaAgentResponse = {
 };
 
 async function runQuestionAndAnswerAgent({
-  query,
   googleGenAI,
   model,
   thinkingBudget,
-}: qnaAgentInput) {
-  const response = await googleGenAI.models.generateContent({
+  userContent,
+  addLog,
+}: AgentInput) {
+  let jsonContent = '';
+
+  const response = await googleGenAI.models.generateContentStream({
     model,
     config: {
-      thinkingConfig: { thinkingBudget },
+      thinkingConfig: { thinkingBudget, includeThoughts: true },
       systemInstruction: {
         parts: [
           { text: systemPrompt },
-          {
-            text: `Current datetime is: ${moment().format('lll')}`,
-          },
-          {
-            text: 'Respond to the user in the language they used to make the request.',
-          },
+          { text: currentDateTimePrompt },
+          { text: languageRequirementPrompt },
         ],
       },
       responseMimeType: 'application/json',
@@ -130,10 +123,21 @@ async function runQuestionAndAnswerAgent({
         required: ['questions'],
       },
     },
-    contents: `<QUERY>\n${query}\n</QUERY>`,
+    contents: [userContent],
   });
 
-  return JSON.parse(response.text || '') as qnaAgentResponse;
+  for await (const chunk of response) {
+    const text = chunk?.candidates?.[0].content?.parts?.[0].text || '';
+    const isThought = chunk?.candidates?.[0].content?.parts?.[0]?.thought || false;
+
+    if (isThought) {
+      addLog(text);
+    } else {
+      jsonContent += text;
+    }
+  }
+
+  return JSON.parse(jsonContent || '') as qnaAgentResponse;
 }
 
 export default runQuestionAndAnswerAgent;

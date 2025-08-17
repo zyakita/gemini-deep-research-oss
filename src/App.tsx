@@ -2,6 +2,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import SettingDialog from './components/Dialog/SettingDialog';
 import Header from './components/Internal/Header';
+import ProcessLogs from './components/Internal/ProcessLogs';
 import ResearchQnA from './components/Research/QnA';
 import ResearchQuery from './components/Research/Query';
 import ResearchReferences from './components/Research/References';
@@ -42,6 +43,9 @@ function App() {
 
         {/* Dialogs */}
         <SettingDialog />
+
+        {/* Process Logs */}
+        <ProcessLogs />
       </div>
     </div>
   );

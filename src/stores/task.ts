@@ -1,4 +1,3 @@
-import { pick } from 'radash';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { QnA, ResearchTask } from '../types';
@@ -24,9 +23,10 @@ export interface TaskStore {
   currentStep: number;
   sourceQueue: string[];
   isProcessingSourceQueue: boolean;
+  logs: string[];
 }
 
-interface TaskActions {
+export interface TaskActions {
   // ID and Query actions
   setId: (id: string) => void;
   setQuery: (query: string) => void;
@@ -66,8 +66,7 @@ interface TaskActions {
   // Utility actions
   clear: () => void;
   reset: () => void;
-  backup: () => TaskStore;
-  restore: (taskStore: TaskStore) => void;
+  addLog: (log: string) => void;
 
   // Computed getters
   hasErrors: () => boolean;
@@ -94,6 +93,7 @@ const defaultValues: TaskStore = {
   currentStep: 0,
   sourceQueue: [],
   isProcessingSourceQueue: false,
+  logs: [],
 };
 
 export const useTaskStore = create(
@@ -240,10 +240,7 @@ export const useTaskStore = create(
           isGeneratingFinalReport: false,
         }),
       reset: () => set(defaultValues),
-      backup: (): TaskStore => {
-        return pick(get(), Object.keys(defaultValues) as (keyof TaskStore)[]) as TaskStore;
-      },
-      restore: (taskStore: TaskStore) => set(taskStore),
+      addLog: (log: string) => set(state => ({ logs: [...state.logs, log] })),
 
       // Computed getters
       hasErrors: () => {

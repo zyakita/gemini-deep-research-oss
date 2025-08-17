@@ -1,5 +1,6 @@
-import { type GoogleGenAI, Type } from '@google/genai';
-import moment from 'moment';
+import { Type } from '@google/genai';
+import { type AgentInput } from '../types';
+import { currentDateTimePrompt, languageRequirementPrompt } from '../utils/system-instructions';
 
 const systemPrompt = `
 # ROLE AND GOAL
@@ -30,16 +31,6 @@ const systemPrompt = `
     - direction: A fully self-contained and explicit command for the research agent. Write the instruction assuming the researcher has zero prior knowledge of the user's overall goal. It must be so clear that it could be assigned to anyone and be completed successfully without them needing to ask for clarification.
 `;
 
-type researchLeadAgentInput = {
-  query: string;
-  qna: Array<{ q: string; a: string }>;
-  reportPlan: string;
-  googleGenAI: GoogleGenAI;
-  model: string;
-  thinkingBudget: number;
-  maxTasks: number;
-};
-
 type researchLeadAgentResponse = {
   tasks: {
     title: string;
@@ -48,27 +39,23 @@ type researchLeadAgentResponse = {
 };
 
 async function runResearchLeadAgent({
-  query,
-  qna,
-  reportPlan,
   googleGenAI,
   model,
   thinkingBudget,
-  maxTasks,
-}: researchLeadAgentInput) {
-  const response = await googleGenAI.models.generateContent({
+  userContent,
+  addLog,
+}: AgentInput) {
+  let jsonContent = '';
+
+  const response = await googleGenAI.models.generateContentStream({
     model,
     config: {
-      thinkingConfig: { thinkingBudget },
+      thinkingConfig: { thinkingBudget, includeThoughts: true },
       systemInstruction: {
         parts: [
           { text: systemPrompt },
-          {
-            text: `Current datetime is: ${moment().format('lll')}`,
-          },
-          {
-            text: 'Respond to the user in the language they used to make the request.',
-          },
+          { text: currentDateTimePrompt },
+          { text: languageRequirementPrompt },
         ],
       },
       responseMimeType: 'application/json',
@@ -90,25 +77,21 @@ async function runResearchLeadAgent({
         required: ['tasks'],
       },
     },
-    contents: [
-      {
-        parts: [
-          { text: `<QUERY>\n${query}\n</QUERY>` },
-          {
-            text: `<QNA>\n${qna.map(item => `<Q>${item.q}</Q>\n<A>${item.a}</A>\n`).join('')}\n</QNA>`,
-          },
-          {
-            text: `<REPORT_PLAN>\n${reportPlan}\n</REPORT_PLAN>`,
-          },
-          {
-            text: `Important note: Generate a maximum of ${maxTasks} tasks.`,
-          },
-        ],
-      },
-    ],
+    contents: [userContent],
   });
 
-  return JSON.parse(response.text || '') as researchLeadAgentResponse;
+  for await (const chunk of response) {
+    const text = chunk?.candidates?.[0].content?.parts?.[0].text || '';
+    const isThought = chunk?.candidates?.[0].content?.parts?.[0]?.thought || false;
+
+    if (isThought) {
+      addLog(text);
+    } else {
+      jsonContent += text;
+    }
+  }
+
+  return JSON.parse(jsonContent || '') as researchLeadAgentResponse;
 }
 
 export default runResearchLeadAgent;

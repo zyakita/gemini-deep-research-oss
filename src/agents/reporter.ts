@@ -1,6 +1,6 @@
-import { type GoogleGenAI } from '@google/genai';
-import moment from 'moment';
 import tones from '../consts/tones';
+import { type AgentInput } from '../types';
+import { currentDateTimePrompt, languageRequirementPrompt } from '../utils/system-instructions';
 
 const systemPrompt = `
 # ROLE AND GOAL
@@ -60,74 +60,42 @@ To ensure the highest quality output, you must follow this process precisely.
 - Use standard Markdown syntax for all formatting, including headings, subheadings, lists, and emphasis.
 `;
 
-type reporterAgentInput = {
-  query: string;
-  qna: Array<{ q: string; a: string }>;
-  reportPlan: string;
-  findings: Array<{ title: string; learning: string }>;
-  tone: string;
-  minWords: number;
-  googleGenAI: GoogleGenAI;
-  model: string;
-  thinkingBudget: number;
-  onStreaming: (data: string) => void;
-};
-
-async function runReporterAgent({
-  query,
-  qna,
-  reportPlan,
-  findings,
-  tone,
-  minWords,
-  googleGenAI,
-  model,
-  thinkingBudget,
-  onStreaming,
-}: reporterAgentInput) {
+async function runReporterAgent(
+  { googleGenAI, model, thinkingBudget, userContent, addLog, onStreaming }: AgentInput,
+  { tone, minWords }: { tone: string; minWords: number }
+) {
   // Find the selected tone from the tones list, fallback to 'journalist-tone'
   const selectedTone = tones.find(t => t.slug === tone) || tones[0];
 
   const response = await googleGenAI.models.generateContentStream({
     model,
     config: {
-      thinkingConfig: { thinkingBudget },
+      thinkingConfig: { thinkingBudget, includeThoughts: true },
       systemInstruction: {
         parts: [
           { text: systemPrompt },
           {
-            text: `The user has a specific expectation for the tone of the report, expecting it to be written in the style of ${selectedTone.name} (${selectedTone.describe}). Additionally, they have a minimum requirement for the word count, setting it at ${minWords} words.`,
+            text: `The user has specific expectations for the tone of the report and expects it to be written in a ${selectedTone.name} (${selectedTone.describe}).`,
           },
           {
-            text: `Current datetime is: ${moment().format('lll')}`,
+            text: `Additionally, they have a minimum word count requirement of ${minWords} words.`,
           },
-          {
-            text: 'Respond to the user in the language they used to make the request.',
-          },
+          { text: currentDateTimePrompt },
+          { text: languageRequirementPrompt },
         ],
       },
     },
-    contents: [
-      {
-        parts: [
-          { text: `<QUERY>\n${query}\n</QUERY>` },
-          {
-            text: `<QNA>\n${qna.map(item => `<Q>${item.q}</Q>\n<A>${item.a}</A>\n`).join('')}\n</QNA>`,
-          },
-          {
-            text: `<REPORT_PLAN>\n${reportPlan}\n</REPORT_PLAN>`,
-          },
-          {
-            text: `<FINDINGS>\n${findings.map(item => `<TITLE>${item.title}</TITLE>\n<LEARNING>${item.learning}</LEARNING>\n`).join('')}\n</FINDINGS>`,
-          },
-        ],
-      },
-    ],
+    contents: [userContent],
   });
 
   for await (const chunk of response) {
-    if (typeof chunk.text !== 'undefined') {
-      onStreaming(chunk.text);
+    const text = chunk?.candidates?.[0].content?.parts?.[0].text || '';
+    const isThought = chunk?.candidates?.[0].content?.parts?.[0]?.thought || false;
+
+    if (isThought) {
+      addLog(text);
+    } else {
+      onStreaming?.(text);
     }
   }
 }

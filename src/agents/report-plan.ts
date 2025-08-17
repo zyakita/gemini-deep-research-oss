@@ -1,5 +1,5 @@
-import { type GoogleGenAI } from '@google/genai';
-import moment from 'moment';
+import { type AgentInput } from '../types';
+import { currentDateTimePrompt, languageRequirementPrompt } from '../utils/system-instructions';
 
 const systemPrompt = `
 # MISSION: CRAFT STRATEGIC REPORT BLUEPRINTS
@@ -31,59 +31,37 @@ Each section must follow this exact format:
 <A one to two sentence description of the section's content and purpose.>
 `;
 
-type reportPlanAgentInput = {
-  query: string;
-  qna: Array<{ q: string; a: string }>;
-  googleGenAI: GoogleGenAI;
-  model: string;
-  thinkingBudget: number;
-  maxSections: number;
-  onStreaming: (data: string) => void;
-};
-
 async function runReportPlanAgent({
-  query,
-  qna,
   googleGenAI,
   model,
   thinkingBudget,
-  maxSections,
+  userContent,
+  addLog,
   onStreaming,
-}: reportPlanAgentInput) {
+}: AgentInput) {
   const response = await googleGenAI.models.generateContentStream({
     model,
     config: {
-      thinkingConfig: { thinkingBudget },
+      thinkingConfig: { thinkingBudget, includeThoughts: true },
       systemInstruction: {
         parts: [
           { text: systemPrompt },
-          {
-            text: `Current datetime is: ${moment().format('lll')}`,
-          },
-          {
-            text: 'Respond to the user in the language they used to make the request.',
-          },
+          { text: currentDateTimePrompt },
+          { text: languageRequirementPrompt },
         ],
       },
     },
-    contents: [
-      {
-        parts: [
-          { text: `<QUERY>\n${query}\n</QUERY>` },
-          {
-            text: `<QNA>\n${qna.map(item => `<Q>${item.q}</Q>\n<A>${item.a}</A>\n`).join('')}\n</QNA>`,
-          },
-          {
-            text: `Important note: Generate a maximum of ${maxSections} sections.`,
-          },
-        ],
-      },
-    ],
+    contents: [userContent],
   });
 
   for await (const chunk of response) {
-    if (typeof chunk.text !== 'undefined') {
-      onStreaming(chunk.text);
+    const text = chunk?.candidates?.[0].content?.parts?.[0].text || '';
+    const isThought = chunk?.candidates?.[0].content?.parts?.[0]?.thought || false;
+
+    if (isThought) {
+      addLog(text);
+    } else {
+      onStreaming?.(text);
     }
   }
 }

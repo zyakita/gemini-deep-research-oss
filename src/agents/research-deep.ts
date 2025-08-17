@@ -1,5 +1,6 @@
-import { type GoogleGenAI, Type } from '@google/genai';
-import moment from 'moment';
+import { Type } from '@google/genai';
+import { type AgentInput } from '../types';
+import { currentDateTimePrompt, languageRequirementPrompt } from '../utils/system-instructions';
 
 const systemPrompt = `
 # ROLE AND GOAL
@@ -41,17 +42,6 @@ const systemPrompt = `
 4.  Generate Final Output: Construct the final JSON object containing the list of tasks. If no gaps were identified in step 2, this list must be empty.
 `;
 
-type researchDeepAgentInput = {
-  query: string;
-  qna: Array<{ q: string; a: string }>;
-  reportPlan: string;
-  findings: Array<{ title: string; direction: string; learning: string }>;
-  googleGenAI: GoogleGenAI;
-  model: string;
-  thinkingBudget: number;
-  maxTasks: number;
-};
-
 type researchDeepAgentResponse = {
   tasks: {
     title: string;
@@ -60,28 +50,23 @@ type researchDeepAgentResponse = {
 };
 
 async function runResearchDeepAgent({
-  query,
-  qna,
-  reportPlan,
-  findings,
   googleGenAI,
   model,
   thinkingBudget,
-  maxTasks,
-}: researchDeepAgentInput) {
-  const response = await googleGenAI.models.generateContent({
+  userContent,
+  addLog,
+}: AgentInput) {
+  let jsonContent = '';
+
+  const response = await googleGenAI.models.generateContentStream({
     model,
     config: {
-      thinkingConfig: { thinkingBudget },
+      thinkingConfig: { thinkingBudget, includeThoughts: true },
       systemInstruction: {
         parts: [
           { text: systemPrompt },
-          {
-            text: `Current datetime is: ${moment().format('lll')}`,
-          },
-          {
-            text: 'Respond to the user in the language they used to make the request.',
-          },
+          { text: currentDateTimePrompt },
+          { text: languageRequirementPrompt },
         ],
       },
       responseMimeType: 'application/json',
@@ -103,28 +88,21 @@ async function runResearchDeepAgent({
         required: ['tasks'],
       },
     },
-    contents: [
-      {
-        parts: [
-          { text: `<QUERY>\n${query}\n</QUERY>` },
-          {
-            text: `<QNA>\n${qna.map(item => `<Q>${item.q}</Q>\n<A>${item.a}</A>\n`).join('')}\n</QNA>`,
-          },
-          {
-            text: `<REPORT_PLAN>\n${reportPlan}\n</REPORT_PLAN>`,
-          },
-          {
-            text: `<FINDINGS>\n${findings.map(item => `<TITLE>${item.title}</TITLE>\n<DIRECTION>${item.direction}</DIRECTION>\n<LEARNING>${item.learning}</LEARNING>\n`).join('')}\n</FINDINGS>`,
-          },
-          {
-            text: `Important note: Generate a maximum of ${maxTasks} tasks.`,
-          },
-        ],
-      },
-    ],
+    contents: [userContent],
   });
 
-  return JSON.parse(response.text || '') as researchDeepAgentResponse;
+  for await (const chunk of response) {
+    const text = chunk?.candidates?.[0].content?.parts?.[0].text || '';
+    const isThought = chunk?.candidates?.[0].content?.parts?.[0]?.thought || false;
+
+    if (isThought) {
+      addLog(text);
+    } else {
+      jsonContent += text;
+    }
+  }
+
+  return JSON.parse(jsonContent || '') as researchDeepAgentResponse;
 }
 
 export default runResearchDeepAgent;

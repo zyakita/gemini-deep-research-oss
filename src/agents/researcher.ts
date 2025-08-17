@@ -1,5 +1,5 @@
 import { type GoogleGenAI } from '@google/genai';
-import moment from 'moment';
+import { currentDateTimePrompt, languageRequirementPrompt } from '../utils/system-instructions';
 
 const systemPrompt = `
 # ROLE AND GOAL
@@ -35,12 +35,8 @@ async function runResearcherAgent({
       systemInstruction: {
         parts: [
           { text: systemPrompt },
-          {
-            text: `Current datetime is: ${moment().format('lll')}`,
-          },
-          {
-            text: 'Respond to the user in the language they used to make the request.',
-          },
+          { text: currentDateTimePrompt },
+          { text: languageRequirementPrompt },
         ],
       },
       tools: [{ googleSearch: {} }],

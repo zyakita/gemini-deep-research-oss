@@ -9,7 +9,7 @@ import runResearcherAgent from '../agents/researcher';
 import { useSettingStore } from '../stores/setting';
 import { useTaskStore } from '../stores/task';
 import type { ResearchTask } from '../types';
-import { wakeUpResolver } from '../utils/vertexaisearch';
+import { buildUserContent } from '../utils/user-contents';
 
 function useDeepResearch() {
   const taskStore = useTaskStore();
@@ -28,21 +28,32 @@ function useDeepResearch() {
   // Memoize common agent parameters
   const commonAgentParams = useMemo(
     () => ({
-      query: taskStore.query,
+      addLog: taskStore.addLog,
       googleGenAI,
-      model: settingStore.coreModel,
       thinkingBudget: settingStore.thinkingBudget,
     }),
-    [taskStore.query, googleGenAI, settingStore.coreModel, settingStore.thinkingBudget]
+    [googleGenAI, settingStore.thinkingBudget, taskStore.addLog]
   );
 
   const generateQnAs = useCallback(async () => {
     try {
-      wakeUpResolver();
+      taskStore.addLog('Starting Q&A generation...');
+
+      const userContent = buildUserContent({
+        task: taskStore,
+        includeQuery: true,
+        includeQnA: false,
+        includePlan: false,
+        includeFindings: false,
+      });
 
       taskStore.setIsGeneratingQnA(true);
 
-      const { questions } = await runQuestionAndAnswerAgent(commonAgentParams);
+      const { questions } = await runQuestionAndAnswerAgent({
+        ...commonAgentParams,
+        model: settingStore.coreModel,
+        userContent,
+      });
 
       // Process questions in parallel
       const qnaPromises = questions.map(async q => {
@@ -53,18 +64,33 @@ function useDeepResearch() {
       const qnas = await Promise.all(qnaPromises);
       qnas.forEach(qna => taskStore.addQnA(qna));
     } catch (error) {
-      console.error('Failed to generate Q&As:', error);
+      taskStore.addLog(`Failed to generate Q&As: ${error}`);
+      taskStore.setIsGeneratingQnA(false);
+
       throw error;
     } finally {
+      taskStore.addLog('=== Q&A generation completed ===');
       taskStore.setIsGeneratingQnA(false);
     }
-  }, [commonAgentParams, taskStore]);
+  }, [commonAgentParams, taskStore, settingStore]);
 
   const generateReportPlan = useCallback(async () => {
     // Create streaming handler with proper cleanup
     let streamingHandler: ReturnType<typeof createSmoothStreamingHandler> | null = null;
 
     try {
+      taskStore.addLog('Starting report plan generation...');
+
+      const userContent = buildUserContent({
+        task: taskStore,
+        includeQuery: true,
+        includeQnA: true,
+        includePlan: false,
+        includeFindings: false,
+        limitCount: settingStore.wide,
+        limitFor: 'sections',
+      });
+
       taskStore.updateReportPlan('');
       taskStore.setIsGeneratingReportPlan(true);
 
@@ -82,38 +108,52 @@ function useDeepResearch() {
 
       await runReportPlanAgent({
         ...commonAgentParams,
-        qna: taskStore.qna.filter(q => q.a.trim() !== ''),
-        maxSections: settingStore.wide,
+        model: settingStore.coreModel,
+        userContent,
         onStreaming: chunk => streamingHandler?.addChunk(chunk),
       });
     } catch (error) {
-      console.error('Failed to generate report plan:', error);
+      taskStore.addLog(`Failed to generate report plan: ${error}`);
+      taskStore.setIsGeneratingReportPlan(false);
+
       throw error;
     } finally {
       streamingHandler?.finish();
+
+      taskStore.addLog('=== Report plan generation completed ===');
       taskStore.setIsGeneratingReportPlan(false);
     }
-  }, [commonAgentParams, taskStore, settingStore.wide]);
+  }, [commonAgentParams, taskStore, settingStore]);
 
   const generateResearchTasks = useCallback(
     async (tier: number) => {
+      taskStore.addLog(`Starting research task generation for round ${tier}...`);
+
       const existingTasks = taskStore.getResearchTasksByTier(tier);
       if (existingTasks.length > 0) return;
 
       try {
-        const agentParams = {
-          ...commonAgentParams,
-          qna: taskStore.qna.filter(q => q.a.trim() !== ''),
-          reportPlan: taskStore.reportPlan,
-          maxTasks: settingStore.wide,
-        };
+        const userContent = buildUserContent({
+          task: taskStore,
+          includeQuery: true,
+          includeQnA: true,
+          includePlan: true,
+          includeFindings: true,
+          limitCount: settingStore.wide,
+          limitFor: 'tasks',
+        });
 
         const { tasks } =
           tier === 1
-            ? await runResearchLeadAgent(agentParams)
+            ? await runResearchLeadAgent({
+                ...commonAgentParams,
+                model: settingStore.coreModel,
+                userContent,
+              })
             : await runResearchDeepAgent({
-                ...agentParams,
-                findings: taskStore.getAllFinishedResearchTasks(),
+                ...commonAgentParams,
+                model: settingStore.coreModel,
+                userContent,
               });
 
         // Process tasks in parallel
@@ -130,27 +170,33 @@ function useDeepResearch() {
 
         const researchTasks = await Promise.all(taskPromises);
         researchTasks.forEach(task => taskStore.addResearchTask(task));
+
+        taskStore.addLog(`=== Research tasks generated for round ${tier} ===`);
       } catch (error) {
-        console.error(`Failed to generate research tasks for tier ${tier}:`, error);
+        taskStore.addLog(`Failed to generate research tasks for round ${tier}: ${error}`);
         throw error;
       }
     },
-    [commonAgentParams, taskStore, settingStore.wide]
+    [commonAgentParams, taskStore, settingStore]
   );
 
   const runResearchTasks = useCallback(
     async (tier: number) => {
+      const maxConcurrency = settingStore.parallelSearch || 1;
       const existingTasks = taskStore.getResearchTasksByTier(tier);
       const tasksToRun = existingTasks.filter(t => t.learning === '');
 
       if (tasksToRun.length === 0) return;
 
-      const maxConcurrency = settingStore.parallelSearch || 1;
+      taskStore.addLog(
+        `Starting research tasks for round ${tier}, ${maxConcurrency} concurrent tasks allowed.`
+      );
 
       try {
         await processConcurrent(
           tasksToRun,
           async (task: ResearchTask) => {
+            taskStore.addLog(`--- Running research task: ${task.title} ---`);
             taskStore.updateResearchTask({ ...task, processing: true });
 
             try {
@@ -175,6 +221,7 @@ function useDeepResearch() {
                 }
               }
 
+              taskStore.addLog(`--- Task completed: ${task.title} ---`);
               return { taskId: task.id, success: true };
             } catch (error) {
               taskStore.updateResearchTask({ ...task, processing: false });
@@ -184,7 +231,7 @@ function useDeepResearch() {
           maxConcurrency
         );
       } catch (error) {
-        console.error(`Failed to run research tasks for tier ${tier}:`, error);
+        taskStore.addLog(`Failed to run research tasks for round ${tier}: ${error}`);
         throw error;
       }
     },
@@ -208,7 +255,7 @@ function useDeepResearch() {
         await runResearchTasks(tier);
       }
     } catch (error) {
-      console.error('Failed to complete research tasks:', error);
+      taskStore.setIsGeneratingResearchTasks(false);
       throw error;
     } finally {
       taskStore.setIsGeneratingResearchTasks(false);
@@ -219,6 +266,8 @@ function useDeepResearch() {
     let streamingHandler: ReturnType<typeof createSmoothStreamingHandler> | null = null;
 
     try {
+      taskStore.addLog('Starting final report generation...');
+
       taskStore.updateFinalReport('');
       taskStore.setIsGeneratingFinalReport(true);
 
@@ -234,15 +283,26 @@ function useDeepResearch() {
 
       streamingHandler.reset();
 
-      await runReporterAgent({
-        ...commonAgentParams,
-        qna: taskStore.qna.filter(q => q.a.trim() !== ''),
-        reportPlan: taskStore.reportPlan,
-        findings: taskStore.getAllFinishedResearchTasks(),
-        tone: settingStore.reportTone,
-        minWords: settingStore.minWords,
-        onStreaming: chunk => streamingHandler?.addChunk(chunk),
+      const userContent = buildUserContent({
+        task: taskStore,
+        includeQuery: true,
+        includeQnA: true,
+        includePlan: true,
+        includeFindings: true,
       });
+
+      await runReporterAgent(
+        {
+          ...commonAgentParams,
+          model: settingStore.coreModel,
+          userContent,
+          onStreaming: chunk => streamingHandler?.addChunk(chunk),
+        },
+        {
+          tone: settingStore.reportTone,
+          minWords: settingStore.minWords,
+        }
+      );
     } catch (error) {
       console.error('Failed to generate final report:', error);
       throw error;
@@ -250,7 +310,7 @@ function useDeepResearch() {
       streamingHandler?.finish();
       taskStore.setIsGeneratingFinalReport(false);
     }
-  }, [commonAgentParams, taskStore, settingStore.reportTone, settingStore.minWords]);
+  }, [commonAgentParams, taskStore, settingStore]);
 
   return {
     generateQnAs,
