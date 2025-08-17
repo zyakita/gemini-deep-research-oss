@@ -193,7 +193,7 @@ function ResearchReportPlan() {
               size="medium"
               startIcon={<PlayArrowIcon />}
               loading={isGeneratingResearchTasks}
-              disabled={!reportPlan || isCompleted}
+              // disabled={!reportPlan || isCompleted}
               onClick={handleStartResearchTasks}
               className="px-6 py-2"
             >

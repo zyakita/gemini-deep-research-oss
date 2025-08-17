@@ -22,6 +22,7 @@ export interface TaskStore {
   sources: string[];
   currentStep: number;
   sourceQueue: string[];
+  resolvedUrlQueue: string[];
   isProcessingSourceQueue: boolean;
   logs: string[];
 }
@@ -92,6 +93,7 @@ const defaultValues: TaskStore = {
   sources: [],
   currentStep: 0,
   sourceQueue: [],
+  resolvedUrlQueue: [],
   isProcessingSourceQueue: false,
   logs: [],
 };
@@ -162,53 +164,89 @@ export const useTaskStore = create(
       },
       processSourceQueue: async () => {
         const state = get();
-        if (state.isProcessingSourceQueue || state.sourceQueue.length === 0) {
+        if (state.isProcessingSourceQueue) {
           return;
         }
 
         set({ isProcessingSourceQueue: true });
 
+        const MAX_CONCURRENT = 5;
+        let activePromises = new Set<Promise<void>>();
+
+        // Helper to process resolved URLs sequentially for uniqueness
+        const processResolvedUrls = () => {
+          const currentState = get();
+          if (currentState.resolvedUrlQueue.length === 0) {
+            return;
+          }
+
+          // Process one URL at a time to maintain uniqueness
+          const finalUrl = currentState.resolvedUrlQueue[0];
+
+          // Remove from resolved queue
+          set(state => ({
+            resolvedUrlQueue: state.resolvedUrlQueue.slice(1),
+          }));
+
+          // Add to sources if not duplicate
+          const currentSources = get().sources;
+          if (!currentSources.includes(finalUrl)) {
+            set(state => ({ sources: [...state.sources, finalUrl] }));
+          }
+
+          // Continue processing if there are more URLs
+          if (get().resolvedUrlQueue.length > 0) {
+            processResolvedUrls();
+          }
+        };
+
+        // Helper to start processing a vertex URI
+        const processVertexUri = async (vertexUri: string) => {
+          try {
+            const finalUrl = await getFinalUrlFromVertexAIsearch(vertexUri);
+            if (finalUrl) {
+              // Add to resolved URL queue
+              set(state => ({
+                resolvedUrlQueue: [...state.resolvedUrlQueue, finalUrl],
+              }));
+              // Process resolved URLs
+              processResolvedUrls();
+            }
+          } catch (error) {
+            console.error('Error processing vertex URI:', error);
+          }
+        };
+
+        // Main processing loop
         while (true) {
           const currentState = get();
-          if (currentState.sourceQueue.length === 0) {
+
+          // If no more items to process and no active promises, we're done
+          if (currentState.sourceQueue.length === 0 && activePromises.size === 0) {
             break;
           }
 
-          // Take up to 3 items from the queue for concurrent processing
-          const batchSize = Math.min(3, currentState.sourceQueue.length);
-          const batch = currentState.sourceQueue.slice(0, batchSize);
+          // Start new promises up to MAX_CONCURRENT limit
+          while (activePromises.size < MAX_CONCURRENT && currentState.sourceQueue.length > 0) {
+            const vertexUri = currentState.sourceQueue[0];
 
-          try {
-            // Process all items in the batch concurrently
-            const results = await Promise.allSettled(
-              batch.map(async vertexUri => {
-                const finalUrl = await getFinalUrlFromVertexAIsearch(vertexUri);
-                return { vertexUri, finalUrl };
-              })
-            );
+            // Remove from source queue
+            set(state => ({
+              sourceQueue: state.sourceQueue.slice(1),
+            }));
 
-            // Process results and add to sources if not duplicate
-            for (const result of results) {
-              if (result.status === 'fulfilled' && result.value.finalUrl) {
-                const { finalUrl } = result.value;
-                const currentSources = get().sources;
+            // Start processing this URI
+            const promise = processVertexUri(vertexUri).finally(() => {
+              activePromises.delete(promise);
+            });
 
-                // Only add if finalUrl doesn't already exist in sources
-                if (!currentSources.includes(finalUrl)) {
-                  set(state => ({ sources: [...state.sources, finalUrl] }));
-                }
-              } else if (result.status === 'rejected') {
-                console.error('Error processing vertex URI in batch:', result.reason);
-              }
-            }
-          } catch (error) {
-            console.error('Error processing batch:', error);
+            activePromises.add(promise);
           }
 
-          // Remove the processed items from the queue
-          set(state => ({
-            sourceQueue: state.sourceQueue.slice(batchSize),
-          }));
+          // Wait for at least one promise to complete before continuing
+          if (activePromises.size > 0) {
+            await Promise.race(activePromises);
+          }
         }
 
         set({ isProcessingSourceQueue: false });
@@ -227,6 +265,7 @@ export const useTaskStore = create(
           sources: [],
           currentStep: 0,
           sourceQueue: [],
+          resolvedUrlQueue: [],
           isProcessingSourceQueue: false,
           // Clear all error states
           qnaError: null,
