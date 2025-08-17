@@ -12,6 +12,10 @@ This open-source tool is designed for in-depth research using Google's Gemini mo
 
 https://gemini-deep-research.oss.jqkat.com/
 
+### Report Example
+
+[Who will win the AI race?](https://github.com/zyakita/gemini-deep-research-oss/blob/main/example/who-will-win-the-ai-race.md)
+
 ## The Core Idea
 
 I use Gemini models every day. Their ability to handle large amounts of context and utilize Google Search makes them ideal for research purposes.
