@@ -37,7 +37,7 @@ function useDeepResearch() {
 
   const generateQnAs = useCallback(async () => {
     try {
-      taskStore.addLog('Starting Q&A generation...');
+      taskStore.addLog('➜ Starting Q&A generation...');
 
       const userContent = buildUserContent({
         task: taskStore,
@@ -64,7 +64,7 @@ function useDeepResearch() {
       const qnas = await Promise.all(qnaPromises);
       qnas.forEach(qna => taskStore.addQnA(qna));
     } catch (error) {
-      taskStore.addLog(`Failed to generate Q&As: ${error}`);
+      taskStore.addLog(`!!! Failed to generate Q&As: ${error}`);
       taskStore.setIsGeneratingQnA(false);
 
       throw error;
@@ -79,7 +79,7 @@ function useDeepResearch() {
     let streamingHandler: ReturnType<typeof createSmoothStreamingHandler> | null = null;
 
     try {
-      taskStore.addLog('Starting report plan generation...');
+      taskStore.addLog('➜ Starting report plan generation...');
 
       const userContent = buildUserContent({
         task: taskStore,
@@ -113,7 +113,7 @@ function useDeepResearch() {
         onStreaming: chunk => streamingHandler?.addChunk(chunk),
       });
     } catch (error) {
-      taskStore.addLog(`Failed to generate report plan: ${error}`);
+      taskStore.addLog(`!!! Failed to generate report plan: ${error}`);
       taskStore.setIsGeneratingReportPlan(false);
 
       throw error;
@@ -127,7 +127,7 @@ function useDeepResearch() {
 
   const generateResearchTasks = useCallback(
     async (tier: number) => {
-      taskStore.addLog(`Starting research task generation for round ${tier}...`);
+      taskStore.addLog(`➜ Starting research task generation for round ${tier}...`);
 
       const existingTasks = taskStore.getResearchTasksByTier(tier);
       if (existingTasks.length > 0) return;
@@ -173,7 +173,7 @@ function useDeepResearch() {
 
         taskStore.addLog(`=== Research tasks generated for round ${tier} ===`);
       } catch (error) {
-        taskStore.addLog(`Failed to generate research tasks for round ${tier}: ${error}`);
+        taskStore.addLog(`!!! Failed to generate research tasks for round ${tier}: ${error}`);
         throw error;
       }
     },
@@ -188,15 +188,14 @@ function useDeepResearch() {
 
       if (tasksToRun.length === 0) return;
 
-      taskStore.addLog(
-        `Starting research tasks for round ${tier}, ${maxConcurrency} concurrent tasks allowed.`
-      );
+      taskStore.addLog(`➜ Starting research tasks for round ${tier}.`);
+      taskStore.addLog(`${maxConcurrency} concurrent tasks allowed.`);
 
       try {
         await processConcurrent(
           tasksToRun,
           async (task: ResearchTask) => {
-            taskStore.addLog(`--- Running research task: ${task.title} ---`);
+            taskStore.addLog(`⌕ researching: ${task.title}`);
             taskStore.updateResearchTask({ ...task, processing: true });
 
             try {
@@ -221,17 +220,18 @@ function useDeepResearch() {
                 }
               }
 
-              taskStore.addLog(`--- Task completed: ${task.title} ---`);
+              taskStore.addLog(`✓ completed: ${task.title}`);
               return { taskId: task.id, success: true };
             } catch (error) {
               taskStore.updateResearchTask({ ...task, processing: false });
+              taskStore.addLog(`!!! Failed to run research task: ${task.title}: ${error}`);
               throw error;
             }
           },
           maxConcurrency
         );
       } catch (error) {
-        taskStore.addLog(`Failed to run research tasks for round ${tier}: ${error}`);
+        taskStore.addLog(`!!! Failed to run research tasks for round ${tier}: ${error}`);
         throw error;
       }
     },
@@ -266,7 +266,7 @@ function useDeepResearch() {
     let streamingHandler: ReturnType<typeof createSmoothStreamingHandler> | null = null;
 
     try {
-      taskStore.addLog('Starting final report generation...');
+      taskStore.addLog('➜ Starting final report generation...');
 
       taskStore.updateFinalReport('');
       taskStore.setIsGeneratingFinalReport(true);
@@ -304,10 +304,12 @@ function useDeepResearch() {
         }
       );
     } catch (error) {
-      console.error('Failed to generate final report:', error);
+      console.error('!!! Failed to generate final report:', error);
       throw error;
     } finally {
       streamingHandler?.finish();
+
+      taskStore.addLog('=== Final report generation completed ===');
       taskStore.setIsGeneratingFinalReport(false);
     }
   }, [commonAgentParams, taskStore, settingStore]);

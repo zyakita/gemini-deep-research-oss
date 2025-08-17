@@ -137,7 +137,11 @@ function ResearchReferences() {
           </div>
           <div className="flex items-center gap-2">
             {sourceQueue.length > 0 ? (
-              <AutorenewIcon className="animate-spin text-gray-400" />
+              <Chip
+                avatar={<AutorenewIcon className="animate-spin text-gray-400" />}
+                label={`Extracting final URL. ${sourceQueue.length} remaining.`}
+                size="small"
+              />
             ) : (
               <Button
                 size="small"
