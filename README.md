@@ -22,12 +22,12 @@ Here are the key design choices:
 
 #### A Multiple-Step Research Pipeline
 
-*   **QNA:** Clarifies research scope by questioning query ambiguities.
-*   **Report Plan:** Outlines a logical report structure based on initial inputs.
-*   **Research Lead:** Deconstructs the primary objective into core research tasks.
-*   **Research Deep:** Identifies and targets missing information with new research tasks.
-*   **Researcher:** Executes tasks by searching the web and summarizing the results.
-*   **Reporter:** Synthesizes all data into a complete, detailed final report.
+- **QNA:** Clarifies research scope by questioning query ambiguities.
+- **Report Plan:** Outlines a logical report structure based on initial inputs.
+- **Research Lead:** Deconstructs the primary objective into core research tasks.
+- **Research Deep:** Identifies and targets missing information with new research tasks.
+- **Researcher:** Executes tasks by searching the web and summarizing the results.
+- **Reporter:** Synthesizes all data into a complete, detailed final report.
 
 #### Serious Prompt Engineering
 
@@ -52,20 +52,20 @@ You will need a Google GenAI API key to access the AI models. Get your key at [G
 
 ### Local Installation
 
-Require Node 20+
+Require Node 20+, pnpm 10+
 
 1.  Clone the repository:
     ```bash
-    git clone git@github.com:zyakita/gemini-deep-research-oss.git
+    git clone https://github.com/zyakita/gemini-deep-research-oss.git
     cd gemini-deep-research-oss
     ```
 2.  Install packages:
     ```bash
-    yarn install
+    pnpm install
     ```
 3.  Start
     ```bash
-    yarn dev
+    pnpm dev
     ```
 
 ### [Optional] Config the Grounding URL Fixer
