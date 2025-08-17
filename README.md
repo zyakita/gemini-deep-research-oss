@@ -14,24 +14,24 @@ https://gemini-deep-research.oss.jqkat.com/
 
 ## The Core Idea
 
-I use Gemini models every day. Their ability to handle large amounts of context and use Google Search makes them fantastic for research.
+I use Gemini models every day. Their ability to handle large amounts of context and utilize Google Search makes them ideal for research purposes.
 
-I've noticed that many open-source research tools support multiple AI providers. While that's a great goal, it often means the workflow is compromised. This project does the opposite. It focuses only on the Gemini API to see how far it can be pushed.
+I've noticed that many open-source research tools support multiple AI providers. While that's a great goal, it often compromises the workflow. This project does the opposite. It focuses solely on the Gemini API to see how far it can be pushed.
 
 Here are the key design choices:
 
 #### A Multiple-Step Research Pipeline
 
-- **QNA:** A query refinement specialist analyzes user research queries to identify ambiguities and generate clarifying questions with predicted answers. These questions help users refine their research scope.
-- **Report Plan:** A strategic outline generator that synthesizes initial research queries and Q&A sessions into structured, logical report blueprints with clear sections and descriptions.
-- **Research Lead:** A strategic task decomposer that breaks down complex research objectives into high-level, foundational research tasks for subordinate research agents.
-- **Research Deep:** A gap analysis specialist that compares research findings against report requirements to identify missing information and generate targeted, in-depth research tasks.
-- **Researcher:** An expert research analyst who executes specific research directives through live internet searches and synthesizes findings into factual, information-dense learning documents.
-- **Reporter:** A comprehensive report writer that transforms research findings into detailed final reports. It ensures zero omission of data and applies thorough analysis using an elaboration framework.
+*   **QNA:** Clarifies research scope by questioning query ambiguities.
+*   **Report Plan:** Outlines a logical report structure based on initial inputs.
+*   **Research Lead:** Deconstructs the primary objective into core research tasks.
+*   **Research Deep:** Identifies and targets missing information with new research tasks.
+*   **Researcher:** Executes tasks by searching the web and summarizing the results.
+*   **Reporter:** Synthesizes all data into a complete, detailed final report.
 
 #### Serious Prompt Engineering
 
-I've noticed that some research tools use relatively short prompts. Here, the prompts are long and detailed by design. The goal is to provide research agents with comprehensive instructions for better, more structured output.
+I've noticed that some research tools use relatively short prompts. Here, the prompts are long and detailed by design. The goal is to provide research agents with comprehensive instructions to produce better, more structured output.
 
 #### How It Works
 
@@ -93,7 +93,7 @@ You can deploy it anywhere, then set `VITE_VERTEXAISEARCH_RESOLVER` to this proj
 
 ## Deployment
 
-This is a simple SPA application built with Vite, you can deploy it anywhere using Vite's official guide: https://vite.dev/guide/static-deploy.html
+This is a simple SPA built with Vite, you can deploy it anywhere using Vite's official guide: https://vite.dev/guide/static-deploy.html
 
 ## Contributing
 
