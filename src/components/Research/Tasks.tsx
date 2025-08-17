@@ -30,6 +30,8 @@ function ResearchTasks() {
     isGeneratingFinalReport,
     isGeneratingResearchTasks,
     finalReport,
+    researchCompletedEarly,
+    maxTierReached,
     setCurrentStep,
   } = useTaskStore();
   const { depth, wide } = useSettingStore();
@@ -40,8 +42,10 @@ function ResearchTasks() {
   const isGeneratingTasks: boolean = isGeneratingResearchTasks;
   const hasTasks: boolean = researchTasks && researchTasks.length > 0;
 
-  // Calculate expected total tasks based on depth and wide settings
-  const expectedTotalTasks = depth * wide;
+  // Calculate expected total tasks based on actual research progress, not just settings
+  // If research completed early, use actual tiers reached; otherwise use planned depth
+  const effectiveDepth = researchCompletedEarly ? Math.max(maxTierReached, 1) : depth;
+  const expectedTotalTasks = effectiveDepth * wide;
 
   const completedTasks = researchTasks?.filter(task => task.learning) || [];
 
@@ -57,17 +61,23 @@ function ResearchTasks() {
   });
 
   const currentTier = Math.max(...Array.from(tasksByTier.keys()), 0);
-  const hasMoreTiers = currentTier < depth;
+  const hasMoreTiers = currentTier < depth && !researchCompletedEarly;
 
   // Calculate progress percentage
   let progressPercentage = 0;
   if (hasTasks) {
-    // Progress based on completed tasks vs expected total
-    progressPercentage = Math.min((completedTasks.length / expectedTotalTasks) * 100, 100);
+    // If research completed early, calculate progress based on actual tasks vs. what we got
+    // Otherwise use expected total tasks
+    const totalTasksForProgress = researchCompletedEarly
+      ? researchTasks.length
+      : expectedTotalTasks;
+    progressPercentage = Math.min((completedTasks.length / totalTasksForProgress) * 100, 100);
   }
 
-  // All tasks completed when we have expected number of completed tasks or final report exists
+  // All tasks completed when we have all completed tasks and no more tiers expected,
+  // OR when research was completed early by agent decision
   const allTasksCompleted =
+    researchCompletedEarly ||
     completedTasks.length >= expectedTotalTasks ||
     (hasTasks && completedTasks.length === researchTasks.length && !hasMoreTiers);
 
@@ -109,13 +119,17 @@ function ResearchTasks() {
             {hasTasks && !isCompleted && (
               <>
                 <Chip
-                  label={`Tier ${currentTier}/${depth}`}
+                  label={
+                    researchCompletedEarly
+                      ? `Completed at round ${maxTierReached}`
+                      : `Round ${currentTier}/${depth}`
+                  }
                   size="small"
-                  color="primary"
+                  color={researchCompletedEarly ? 'success' : 'primary'}
                   variant="outlined"
                 />
                 <Chip
-                  label={`${completedTasks.length}/${expectedTotalTasks} total completed`}
+                  label={`${completedTasks.length}/${researchCompletedEarly ? researchTasks.length : expectedTotalTasks} tasks completed`}
                   size="small"
                   color={allTasksCompleted ? 'success' : 'default'}
                   variant="outlined"
@@ -131,6 +145,12 @@ function ResearchTasks() {
         <Typography variant="body2" className="mb-4 text-gray-600">
           Gathering information from various sources in {depth} rounds, up to {wide} tasks per
           round. First, go broad. Then, go deep.
+          {researchCompletedEarly && (
+            <span className="mt-1 block font-medium text-blue-600">
+              ✓ Research agent determined that sufficient information was gathered at round{' '}
+              {maxTierReached}.
+            </span>
+          )}
         </Typography>
 
         <Divider className="mb-4" />
@@ -139,7 +159,9 @@ function ResearchTasks() {
           <Box className="mb-4">
             <div className="mb-2 flex items-center justify-between">
               <Typography variant="caption" className="text-gray-600">
-                Overall Progress ({completedTasks.length} of {expectedTotalTasks} expected tasks)
+                {researchCompletedEarly
+                  ? `Progress (${completedTasks.length} of ${researchTasks.length} generated tasks)`
+                  : `Overall Progress (${completedTasks.length} of ${expectedTotalTasks} expected tasks)`}
               </Typography>
               <Typography variant="caption" className="text-gray-600">
                 {Math.round(progressPercentage)}%
@@ -394,7 +416,7 @@ function ResearchTasks() {
               ))}
 
             {/* Render skeleton loaders for tiers that haven't been generated yet */}
-            {(isGeneratingTasks || tasksByTier.size < depth) &&
+            {(isGeneratingTasks || (tasksByTier.size < depth && !researchCompletedEarly)) &&
               Array.from({ length: depth - tasksByTier.size }, (_, index) => {
                 const skeletonTier = tasksByTier.size + index + 1;
                 const isNextTier = skeletonTier === tasksByTier.size + 1;
@@ -465,8 +487,12 @@ function ResearchTasks() {
               {isCompleted
                 ? 'All tasks completed! Final report has been generated.'
                 : allTasksCompleted
-                  ? 'All expected tasks completed. Ready to generate final report.'
-                  : `${completedTasks.length} of ${expectedTotalTasks} expected tasks completed (${researchTasks.length} total tasks)`}
+                  ? researchCompletedEarly
+                    ? 'Research agent determined sufficient information was gathered. Ready to generate final report.'
+                    : 'All expected tasks completed. Ready to generate final report.'
+                  : researchCompletedEarly
+                    ? `${completedTasks.length} of ${researchTasks.length} generated tasks completed`
+                    : `${completedTasks.length} of ${expectedTotalTasks} expected tasks completed (${researchTasks.length} total tasks)`}
             </Typography>
             <Button
               variant="contained"

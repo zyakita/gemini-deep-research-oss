@@ -171,7 +171,15 @@ function useDeepResearch() {
         const researchTasks = await Promise.all(taskPromises);
         researchTasks.forEach(task => taskStore.addResearchTask(task));
 
-        taskStore.addLog(`=== Research tasks generated for round ${tier} ===`);
+        if (researchTasks.length === 0) {
+          taskStore.addLog(
+            `=== No additional research tasks needed for round ${tier} - agent determined current findings are sufficient ===`
+          );
+        } else {
+          taskStore.addLog(
+            `=== ${researchTasks.length} research tasks generated for round ${tier} ===`
+          );
+        }
       } catch (error) {
         taskStore.addLog(`!!! Failed to generate research tasks for round ${tier}: ${error}`);
         throw error;
@@ -252,6 +260,19 @@ function useDeepResearch() {
 
       for (let tier = 1; tier <= settingStore.depth; tier++) {
         await generateResearchTasks(tier);
+
+        // Check if any tasks were actually generated for this tier
+        const tierTasks = taskStore.getResearchTasksByTier(tier);
+        if (tierTasks.length === 0) {
+          taskStore.addLog(
+            `➜ Research completion detected at round ${tier} - proceeding to final report`
+          );
+          taskStore.setResearchCompletedEarly(true);
+          taskStore.setMaxTierReached(tier - 1); // Previous tier was the last one with tasks
+          break; // Exit early if no tasks were generated (agent determined research is complete)
+        }
+
+        taskStore.setMaxTierReached(tier);
         await runResearchTasks(tier);
       }
     } catch (error) {

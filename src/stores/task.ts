@@ -16,6 +16,8 @@ export interface TaskStore {
   researchTasks: ResearchTask[];
   isGeneratingResearchTasks: boolean;
   researchTasksError: string | null;
+  researchCompletedEarly: boolean; // New field to track early completion
+  maxTierReached: number; // Track the highest tier that was actually processed
   finalReport: string;
   isGeneratingFinalReport: boolean;
   finalReportError: string | null;
@@ -53,6 +55,8 @@ export interface TaskActions {
   resetResearchTasks: () => void;
   setIsGeneratingResearchTasks: (isGenerating: boolean) => void;
   setResearchTasksError: (error: string | null) => void;
+  setResearchCompletedEarly: (completed: boolean) => void; // New action
+  setMaxTierReached: (tier: number) => void; // New action
 
   // Final Report actions
   updateFinalReport: (report: string) => void;
@@ -87,6 +91,8 @@ const defaultValues: TaskStore = {
   researchTasks: [],
   isGeneratingResearchTasks: false,
   researchTasksError: null,
+  researchCompletedEarly: false,
+  maxTierReached: 0,
   finalReport: '',
   isGeneratingFinalReport: false,
   finalReportError: null,
@@ -139,10 +145,14 @@ export const useTaskStore = create(
         const tasks = get().researchTasks;
         return tasks.filter(task => task.tier === tier);
       },
-      resetResearchTasks: () => set({ researchTasks: [] }),
+      resetResearchTasks: () =>
+        set({ researchTasks: [], researchCompletedEarly: false, maxTierReached: 0 }),
       setIsGeneratingResearchTasks: (isGeneratingResearchTasks: boolean) =>
         set({ isGeneratingResearchTasks }),
       setResearchTasksError: (researchTasksError: string | null) => set({ researchTasksError }),
+      setResearchCompletedEarly: (researchCompletedEarly: boolean) =>
+        set({ researchCompletedEarly }),
+      setMaxTierReached: (maxTierReached: number) => set({ maxTierReached }),
 
       // Final Report actions
       updateFinalReport: (finalReport: string) => set({ finalReport }),
@@ -171,7 +181,7 @@ export const useTaskStore = create(
         set({ isProcessingSourceQueue: true });
 
         const MAX_CONCURRENT = 5;
-        let activePromises = new Set<Promise<void>>();
+        const activePromises = new Set<Promise<void>>();
 
         // Helper to process resolved URLs sequentially for uniqueness
         const processResolvedUrls = () => {
@@ -261,6 +271,8 @@ export const useTaskStore = create(
           reportPlan: '',
           reportPlanFeedback: '',
           researchTasks: [],
+          researchCompletedEarly: false,
+          maxTierReached: 0,
           finalReport: '',
           sources: [],
           currentStep: 0,
