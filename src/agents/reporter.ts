@@ -60,14 +60,11 @@ async function runReporterAgent(
       systemInstruction: {
         parts: [
           { text: systemPrompt },
-          {
-            text: `The user has specific expectations for the tone of the report and expects it to be written in a ${selectedTone.name} (${selectedTone.describe}).`,
-          },
-          {
-            text: `Additionally, they have a minimum word count requirement of ${minWords} words.`,
-          },
           { text: currentDateTimePrompt },
           { text: languageRequirementPrompt },
+          {
+            text: `Important Note: The required writing tone is ${selectedTone.name} (${selectedTone.describe}) with a minimum of ${minWords} words.`,
+          },
         ],
       },
     },
