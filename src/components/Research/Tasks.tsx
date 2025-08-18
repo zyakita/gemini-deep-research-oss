@@ -367,7 +367,7 @@ function ResearchTasks() {
                                     Research Results
                                   </Typography>
                                 </div>
-                                <div className="rounded-lg border border-gray-200 bg-white p-4">
+                                <div className="max-h-96 overflow-y-auto rounded-lg border border-gray-200 bg-white p-4">
                                   <div className="prose prose-sm max-w-none text-gray-700">
                                     <Markdown
                                       remarkPlugins={[remarkGfm]}
@@ -405,6 +405,34 @@ function ResearchTasks() {
                                     </Markdown>
                                   </div>
                                 </div>
+                                {task.groundingChunks && (
+                                  <>
+                                    <div className="mt-2 flex items-center gap-2">
+                                      <Typography
+                                        variant="subtitle2"
+                                        className="font-semibold text-gray-800"
+                                      >
+                                        Grounding Results
+                                      </Typography>
+                                    </div>
+                                    <div className="max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-white p-4">
+                                      {task.groundingChunks.map((chunk, index) => (
+                                        <div key={index} className="mb-2">
+                                          <Typography className="line-clamp-1 text-xs text-gray-700">
+                                            {chunk.web?.title || ''} -{' '}
+                                            <a
+                                              href={chunk.web?.uri}
+                                              target="_blank"
+                                              className="text-blue-500 hover:underline"
+                                            >
+                                              {chunk.web?.uri}
+                                            </a>
+                                          </Typography>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </>
+                                )}
                               </div>
                             )}
                           </div>
