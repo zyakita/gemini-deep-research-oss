@@ -1,6 +1,10 @@
+import ArticleIcon from '@mui/icons-material/Article';
+import CancelIcon from '@mui/icons-material/Cancel';
 import DescriptionIcon from '@mui/icons-material/Description';
 import DownloadIcon from '@mui/icons-material/Download';
-import ShareIcon from '@mui/icons-material/Share';
+import EditIcon from '@mui/icons-material/Edit';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import SaveIcon from '@mui/icons-material/Save';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -8,13 +12,20 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import { useState } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useTaskStore } from '../../stores/task';
 
 function ResearchReport() {
-  const { finalReport, isGeneratingFinalReport } = useTaskStore();
+  const { finalReport, isGeneratingFinalReport, updateFinalReport } = useTaskStore();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedReport, setEditedReport] = useState('');
+  const [downloadMenuAnchor, setDownloadMenuAnchor] = useState<null | HTMLElement>(null);
 
   const isCompleted = finalReport && finalReport.length > 0 && !isGeneratingFinalReport;
   const isLoading = isGeneratingFinalReport;
@@ -31,25 +42,125 @@ function ResearchReport() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    setDownloadMenuAnchor(null);
   };
 
-  const handleShare = async () => {
+  const handleDownloadPDF = () => {
     if (!finalReport) return;
 
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Research Report',
-          text: finalReport,
-        });
-      } catch (err) {
-        console.log('Error sharing:', err);
-      }
-    } else {
-      // Fallback to clipboard
-      navigator.clipboard.writeText(finalReport);
-      // You might want to show a toast notification here
+    // Create a new window with just the report content for printing
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Research Report</title>
+            <style>
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+                line-height: 1.6;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+                color: #333;
+              }
+              h1 {
+                color: #1a202c;
+                border-bottom: 2px solid #e2e8f0;
+                padding-bottom: 8px;
+                margin-bottom: 24px;
+              }
+              h2 {
+                color: #2d3748;
+                margin-top: 32px;
+                margin-bottom: 16px;
+              }
+              h3 {
+                color: #4a5568;
+                margin-top: 24px;
+                margin-bottom: 12px;
+              }
+              p {
+                margin-bottom: 16px;
+              }
+              ul, ol {
+                margin-bottom: 16px;
+                padding-left: 24px;
+              }
+              li {
+                margin-bottom: 4px;
+              }
+              blockquote {
+                border-left: 4px solid #cbd5e0;
+                background-color: #f7fafc;
+                padding: 16px;
+                margin: 16px 0;
+                font-style: italic;
+              }
+              code {
+                background-color: #f7fafc;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 0.9em;
+              }
+              pre {
+                background-color: #f7fafc;
+                padding: 16px;
+                border-radius: 8px;
+                overflow-x: auto;
+                margin: 16px 0;
+              }
+              @media print {
+                body { margin: 0; }
+                h1 { page-break-after: avoid; }
+                h2, h3 { page-break-after: avoid; }
+              }
+            </style>
+          </head>
+          <body>
+            <div id="report-content"></div>
+          </body>
+        </html>
+      `);
+
+      // Get the rendered HTML content from the current report
+      const reportElement = document.querySelector('#report-rendered');
+      const htmlContent = reportElement ? reportElement.innerHTML : finalReport;
+
+      printWindow.document.getElementById('report-content')!.innerHTML = htmlContent;
+      printWindow.document.close();
+
+      // Wait a bit for content to load, then print
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
     }
+    setDownloadMenuAnchor(null);
+  };
+
+  const handleDownloadClick = (event: React.MouseEvent<HTMLElement>) => {
+    setDownloadMenuAnchor(event.currentTarget);
+  };
+
+  const handleDownloadMenuClose = () => {
+    setDownloadMenuAnchor(null);
+  };
+
+  const handleEdit = () => {
+    setEditedReport(finalReport);
+    setIsEditing(true);
+  };
+
+  const handleSave = () => {
+    updateFinalReport(editedReport);
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditedReport('');
+    setIsEditing(false);
   };
 
   return (
@@ -74,8 +185,42 @@ function ResearchReport() {
               Final Report
             </Typography>
           </div>
-          {isCompleted && (
-            <Chip label="Completed" size="small" color="success" variant="outlined" />
+
+          {isCompleted && !isEditing && (
+            <div className="flex items-center gap-2">
+              <Button
+                size="small"
+                startIcon={<EditIcon />}
+                onClick={handleEdit}
+                variant="outlined"
+                className="ml-2 text-xs"
+              >
+                Edit
+              </Button>
+              <Chip label="Completed" size="small" color="success" variant="outlined" />
+            </div>
+          )}
+          {isEditing && (
+            <div className="flex gap-2">
+              <Button
+                size="small"
+                startIcon={<SaveIcon />}
+                onClick={handleSave}
+                variant="contained"
+                color="primary"
+              >
+                Save
+              </Button>
+              <Button
+                size="small"
+                startIcon={<CancelIcon />}
+                onClick={handleCancelEdit}
+                variant="outlined"
+                color="secondary"
+              >
+                Cancel
+              </Button>
+            </div>
           )}
           {isLoading && (
             <Chip label="Generating..." size="small" color="primary" variant="outlined" />
@@ -113,45 +258,69 @@ function ResearchReport() {
 
         {finalReport && (
           <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
-            <div className="max-h-96 overflow-y-auto p-6">
-              <div className="prose prose-sm max-w-none text-gray-700">
-                <Markdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    h1: ({ children }) => (
-                      <h1 className="mb-4 border-b border-gray-200 pb-2 text-2xl font-bold text-gray-800">
-                        {children}
-                      </h1>
-                    ),
-                    h2: ({ children }) => (
-                      <h2 className="mt-6 mb-3 text-xl font-semibold text-gray-800">{children}</h2>
-                    ),
-                    h3: ({ children }) => (
-                      <h3 className="mt-4 mb-2 text-lg font-medium text-gray-800">{children}</h3>
-                    ),
-                    p: ({ children }) => <p className="mb-4 leading-relaxed">{children}</p>,
-                    ul: ({ children }) => <ul className="mb-4 space-y-2 pl-6">{children}</ul>,
-                    ol: ({ children }) => <ol className="mb-4 space-y-2 pl-6">{children}</ol>,
-                    li: ({ children }) => <li className="text-gray-700">{children}</li>,
-                    blockquote: ({ children }) => (
-                      <blockquote className="my-4 border-l-4 border-blue-200 bg-blue-50 py-2 pl-4 text-gray-600 italic">
-                        {children}
-                      </blockquote>
-                    ),
-                    code: ({ children }) => (
-                      <code className="rounded bg-gray-100 px-2 py-1 text-sm">{children}</code>
-                    ),
-                    pre: ({ children }) => (
-                      <pre className="mb-4 overflow-x-auto rounded-lg bg-gray-100 p-4">
-                        {children}
-                      </pre>
-                    ),
+            {isEditing ? (
+              <div className="p-6">
+                <TextField
+                  multiline
+                  rows={20}
+                  fullWidth
+                  value={editedReport}
+                  onChange={e => setEditedReport(e.target.value)}
+                  variant="outlined"
+                  placeholder="Edit your research report..."
+                  className="font-mono text-sm"
+                  InputProps={{
+                    style: {
+                      fontFamily: 'monospace',
+                      fontSize: '14px',
+                      lineHeight: '1.5',
+                    },
                   }}
-                >
-                  {finalReport}
-                </Markdown>
+                />
               </div>
-            </div>
+            ) : (
+              <div className="max-h-96 overflow-y-auto p-6">
+                <div id="report-rendered" className="prose prose-sm max-w-none text-gray-700">
+                  <Markdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      h1: ({ children }) => (
+                        <h1 className="mb-4 border-b border-gray-200 pb-2 text-2xl font-bold text-gray-800">
+                          {children}
+                        </h1>
+                      ),
+                      h2: ({ children }) => (
+                        <h2 className="mt-6 mb-3 text-xl font-semibold text-gray-800">
+                          {children}
+                        </h2>
+                      ),
+                      h3: ({ children }) => (
+                        <h3 className="mt-4 mb-2 text-lg font-medium text-gray-800">{children}</h3>
+                      ),
+                      p: ({ children }) => <p className="mb-4 leading-relaxed">{children}</p>,
+                      ul: ({ children }) => <ul className="mb-4 space-y-2 pl-6">{children}</ul>,
+                      ol: ({ children }) => <ol className="mb-4 space-y-2 pl-6">{children}</ol>,
+                      li: ({ children }) => <li className="text-gray-700">{children}</li>,
+                      blockquote: ({ children }) => (
+                        <blockquote className="my-4 border-l-4 border-blue-200 bg-blue-50 py-2 pl-4 text-gray-600 italic">
+                          {children}
+                        </blockquote>
+                      ),
+                      code: ({ children }) => (
+                        <code className="rounded bg-gray-100 px-2 py-1 text-sm">{children}</code>
+                      ),
+                      pre: ({ children }) => (
+                        <pre className="mb-4 overflow-x-auto rounded-lg bg-gray-100 p-4">
+                          {children}
+                        </pre>
+                      ),
+                    }}
+                  >
+                    {finalReport}
+                  </Markdown>
+                </div>
+              </div>
+            )}
 
             {isLoading && (
               <div className="rounded-b-lg border-t border-gray-200 bg-blue-50 px-6 py-3">
@@ -174,7 +343,7 @@ function ResearchReport() {
         )}
       </CardContent>
 
-      {isCompleted && (
+      {isCompleted && !isEditing && (
         <CardActions className="px-6 pb-4">
           <div className="flex w-full items-center justify-between">
             <Typography variant="caption" className="text-gray-500">
@@ -185,26 +354,39 @@ function ResearchReport() {
                 variant="outlined"
                 size="medium"
                 startIcon={<DownloadIcon />}
-                onClick={handleDownload}
+                onClick={handleDownloadClick}
                 className="px-4 py-2"
               >
                 Download
               </Button>
-              <Button
-                variant="outlined"
-                size="medium"
-                startIcon={<ShareIcon />}
-                onClick={handleShare}
-                className="px-4 py-2"
+              <Menu
+                anchorEl={downloadMenuAnchor}
+                open={Boolean(downloadMenuAnchor)}
+                onClose={handleDownloadMenuClose}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center',
+                }}
+                transformOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
               >
-                Share
-              </Button>
+                <MenuItem onClick={handleDownload}>
+                  <ArticleIcon className="mr-2" fontSize="small" />
+                  Download as Markdown
+                </MenuItem>
+                <MenuItem onClick={handleDownloadPDF}>
+                  <PictureAsPdfIcon className="mr-2" fontSize="small" />
+                  Download as PDF
+                </MenuItem>
+              </Menu>
             </div>
           </div>
         </CardActions>
       )}
 
-      {finalReport && isLoading && (
+      {finalReport && isLoading && !isEditing && (
         <CardActions className="px-6 pb-4">
           <div className="flex w-full items-center justify-between">
             <Typography variant="caption" className="text-blue-600">
@@ -215,21 +397,11 @@ function ResearchReport() {
                 variant="outlined"
                 size="medium"
                 startIcon={<DownloadIcon />}
-                onClick={handleDownload}
+                onClick={handleDownloadClick}
                 className="px-4 py-2"
                 disabled
               >
                 Download
-              </Button>
-              <Button
-                variant="outlined"
-                size="medium"
-                startIcon={<ShareIcon />}
-                onClick={handleShare}
-                className="px-4 py-2"
-                disabled
-              >
-                Share
               </Button>
             </div>
           </div>
