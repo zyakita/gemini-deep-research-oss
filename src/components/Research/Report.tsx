@@ -20,6 +20,7 @@ import { useState } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useTaskStore } from '../../stores/task';
+import { getPrintTemplate } from '../../utils/print-template';
 
 function ResearchReport() {
   const { finalReport, isGeneratingFinalReport, updateFinalReport } = useTaskStore();
@@ -51,84 +52,11 @@ function ResearchReport() {
     // Create a new window with just the report content for printing
     const printWindow = window.open('', '_blank');
     if (printWindow) {
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Research Report</title>
-            <style>
-              body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-                line-height: 1.6;
-                max-width: 800px;
-                margin: 0 auto;
-                padding: 20px;
-                color: #333;
-              }
-              h1 {
-                color: #1a202c;
-                border-bottom: 2px solid #e2e8f0;
-                padding-bottom: 8px;
-                margin-bottom: 24px;
-              }
-              h2 {
-                color: #2d3748;
-                margin-top: 32px;
-                margin-bottom: 16px;
-              }
-              h3 {
-                color: #4a5568;
-                margin-top: 24px;
-                margin-bottom: 12px;
-              }
-              p {
-                margin-bottom: 16px;
-              }
-              ul, ol {
-                margin-bottom: 16px;
-                padding-left: 24px;
-              }
-              li {
-                margin-bottom: 4px;
-              }
-              blockquote {
-                border-left: 4px solid #cbd5e0;
-                background-color: #f7fafc;
-                padding: 16px;
-                margin: 16px 0;
-                font-style: italic;
-              }
-              code {
-                background-color: #f7fafc;
-                padding: 2px 6px;
-                border-radius: 4px;
-                font-size: 0.9em;
-              }
-              pre {
-                background-color: #f7fafc;
-                padding: 16px;
-                border-radius: 8px;
-                overflow-x: auto;
-                margin: 16px 0;
-              }
-              @media print {
-                body { margin: 0; }
-                h1 { page-break-after: avoid; }
-                h2, h3 { page-break-after: avoid; }
-              }
-            </style>
-          </head>
-          <body>
-            <div id="report-content"></div>
-          </body>
-        </html>
-      `);
-
       // Get the rendered HTML content from the current report
       const reportElement = document.querySelector('#report-rendered');
       const htmlContent = reportElement ? reportElement.innerHTML : finalReport;
 
-      printWindow.document.getElementById('report-content')!.innerHTML = htmlContent;
+      printWindow.document.write(getPrintTemplate(htmlContent));
       printWindow.document.close();
 
       // Wait a bit for content to load, then print
