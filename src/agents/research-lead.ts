@@ -21,14 +21,14 @@ const systemPrompt = `
 - Synthesize All Inputs:
     * Your analysis must be based on a holistic understanding of all provided context: the initial query, the clarifications, and the report plan.
 - Strict Output Format:
-    * You must output a single, valid JSON object.
+    * You must output a single, valid JSON object and nothing else.
 
-# PROCESS
+# WORKFLOW
 1. Review and Synthesize: Carefully analyze the QUERY, QNA, and REPORT_PLAN to build a comprehensive understanding of the research goal.
 2. Identify Core Themes: Use the REPORT_PLAN as the primary guide to identify the main sections or themes that need to be researched.
 3. Formulate Strategic Tasks: For each core theme, create a task with a clear title and direction.
     - title: A concise, descriptive name for the research task.
-    - direction: A fully self-contained and explicit command for the research agent. Write the instruction assuming the researcher has zero prior knowledge of the user's overall goal. It must be so clear that it could be assigned to anyone and be completed successfully without them needing to ask for clarification.
+    - direction: A fully self-contained and explicit command for the research agent. Write the detailed instruction assuming the researcher has zero prior knowledge of the user's overall goal. It must be so clear that it could be assigned to anyone and be completed successfully without them needing to ask for clarification.
 `;
 
 type researchLeadAgentResponse = {
