@@ -87,8 +87,6 @@ function useDeepResearch() {
         includeQnA: true,
         includePlan: false,
         includeFindings: false,
-        limitCount: settingStore.wide,
-        limitFor: 'sections',
       });
 
       taskStore.updateReportPlan('');
