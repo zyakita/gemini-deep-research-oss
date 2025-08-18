@@ -4,6 +4,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
+import CircularProgress from '@mui/material/CircularProgress';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -15,10 +16,12 @@ import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import Slider from '@mui/material/Slider';
+import { useTheme } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import { useState } from 'react';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useEffect, useState } from 'react';
 import tones from '../../consts/tones';
 import { useGlobalStore } from '../../stores/global';
 import { useSettingStore } from '../../stores/setting';
@@ -36,49 +39,85 @@ function SettingDialog() {
     parallelSearch,
     reportTone,
     minWords,
+    modelList,
+    isApiKeyValid,
+    isApiKeyValidating,
     update,
+    validateApiKey,
   } = useSettingStore();
 
   const [showApiKey, setShowApiKey] = useState(false);
   const [toneInfoOpen, setToneInfoOpen] = useState(false);
+
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+  // Validate API key when it changes
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      validateApiKey(apiKey);
+    }, 500); // Debounce for 500 milliseconds
+
+    return () => clearTimeout(timeoutId);
+  }, [apiKey, validateApiKey]);
 
   const handleClose = () => {
     setOpenSetting(false);
   };
 
   const selectedTone = tones.find(tone => tone.slug === reportTone);
+  const modelsDisabled = !apiKey.trim() || !isApiKeyValid || isApiKeyValidating;
 
   return (
     <>
-      <Dialog open={openSetting} maxWidth="md" fullWidth onClose={handleClose}>
-        <DialogTitle sx={{ pb: 1 }}>
+      <Dialog
+        open={openSetting}
+        maxWidth="md"
+        fullWidth
+        onClose={handleClose}
+        fullScreen={fullScreen}
+        scroll="paper"
+      >
+        <DialogTitle sx={{ pb: { xs: 0.5, sm: 1 }, pr: { xs: 2, sm: 3 }, pl: { xs: 2, sm: 3 } }}>
           <Typography variant="h5" component="div">
             Research Settings
           </Typography>
         </DialogTitle>
-        <DialogContent sx={{ px: 3, py: 2 }}>
-          <DialogContentText sx={{ mb: 3 }}>
+        <DialogContent sx={{ px: { xs: 2, sm: 3 }, py: { xs: 1.5, sm: 2 } }} dividers>
+          <DialogContentText sx={{ mb: { xs: 2, sm: 3 } }}>
             Configure your research parameters and AI models. All settings are saved locally in your
             browser.
           </DialogContentText>
 
           {/* API Configuration Section */}
-          <Box sx={{ mb: 4 }}>
+          <Box sx={{ mb: { xs: 3, sm: 4 } }}>
             <Typography
               variant="h6"
               color="primary"
               gutterBottom
-              sx={{ mb: 2, display: 'flex', alignItems: 'center' }}
+              sx={{ mb: { xs: 1.5, sm: 2 }, display: 'flex', alignItems: 'center' }}
             >
               🔑 API Configuration
             </Typography>
 
             {/* Api Key */}
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: { xs: 2, sm: 3 } }}>
               <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                API Key *
+                API Key *{isApiKeyValidating && <CircularProgress size={16} sx={{ ml: 1 }} />}
+                {apiKey.trim() && !isApiKeyValidating && (
+                  <Chip
+                    label={isApiKeyValid ? 'Valid' : 'Invalid'}
+                    color={isApiKeyValid ? 'success' : 'error'}
+                    size="small"
+                    sx={{ ml: 1 }}
+                  />
+                )}
               </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ mb: { xs: 1, sm: 2 }, display: { xs: 'none', sm: 'block' } }}
+              >
                 Your Google GenAI API key for accessing AI models, get it from
                 https://aistudio.google.com/
               </Typography>
@@ -87,10 +126,17 @@ function SettingDialog() {
                 fullWidth
                 variant="outlined"
                 size="small"
+                margin="dense"
                 type={showApiKey ? 'text' : 'password'}
                 placeholder="Enter your API key"
                 value={apiKey}
                 onChange={e => update({ apiKey: e.target.value })}
+                error={apiKey.trim() !== '' && !isApiKeyValid && !isApiKeyValidating}
+                helperText={
+                  apiKey.trim() !== '' && !isApiKeyValid && !isApiKeyValidating
+                    ? 'Invalid API key'
+                    : ''
+                }
                 InputProps={{
                   endAdornment: (
                     <IconButton size="small" onClick={() => setShowApiKey(!showApiKey)}>
@@ -102,49 +148,96 @@ function SettingDialog() {
             </Box>
 
             {/* Models */}
-            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 2,
+                mb: { xs: 1.5, sm: 2 },
+                flexDirection: { xs: 'column', sm: 'row' },
+              }}
+            >
               <Box sx={{ flex: 1 }}>
                 <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                   Core Model
+                  {modelsDisabled && (
+                    <Typography
+                      component="span"
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ ml: 1 }}
+                    >
+                      (disabled)
+                    </Typography>
+                  )}
                 </Typography>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  value={coreModel}
-                  onChange={e => update({ coreModel: e.target.value })}
-                />
+                <FormControl fullWidth size="small" disabled={modelsDisabled}>
+                  <Select
+                    value={isApiKeyValid ? coreModel : ''}
+                    onChange={e => update({ coreModel: e.target.value })}
+                    displayEmpty
+                  >
+                    {modelList.map(model => (
+                      <MenuItem key={model} value={model}>
+                        {model}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                   Task Model
+                  {modelsDisabled && (
+                    <Typography
+                      component="span"
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ ml: 1 }}
+                    >
+                      (disabled)
+                    </Typography>
+                  )}
                 </Typography>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  value={taskModel}
-                  onChange={e => update({ taskModel: e.target.value })}
-                />
+                <FormControl fullWidth size="small" disabled={modelsDisabled}>
+                  <Select
+                    value={isApiKeyValid ? taskModel : ''}
+                    onChange={e => update({ taskModel: e.target.value })}
+                    displayEmpty
+                  >
+                    {modelList.map(model => (
+                      <MenuItem key={model} value={model}>
+                        {model}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Box>
             </Box>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mb: { xs: 1, sm: 2 }, display: { xs: 'none', sm: 'block' } }}
+            >
+              Model selection is only available with a valid API key. Models are automatically
+              loaded when your API key is validated.
+            </Typography>
           </Box>
 
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ my: { xs: 2, sm: 3 } }} />
 
           {/* Research Parameters Section */}
-          <Box sx={{ mb: 4 }}>
+          <Box sx={{ mb: { xs: 3, sm: 4 } }}>
             <Typography
               variant="h6"
               color="primary"
               gutterBottom
-              sx={{ mb: 2, display: 'flex', alignItems: 'center' }}
+              sx={{ mb: { xs: 1.5, sm: 2 }, display: 'flex', alignItems: 'center' }}
             >
               🔬 Research Parameters
             </Typography>
 
             {/* Report Tone */}
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: { xs: 2, sm: 3 } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                   Report Tone
@@ -188,7 +281,7 @@ function SettingDialog() {
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  sx={{ mt: 1, display: 'block' }}
+                  sx={{ mt: 1, display: { xs: 'none', sm: 'block' } }}
                 >
                   {selectedTone.describe}
                 </Typography>
@@ -196,14 +289,18 @@ function SettingDialog() {
             </Box>
 
             {/* Min Words */}
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: { xs: 2, sm: 3 } }}>
               <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                 Minimum Words ({minWords.toLocaleString()})
               </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ mb: { xs: 1, sm: 2 }, display: { xs: 'none', sm: 'block' } }}
+              >
                 The expected length of the report
               </Typography>
-              <Box sx={{ px: 2 }}>
+              <Box sx={{ px: { xs: 1, sm: 2 } }}>
                 <Slider
                   value={minWords}
                   onChange={(e, newValue) => update({ minWords: newValue as number })}
@@ -211,9 +308,10 @@ function SettingDialog() {
                   max={10000}
                   step={500}
                   valueLabelDisplay="auto"
+                  size="small"
                   valueLabelFormat={value => `${value.toLocaleString()} words`}
                   sx={{
-                    mx: 1,
+                    mx: { xs: 0.5, sm: 1 },
                     '& .MuiSlider-markLabel': {
                       fontSize: '0.75rem',
                       '&[data-index="0"]': {
@@ -234,7 +332,14 @@ function SettingDialog() {
             </Box>
 
             {/* Advanced Parameters - Two Column Layout with Proper Label Containment */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, rowGap: 4 }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                gap: { xs: 2, sm: 4 },
+                rowGap: { xs: 2, sm: 3 },
+              }}
+            >
               {/* Thinking Budget */}
               <Box sx={{ px: 2 }}>
                 <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
@@ -243,7 +348,7 @@ function SettingDialog() {
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  sx={{ mb: 2, display: 'block' }}
+                  sx={{ mb: { xs: 1, sm: 2 }, display: { xs: 'none', sm: 'block' } }}
                 >
                   This is the maximum number of tokens that the AI can use for internal reasoning
                   before generating the final response.
@@ -255,8 +360,9 @@ function SettingDialog() {
                   max={16384}
                   step={1024}
                   valueLabelDisplay="auto"
+                  size="small"
                   sx={{
-                    mx: 1,
+                    mx: { xs: 0.5, sm: 1 },
                     '& .MuiSlider-markLabel': {
                       fontSize: '0.75rem',
                       '&[data-index="0"]': {
@@ -283,7 +389,7 @@ function SettingDialog() {
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  sx={{ mb: 2, display: 'block' }}
+                  sx={{ mb: { xs: 1, sm: 2 }, display: { xs: 'none', sm: 'block' } }}
                 >
                   The number of simultaneous search queries executed in parallel to speed up the
                   gathering of information.
@@ -295,8 +401,9 @@ function SettingDialog() {
                   max={5}
                   step={1}
                   valueLabelDisplay="auto"
+                  size="small"
                   sx={{
-                    mx: 1,
+                    mx: { xs: 0.5, sm: 1 },
                     '& .MuiSlider-markLabel': {
                       fontSize: '0.75rem',
                       '&[data-index="0"]': {
@@ -323,7 +430,7 @@ function SettingDialog() {
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  sx={{ mb: 2, display: 'block' }}
+                  sx={{ mb: { xs: 1, sm: 2 }, display: { xs: 'none', sm: 'block' } }}
                 >
                   What is the ideal number of research rounds to ensure a thorough coverage of a
                   query? First, go broad. Then, go deep.
@@ -335,8 +442,9 @@ function SettingDialog() {
                   max={5}
                   step={1}
                   valueLabelDisplay="auto"
+                  size="small"
                   sx={{
-                    mx: 1,
+                    mx: { xs: 0.5, sm: 1 },
                     '& .MuiSlider-markLabel': {
                       fontSize: '0.75rem',
                       '&[data-index="0"]': {
@@ -364,7 +472,7 @@ function SettingDialog() {
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  sx={{ mb: 2, display: 'block' }}
+                  sx={{ mb: { xs: 1, sm: 2 }, display: { xs: 'none', sm: 'block' } }}
                 >
                   What is the ideal number of distinct sources to consult{' '}
                   <span className="font-semibold">in each round</span> to ensure a broad
@@ -377,8 +485,9 @@ function SettingDialog() {
                   max={9}
                   step={1}
                   valueLabelDisplay="auto"
+                  size="small"
                   sx={{
-                    mx: 1,
+                    mx: { xs: 0.5, sm: 1 },
                     '& .MuiSlider-markLabel': {
                       fontSize: '0.75rem',
                       '&[data-index="0"]': {
@@ -399,8 +508,8 @@ function SettingDialog() {
             </Box>
           </Box>
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button onClick={handleClose} variant="outlined" size="large">
+        <DialogActions sx={{ px: { xs: 2, sm: 3 }, py: { xs: 1, sm: 2 } }}>
+          <Button onClick={handleClose} variant="outlined" size="medium">
             Close
           </Button>
         </DialogActions>
