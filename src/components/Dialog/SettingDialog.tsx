@@ -385,7 +385,7 @@ const SettingDialog = memo(function SettingDialog() {
                 label="Minimum Words"
                 value={minWords}
                 onChange={handleMinWordsChange}
-                min={1000}
+                min={500}
                 max={10000}
                 step={500}
                 formatLabel={value => value.toLocaleString()}
@@ -462,8 +462,8 @@ const SettingDialog = memo(function SettingDialog() {
                 label="Research Width"
                 value={wide}
                 onChange={handleWideChange}
-                min={3}
-                max={9}
+                min={2}
+                max={10}
                 step={1}
                 descriptionNode={
                   <>
@@ -473,9 +473,9 @@ const SettingDialog = memo(function SettingDialog() {
                   </>
                 }
                 marks={[
-                  { value: 3, label: 'Focused' },
+                  { value: 2, label: 'Focused' },
                   { value: 6, label: 'Balanced' },
-                  { value: 9, label: 'Broad' },
+                  { value: 10, label: 'Broad' },
                 ]}
               />
             </Box>

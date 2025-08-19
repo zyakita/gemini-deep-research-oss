@@ -41,6 +41,7 @@ const systemPrompt = `
 2.  Task Formulation:
     - Use the sections from the REPORT_PLAN to define the main themes for your research tasks.
     - For each theme, formulate a strategic research task.
+    - Important note: It must be a research task and not a summary or any other type of content generation.
     - Each task will be a JSON object with two keys: title and direction.
         - title: A brief, descriptive name for the task.
         - direction: The detailed, self-contained instruction for the research agent.

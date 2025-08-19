@@ -47,6 +47,7 @@ const systemPrompt = `
 
 3.  Formulate Specific Tasks:
     - For each identified gap, create a precise and granular research task.
+    - Important note: It must be a research task and not a summary or any other type of content generation.
     - Each task must be a JSON object with two keys: title and direction.
         - title: A brief, descriptive name for the task.
         - direction: The detailed, self-contained instruction for the research agent.
