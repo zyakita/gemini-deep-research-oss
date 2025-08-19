@@ -57,15 +57,22 @@ export const useSettingStore = create(
         );
       },
       validateApiKey: async (apiKey: string) => {
-        if (!apiKey.trim()) {
-          set({ isApiKeyValid: false, modelList: [], isApiKeyValidating: false });
+        const trimmedKey = apiKey.trim();
+
+        if (!trimmedKey) {
+          set({
+            isApiKeyValid: false,
+            modelList: defaultValues.modelList,
+            isApiKeyValidating: false,
+          });
           return;
         }
 
-        set({ isApiKeyValidating: true });
+        // Don't set validating state here - let the component handle it
+        // This prevents race conditions with rapid state updates
 
         try {
-          const genAI = new GoogleGenAI({ apiKey: apiKey });
+          const genAI = new GoogleGenAI({ apiKey: trimmedKey });
           const listModels = await genAI.models.list();
 
           const models = listModels.page;
@@ -77,7 +84,7 @@ export const useSettingStore = create(
             }
           });
 
-          // short by model name, remove empty strings
+          // Sort by model name, remove empty strings
           const filteredModelNames = modelNames.filter(name => name !== '');
           filteredModelNames.sort();
 
@@ -90,18 +97,18 @@ export const useSettingStore = create(
           };
 
           // Reset model selections if they're not in the new list
-          if (!modelNames.includes(currentState.coreModel)) {
-            updates.coreModel = modelNames[0] || '';
+          if (!filteredModelNames.includes(currentState.coreModel)) {
+            updates.coreModel = filteredModelNames[0] || defaultValues.coreModel;
           }
-          if (!modelNames.includes(currentState.taskModel)) {
-            updates.taskModel = modelNames[0] || '';
+          if (!filteredModelNames.includes(currentState.taskModel)) {
+            updates.taskModel = filteredModelNames[0] || defaultValues.taskModel;
           }
 
           set(updates);
         } catch (error) {
           console.error('API key validation failed:', error);
           set({
-            modelList: [],
+            modelList: defaultValues.modelList,
             isApiKeyValid: false,
             isApiKeyValidating: false,
           });

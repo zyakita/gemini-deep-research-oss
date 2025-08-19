@@ -17,7 +17,7 @@ function ResearchQuery() {
   const { id, query, setId, setQuery, isGeneratingQnA, qna, setCurrentStep } = useTaskStore();
   const { generateQnAs } = useDeepResearch();
   const { setOpenSetting } = useGlobalStore();
-  const { apiKey } = useSettingStore();
+  const { isApiKeyValid } = useSettingStore();
 
   const handleSubmit = () => {
     if (!query.trim()) {
@@ -25,7 +25,7 @@ function ResearchQuery() {
       return;
     }
 
-    if (!apiKey) {
+    if (!isApiKeyValid) {
       setOpenSetting(true);
       return;
     }

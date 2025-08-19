@@ -36,6 +36,11 @@ function useDeepResearch() {
   );
 
   const generateQnAs = useCallback(async () => {
+    if (!settingStore.isApiKeyValid) {
+      taskStore.addLog('!!! API key is invalid');
+      return;
+    }
+
     try {
       taskStore.addLog('➜ Starting Q&A generation...');
 

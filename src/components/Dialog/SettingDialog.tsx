@@ -14,20 +14,23 @@ import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
+import type { SelectChangeEvent } from '@mui/material/Select';
 import Select from '@mui/material/Select';
-import Slider from '@mui/material/Slider';
 import { useTheme } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { useEffect, useState } from 'react';
+import type React from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import tones from '../../consts/tones';
 import { useGlobalStore } from '../../stores/global';
 import { useSettingStore } from '../../stores/setting';
+import ModelSelect from './ModelSelect';
+import SliderSetting from './SliderSetting';
 import ToneInfoDialog from './ToneInfoDialog';
 
-function SettingDialog() {
+const SettingDialog = memo(function SettingDialog() {
   const { openSetting, setOpenSetting } = useGlobalStore();
   const {
     apiKey,
@@ -49,24 +52,148 @@ function SettingDialog() {
   const [showApiKey, setShowApiKey] = useState(false);
   const [toneInfoOpen, setToneInfoOpen] = useState(false);
 
+  // Use refs to track validation state and prevent race conditions
+  const validationTimeoutRef = useRef<number | null>(null);
+  const lastValidatedKeyRef = useRef<string>('');
+  const validationSequenceRef = useRef<number>(0);
+
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // Validate API key when it changes
+  // Memoize expensive computations
+  const selectedTone = useMemo(() => tones.find(tone => tone.slug === reportTone), [reportTone]);
+  const modelsDisabled = useMemo(
+    () => !apiKey.trim() || !isApiKeyValid || isApiKeyValidating,
+    [apiKey, isApiKeyValid, isApiKeyValidating]
+  );
+
+  // Improved API key validation with race condition prevention
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      validateApiKey(apiKey);
-    }, 500); // Debounce for 500 milliseconds
+    // Clear any existing timeout
+    if (validationTimeoutRef.current) {
+      clearTimeout(validationTimeoutRef.current);
+    }
 
-    return () => clearTimeout(timeoutId);
-  }, [apiKey, validateApiKey]);
+    const trimmedKey = apiKey.trim();
 
-  const handleClose = () => {
+    // If the key is empty, immediately set as invalid
+    if (!trimmedKey) {
+      lastValidatedKeyRef.current = '';
+      update({ isApiKeyValid: false, isApiKeyValidating: false });
+      return;
+    }
+
+    // If this is the same key we just validated, skip validation
+    if (trimmedKey === lastValidatedKeyRef.current && isApiKeyValid) {
+      return;
+    }
+
+    // Increment sequence number for this validation attempt
+    const currentSequence = ++validationSequenceRef.current;
+
+    // Set validating state immediately for non-empty keys
+    update({ isApiKeyValidating: true });
+
+    // Debounced validation
+    validationTimeoutRef.current = setTimeout(async () => {
+      // Only proceed if this is still the latest validation request
+      if (currentSequence === validationSequenceRef.current) {
+        try {
+          await validateApiKey(trimmedKey);
+          lastValidatedKeyRef.current = trimmedKey;
+        } catch (error) {
+          console.error('API key validation error:', error);
+        }
+      }
+    }, 800); // Increased debounce time to 800ms for better UX
+
+    return () => {
+      if (validationTimeoutRef.current) {
+        clearTimeout(validationTimeoutRef.current);
+      }
+    };
+  }, [apiKey, validateApiKey, update, isApiKeyValid]);
+
+  // Memoized handlers to prevent unnecessary re-renders
+  const handleClose = useCallback(() => {
     setOpenSetting(false);
-  };
+    setShowApiKey(false);
+  }, [setOpenSetting]);
 
-  const selectedTone = tones.find(tone => tone.slug === reportTone);
-  const modelsDisabled = !apiKey.trim() || !isApiKeyValid || isApiKeyValidating;
+  const handleApiKeyToggle = useCallback(() => {
+    setShowApiKey(prev => !prev);
+  }, []);
+
+  const handleApiKeyChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      update({ apiKey: e.target.value });
+    },
+    [update]
+  );
+
+  const handleCoreModelChange = useCallback(
+    (e: SelectChangeEvent<string>) => {
+      update({ coreModel: e.target.value });
+    },
+    [update]
+  );
+
+  const handleTaskModelChange = useCallback(
+    (e: SelectChangeEvent<string>) => {
+      update({ taskModel: e.target.value });
+    },
+    [update]
+  );
+
+  const handleToneChange = useCallback(
+    (e: SelectChangeEvent<string>) => {
+      update({ reportTone: e.target.value });
+    },
+    [update]
+  );
+
+  const handleMinWordsChange = useCallback(
+    (_: Event, newValue: number | number[]) => {
+      update({ minWords: newValue as number });
+    },
+    [update]
+  );
+
+  const handleThinkingBudgetChange = useCallback(
+    (_: Event, newValue: number | number[]) => {
+      update({ thinkingBudget: newValue as number });
+    },
+    [update]
+  );
+
+  const handleParallelSearchChange = useCallback(
+    (_: Event, newValue: number | number[]) => {
+      update({ parallelSearch: newValue as number });
+    },
+    [update]
+  );
+
+  const handleDepthChange = useCallback(
+    (_: Event, newValue: number | number[]) => {
+      update({ depth: newValue as number });
+    },
+    [update]
+  );
+
+  const handleWideChange = useCallback(
+    (_: Event, newValue: number | number[]) => {
+      update({ wide: newValue as number });
+    },
+    [update]
+  );
+
+  const handleToneInfoOpen = useCallback(() => {
+    setToneInfoOpen(true);
+  }, []);
+
+  const handleToneInfoClose = useCallback(() => {
+    setToneInfoOpen(false);
+  }, []);
 
   return (
     <>
@@ -130,7 +257,7 @@ function SettingDialog() {
                 type={showApiKey ? 'text' : 'password'}
                 placeholder="Enter your API key"
                 value={apiKey}
-                onChange={e => update({ apiKey: e.target.value })}
+                onChange={handleApiKeyChange}
                 error={apiKey.trim() !== '' && !isApiKeyValid && !isApiKeyValidating}
                 helperText={
                   apiKey.trim() !== '' && !isApiKeyValid && !isApiKeyValidating
@@ -139,7 +266,7 @@ function SettingDialog() {
                 }
                 InputProps={{
                   endAdornment: (
-                    <IconButton size="small" onClick={() => setShowApiKey(!showApiKey)}>
+                    <IconButton size="small" onClick={handleApiKeyToggle}>
                       {showApiKey ? <Visibility /> : <VisibilityOff />}
                     </IconButton>
                   ),
@@ -157,60 +284,24 @@ function SettingDialog() {
               }}
             >
               <Box sx={{ flex: 1 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                  Core Model
-                  {modelsDisabled && (
-                    <Typography
-                      component="span"
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ ml: 1 }}
-                    >
-                      (disabled)
-                    </Typography>
-                  )}
-                </Typography>
-                <FormControl fullWidth size="small" disabled={modelsDisabled}>
-                  <Select
-                    value={isApiKeyValid ? coreModel : ''}
-                    onChange={e => update({ coreModel: e.target.value })}
-                    displayEmpty
-                  >
-                    {modelList.map(model => (
-                      <MenuItem key={model} value={model}>
-                        {model}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <ModelSelect
+                  label="Core Model"
+                  value={coreModel}
+                  onChange={handleCoreModelChange}
+                  modelList={modelList}
+                  disabled={!isApiKeyValid}
+                  modelsDisabled={modelsDisabled}
+                />
               </Box>
               <Box sx={{ flex: 1 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                  Task Model
-                  {modelsDisabled && (
-                    <Typography
-                      component="span"
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ ml: 1 }}
-                    >
-                      (disabled)
-                    </Typography>
-                  )}
-                </Typography>
-                <FormControl fullWidth size="small" disabled={modelsDisabled}>
-                  <Select
-                    value={isApiKeyValid ? taskModel : ''}
-                    onChange={e => update({ taskModel: e.target.value })}
-                    displayEmpty
-                  >
-                    {modelList.map(model => (
-                      <MenuItem key={model} value={model}>
-                        {model}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <ModelSelect
+                  label="Task Model"
+                  value={taskModel}
+                  onChange={handleTaskModelChange}
+                  modelList={modelList}
+                  disabled={!isApiKeyValid}
+                  modelsDisabled={modelsDisabled}
+                />
               </Box>
             </Box>
             <Typography
@@ -243,7 +334,7 @@ function SettingDialog() {
                   Report Tone
                 </Typography>
                 <Tooltip title="Click to see all available tones and their descriptions">
-                  <IconButton size="small" onClick={() => setToneInfoOpen(true)} sx={{ ml: 1 }}>
+                  <IconButton size="small" onClick={handleToneInfoOpen} sx={{ ml: 1 }}>
                     <HelpOutlineIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
@@ -251,7 +342,7 @@ function SettingDialog() {
               <FormControl fullWidth size="small">
                 <Select
                   value={reportTone}
-                  onChange={e => update({ reportTone: e.target.value })}
+                  onChange={handleToneChange}
                   renderValue={selected => (
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       <Chip
@@ -290,45 +381,21 @@ function SettingDialog() {
 
             {/* Min Words */}
             <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                Minimum Words ({minWords.toLocaleString()})
-              </Typography>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ mb: { xs: 1, sm: 2 }, display: { xs: 'none', sm: 'block' } }}
-              >
-                The expected length of the report
-              </Typography>
-              <Box sx={{ px: { xs: 1, sm: 2 } }}>
-                <Slider
-                  value={minWords}
-                  onChange={(e, newValue) => update({ minWords: newValue as number })}
-                  min={1000}
-                  max={10000}
-                  step={500}
-                  valueLabelDisplay="auto"
-                  size="small"
-                  valueLabelFormat={value => `${value.toLocaleString()} words`}
-                  sx={{
-                    mx: { xs: 0.5, sm: 1 },
-                    '& .MuiSlider-markLabel': {
-                      fontSize: '0.75rem',
-                      '&[data-index="0"]': {
-                        transform: 'translateX(0%)',
-                      },
-                      '&[data-index="2"]': {
-                        transform: 'translateX(-100%)',
-                      },
-                    },
-                  }}
-                  marks={[
-                    { value: 1000, label: '1K' },
-                    { value: 5000, label: '5K' },
-                    { value: 10000, label: '10K' },
-                  ]}
-                />
-              </Box>
+              <SliderSetting
+                label="Minimum Words"
+                value={minWords}
+                onChange={handleMinWordsChange}
+                min={1000}
+                max={10000}
+                step={500}
+                formatLabel={value => value.toLocaleString()}
+                description="The expected length of the report"
+                marks={[
+                  { value: 1000, label: '1K' },
+                  { value: 5000, label: '5K' },
+                  { value: 10000, label: '10K' },
+                ]}
+              />
             </Box>
 
             {/* Advanced Parameters - Two Column Layout with Proper Label Containment */}
@@ -341,170 +408,76 @@ function SettingDialog() {
               }}
             >
               {/* Thinking Budget */}
-              <Box sx={{ px: 2 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                  Thinking Budget ({thinkingBudget.toLocaleString()})
-                </Typography>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ mb: { xs: 1, sm: 2 }, display: { xs: 'none', sm: 'block' } }}
-                >
-                  This is the maximum number of tokens that the AI can use for internal reasoning
-                  before generating the final response.
-                </Typography>
-                <Slider
-                  value={thinkingBudget}
-                  onChange={(e, newValue) => update({ thinkingBudget: newValue as number })}
-                  min={1024}
-                  max={16384}
-                  step={1024}
-                  valueLabelDisplay="auto"
-                  size="small"
-                  sx={{
-                    mx: { xs: 0.5, sm: 1 },
-                    '& .MuiSlider-markLabel': {
-                      fontSize: '0.75rem',
-                      '&[data-index="0"]': {
-                        transform: 'translateX(0%)',
-                      },
-                      '&[data-index="2"]': {
-                        transform: 'translateX(-100%)',
-                      },
-                    },
-                  }}
-                  marks={[
-                    { value: 1024, label: '1K' },
-                    { value: 8192, label: '8K' },
-                    { value: 16384, label: '16K' },
-                  ]}
-                />
-              </Box>
+              <SliderSetting
+                label="Thinking Budget"
+                value={thinkingBudget}
+                onChange={handleThinkingBudgetChange}
+                min={1024}
+                max={16384}
+                step={1024}
+                formatLabel={value => value.toLocaleString()}
+                description="This is the maximum number of tokens that the AI can use for internal reasoning before generating the final response."
+                marks={[
+                  { value: 1024, label: '1K' },
+                  { value: 8192, label: '8K' },
+                  { value: 16384, label: '16K' },
+                ]}
+              />
 
               {/* Parallel Search */}
-              <Box sx={{ px: 2 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                  Parallel Search ({parallelSearch})
-                </Typography>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ mb: { xs: 1, sm: 2 }, display: { xs: 'none', sm: 'block' } }}
-                >
-                  The number of simultaneous search queries executed in parallel to speed up the
-                  gathering of information.
-                </Typography>
-                <Slider
-                  value={parallelSearch}
-                  onChange={(e, newValue) => update({ parallelSearch: newValue as number })}
-                  min={1}
-                  max={5}
-                  step={1}
-                  valueLabelDisplay="auto"
-                  size="small"
-                  sx={{
-                    mx: { xs: 0.5, sm: 1 },
-                    '& .MuiSlider-markLabel': {
-                      fontSize: '0.75rem',
-                      '&[data-index="0"]': {
-                        transform: 'translateX(0%)',
-                      },
-                      '&[data-index="2"]': {
-                        transform: 'translateX(-100%)',
-                      },
-                    },
-                  }}
-                  marks={[
-                    { value: 1, label: 'Sequential' },
-                    { value: 3, label: 'Moderate' },
-                    { value: 5, label: 'Maximum' },
-                  ]}
-                />
-              </Box>
+              <SliderSetting
+                label="Parallel Search"
+                value={parallelSearch}
+                onChange={handleParallelSearchChange}
+                min={1}
+                max={5}
+                step={1}
+                description="The number of simultaneous search queries executed in parallel to speed up the gathering of information."
+                marks={[
+                  { value: 1, label: 'Sequential' },
+                  { value: 3, label: 'Moderate' },
+                  { value: 5, label: 'Maximum' },
+                ]}
+              />
 
               {/* Research Depth */}
-              <Box sx={{ px: 2 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                  Research Depth ({depth})
-                </Typography>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ mb: { xs: 1, sm: 2 }, display: { xs: 'none', sm: 'block' } }}
-                >
-                  What is the ideal number of research rounds to ensure a thorough coverage of a
-                  query? First, go broad. Then, go deep.
-                </Typography>
-                <Slider
-                  value={depth}
-                  onChange={(e, newValue) => update({ depth: newValue as number })}
-                  min={2}
-                  max={5}
-                  step={1}
-                  valueLabelDisplay="auto"
-                  size="small"
-                  sx={{
-                    mx: { xs: 0.5, sm: 1 },
-                    '& .MuiSlider-markLabel': {
-                      fontSize: '0.75rem',
-                      '&[data-index="0"]': {
-                        transform: 'translateX(0%)',
-                      },
-                      '&[data-index="3"]': {
-                        transform: 'translateX(-100%)',
-                      },
-                    },
-                  }}
-                  marks={[
-                    { value: 2, label: 'Light' },
-                    { value: 3, label: 'Medium' },
-                    { value: 4, label: 'Deep' },
-                    { value: 5, label: 'Extensive' },
-                  ]}
-                />
-              </Box>
+              <SliderSetting
+                label="Research Depth"
+                value={depth}
+                onChange={handleDepthChange}
+                min={2}
+                max={5}
+                step={1}
+                description="What is the ideal number of research rounds to ensure a thorough coverage of a query? First, go broad. Then, go deep."
+                marks={[
+                  { value: 2, label: 'Light' },
+                  { value: 3, label: 'Medium' },
+                  { value: 4, label: 'Deep' },
+                  { value: 5, label: 'Extensive' },
+                ]}
+              />
 
               {/* Research Width */}
-              <Box sx={{ px: 2 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                  Research Width ({wide})
-                </Typography>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ mb: { xs: 1, sm: 2 }, display: { xs: 'none', sm: 'block' } }}
-                >
-                  What is the ideal number of distinct sources to consult{' '}
-                  <span className="font-semibold">in each round</span> to ensure a broad
-                  understanding of a query?
-                </Typography>
-                <Slider
-                  value={wide}
-                  onChange={(e, newValue) => update({ wide: newValue as number })}
-                  min={3}
-                  max={9}
-                  step={1}
-                  valueLabelDisplay="auto"
-                  size="small"
-                  sx={{
-                    mx: { xs: 0.5, sm: 1 },
-                    '& .MuiSlider-markLabel': {
-                      fontSize: '0.75rem',
-                      '&[data-index="0"]': {
-                        transform: 'translateX(0%)',
-                      },
-                      '&[data-index="2"]': {
-                        transform: 'translateX(-100%)',
-                      },
-                    },
-                  }}
-                  marks={[
-                    { value: 3, label: 'Focused' },
-                    { value: 6, label: 'Balanced' },
-                    { value: 9, label: 'Broad' },
-                  ]}
-                />
-              </Box>
+              <SliderSetting
+                label="Research Width"
+                value={wide}
+                onChange={handleWideChange}
+                min={3}
+                max={9}
+                step={1}
+                descriptionNode={
+                  <>
+                    What is the ideal number of distinct sources to consult{' '}
+                    <span className="font-semibold">in each round</span> to ensure a broad
+                    understanding of a query?
+                  </>
+                }
+                marks={[
+                  { value: 3, label: 'Focused' },
+                  { value: 6, label: 'Balanced' },
+                  { value: 9, label: 'Broad' },
+                ]}
+              />
             </Box>
           </Box>
         </DialogContent>
@@ -515,9 +488,9 @@ function SettingDialog() {
         </DialogActions>
       </Dialog>
 
-      <ToneInfoDialog open={toneInfoOpen} onClose={() => setToneInfoOpen(false)} />
+      <ToneInfoDialog open={toneInfoOpen} onClose={handleToneInfoClose} />
     </>
   );
-}
+});
 
 export default SettingDialog;
