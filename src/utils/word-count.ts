@@ -263,7 +263,7 @@ function getAverageReadingSpeed(text: string): number {
   }
 
   // Default for Latin-based languages
-  return 225; // words per minute
+  return 250; // words per minute
 }
 
 /**

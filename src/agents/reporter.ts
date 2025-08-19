@@ -111,14 +111,16 @@ async function runReporterAgent(
         }
 
         if (part.executableCode && part.executableCode.code) {
-          // add under code block in Markdown (three backticks)
-          // if the code is not starts with ```
+          addLog('#### The model decided to execute the following code:');
+
           if (!part.executableCode.code.startsWith('```')) {
             addLog(`\`\`\` \n${part.executableCode.code}\n\`\`\``);
           }
         }
 
         if (part.codeExecutionResult && part.codeExecutionResult.output) {
+          addLog('#### Result of the executed code:');
+
           if (!part.codeExecutionResult.output.startsWith('```')) {
             addLog(`\`\`\` \n${part.codeExecutionResult.output}\n\`\`\``);
           }

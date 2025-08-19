@@ -4,6 +4,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import DownloadIcon from '@mui/icons-material/Download';
 import EditIcon from '@mui/icons-material/Edit';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import SaveIcon from '@mui/icons-material/Save';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -11,6 +12,11 @@ import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 import Divider from '@mui/material/Divider';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -20,15 +26,18 @@ import { useState } from 'react';
 import Markdown, { defaultUrlTransform } from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
+import useDeepResearch from '../../hooks/useDeepResearch';
 import { useTaskStore } from '../../stores/task';
 import { getPrintTemplate } from '../../utils/print-template';
 import { countWords, formatWordCountResults } from '../../utils/word-count';
 
 function ResearchReport() {
+  const { generateFinalReport } = useDeepResearch();
   const { finalReport, isGeneratingFinalReport, updateFinalReport } = useTaskStore();
   const [isEditing, setIsEditing] = useState(false);
   const [editedReport, setEditedReport] = useState('');
   const [downloadMenuAnchor, setDownloadMenuAnchor] = useState<null | HTMLElement>(null);
+  const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
 
   const isCompleted = finalReport && finalReport.length > 0 && !isGeneratingFinalReport;
   const isLoading = isGeneratingFinalReport;
@@ -93,6 +102,19 @@ function ResearchReport() {
     setIsEditing(false);
   };
 
+  const handleRegenerateClick = () => {
+    setShowRegenerateDialog(true);
+  };
+
+  const handleRegenerateConfirm = () => {
+    setShowRegenerateDialog(false);
+    generateFinalReport();
+  };
+
+  const handleRegenerateCancel = () => {
+    setShowRegenerateDialog(false);
+  };
+
   return (
     <Card
       id="research-report"
@@ -126,6 +148,16 @@ function ResearchReport() {
                 className="ml-2 text-xs"
               >
                 Edit
+              </Button>
+              <Button
+                size="small"
+                startIcon={<RefreshIcon />}
+                onClick={handleRegenerateClick}
+                variant="outlined"
+                className="text-xs"
+                color="warning"
+              >
+                Re-generate
               </Button>
               <Chip label="Completed" size="small" color="success" variant="outlined" />
             </div>
@@ -343,6 +375,35 @@ function ResearchReport() {
           </div>
         </CardActions>
       )}
+
+      {/* Regenerate Confirmation Dialog */}
+      <Dialog
+        open={showRegenerateDialog}
+        onClose={handleRegenerateCancel}
+        aria-labelledby="regenerate-dialog-title"
+        aria-describedby="regenerate-dialog-description"
+      >
+        <DialogTitle id="regenerate-dialog-title">Re-generate Report?</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="regenerate-dialog-description">
+            This will replace the current report with a newly generated one. Any unsaved edits will
+            be lost. Are you sure you want to continue?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleRegenerateCancel} color="inherit">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleRegenerateConfirm}
+            color="primary"
+            variant="contained"
+            startIcon={<RefreshIcon />}
+          >
+            Re-generate
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 }
