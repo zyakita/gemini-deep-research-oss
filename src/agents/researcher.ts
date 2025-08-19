@@ -7,15 +7,14 @@ const systemPrompt = `
 - You do not offer opinions, summaries, or information outside the direct scope of the user's request.
 
 # MISSION
-- Your mission is to respond to a user's RESEARCH_DIRECTIVE by conducting a live internet search and using your tools to process the findings.
-- You will then present the findings as a dense, factual, and well-structured learning document in Markdown format.
+- Your mission is to respond to a user's RESEARCH_DIRECTIVE by conducting a live internet search.
+- You will then synthesize the findings into a dense, factual, and well-structured learning document in Markdown format.
 
 # KEY DIRECTIVES
 - Live Search Only: Use only live internet search results. Do not use internal knowledge.
 - Focus on Directive: The output must only answer the RESEARCH_DIRECTIVE. Exclude any background information or related topics not explicitly requested.
-- High Information Density: Avoid conversational filler, apologies, or introductory phrasing. The output must be rich with specific, verifiable facts.
-- Verifiable Information: All facts must be attributable to a source found during the search.
-- Calculation Protocol: For any numerical calculations—including but not limited to averages, sums, statistical analysis, or data conversions—you must use the codeExecution tool. Do not perform calculations manually.
+- High Information Density: Avoid conversational filler and introductory phrasing. The output must be rich with specific, verifiable facts.
+- Verifiable Information: All facts must be attributable to a source.
 
 # WORKFLOW
 1.  Plan:
@@ -23,13 +22,13 @@ const systemPrompt = `
     - Identify the key entities, concepts, and questions.
     - Formulate a clear plan of the search queries you will use to find the necessary information.
 2.  Search & Extract:
-    - Execute the planned search queries using your search tool.
+    - Execute the planned search queries.
     - Focus on reliable sources like official reports, academic papers, and reputable news organizations.
     - Extract only the specific facts, figures, and data that directly address the directive.
 3.  Synthesize & Structure:
-    - Organize the extracted information into a logical structure. Use headings, subheadings, and bullet points to ensure clarity.
-    - If the directive requires calculations based on the extracted data, use the codeExecution tool to perform them accurately.
-    - Structure the facts into a cohesive document without adding commentary, interpretation, or conclusions.
+    - Organize the extracted information into a logical structure.
+    - Use headings, subheadings, and bullet points to ensure clarity.
+    - Synthesize the facts into a cohesive and easy-to-understand document without adding commentary.
 
 # OUTPUT FORMAT
 - Format: The entire response must be in Markdown.
@@ -60,7 +59,7 @@ async function runResearcherAgent({
           { text: languageRequirementPrompt },
         ],
       },
-      tools: [{ googleSearch: {}, codeExecution: {} }],
+      tools: [{ googleSearch: {} }],
     },
     contents: [
       {
@@ -69,10 +68,19 @@ async function runResearcherAgent({
     ],
   });
 
+  const groundingChunks = [];
+
+  if (response?.candidates) {
+    for (const candidate of response.candidates) {
+      if (candidate?.groundingMetadata?.groundingChunks) {
+        groundingChunks.push(...candidate.groundingMetadata.groundingChunks);
+      }
+    }
+  }
+
   return {
     learning: response.text || '',
-    groundingChunks:
-      (response?.candidates && response?.candidates[0]?.groundingMetadata?.groundingChunks) || [],
+    groundingChunks: groundingChunks,
   };
 }
 

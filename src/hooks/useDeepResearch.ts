@@ -446,7 +446,7 @@ function useDeepResearch() {
       taskStore.addLog('➜ Starting reset and file deletion...');
       await deleteAllFiles();
       taskStore.reset();
-      taskStore.addLog('=== Reset completed ===');
+      // taskStore.addLog('=== Reset completed ===');
     } catch (error) {
       console.error('Error during reset:', error);
       taskStore.addLog(`!!! Error during reset: ${error}`);

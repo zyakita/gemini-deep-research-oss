@@ -65,13 +65,21 @@ async function runReportPlanAgent({
   });
 
   for await (const chunk of response) {
-    const text = chunk?.candidates?.[0].content?.parts?.[0].text || '';
-    const isThought = chunk?.candidates?.[0].content?.parts?.[0]?.thought || false;
+    if (!chunk?.candidates) continue;
 
-    if (isThought) {
-      addLog(text);
-    } else {
-      onStreaming?.(text);
+    for (const candidate of chunk.candidates) {
+      if (!candidate?.content?.parts) continue;
+
+      for (const part of candidate.content.parts) {
+        const text = part.text || '';
+        const isThought = part.thought || false;
+
+        if (isThought) {
+          addLog(text);
+        } else {
+          onStreaming?.(text);
+        }
+      }
     }
   }
 }

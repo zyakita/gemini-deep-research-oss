@@ -23,6 +23,10 @@ You will be provided with the following materials for the project:
 - Follow the Plan Exactly: The report's structure must match the REPORT_PLAN perfectly. Do not add, remove, or reorder sections.
 - Explain Everything: Assume the reader is a novice. Define all key terms and explain concepts in full detail.
 - Prioritize Detail: Your primary goal is comprehensive explanation, not brevity.
+- Calculation Protocol:
+  * You must re-evaluate all numbers from the FINDINGS and ensure they are accurate.
+  * You must use the codeExecution tool for any numerical calculations, including averages, sums, statistical analyses, and data conversions.
+  * Never perform calculations manually. Always use the codeExecution tool to generate and run code for the calculation.
 
 # WORKFLOW
 Follow this process to complete your mission.
@@ -71,18 +75,35 @@ async function runReporterAgent(
           },
         ],
       },
+      tools: [{ codeExecution: {} }],
     },
     contents: [userContent],
   });
 
   for await (const chunk of response) {
-    const text = chunk?.candidates?.[0].content?.parts?.[0].text || '';
-    const isThought = chunk?.candidates?.[0].content?.parts?.[0]?.thought || false;
+    if (!chunk?.candidates) continue;
 
-    if (isThought) {
-      addLog(text);
-    } else {
-      onStreaming?.(text);
+    for (const candidate of chunk.candidates) {
+      if (!candidate?.content?.parts) continue;
+
+      for (const part of candidate.content.parts) {
+        const text = part.text || '';
+        const isThought = part.thought || false;
+
+        if (isThought) {
+          addLog(text);
+        } else {
+          onStreaming?.(text);
+        }
+
+        if (part.executableCode && part.executableCode.code) {
+          addLog(part.executableCode.code);
+        }
+
+        if (part.codeExecutionResult && part.codeExecutionResult.output) {
+          addLog(part.codeExecutionResult.output);
+        }
+      }
     }
   }
 }

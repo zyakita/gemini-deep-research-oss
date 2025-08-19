@@ -6,6 +6,7 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { useEffect, useRef } from 'react';
 import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useGlobalStore } from '../../stores/global';
 import { useTaskStore } from '../../stores/task';
 
@@ -116,11 +117,15 @@ function ProcessLogs() {
             </>
           ) : (
             <>
-              {logs.map((log, index) => (
-                <div key={index} className="font-mono text-xs text-gray-600">
-                  <Markdown>{log}</Markdown>
-                </div>
-              ))}
+              {logs.map((log, index) => {
+                // auto convert h1, h2, h3 to h4 to make it smaller
+                const modifiedLog = log.replace(/^(#{1,3})\s+/gm, '#### ');
+                return (
+                  <div key={index} className="prose prose-xs font-mono text-xs text-gray-600">
+                    <Markdown remarkPlugins={[remarkGfm]}>{modifiedLog}</Markdown>
+                  </div>
+                );
+              })}
             </>
           )}
         </Box>
