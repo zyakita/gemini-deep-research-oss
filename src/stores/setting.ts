@@ -84,9 +84,11 @@ export const useSettingStore = create(
             }
           });
 
-          // Sort by model name, remove empty strings
-          const filteredModelNames = modelNames.filter(name => name !== '');
-          filteredModelNames.sort();
+          // filter models start with 'gemini-{number}'
+          const filteredModelNames = modelNames.filter(name => /^gemini-\d+/.test(name));
+
+          // Sort by model name desc
+          filteredModelNames.sort().reverse();
 
           // Get current state to check if selected models are still valid
           const currentState = get();
