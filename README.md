@@ -6,7 +6,7 @@
 
 This open-source tool is designed for in-depth research using Google's Gemini models. It is specifically designed to leverage the large context window and built-in search capabilities of models like Gemini Pro.
 
-<img width="1440" height="813" alt="screenshot" src="https://github.com/user-attachments/assets/7189fd99-d20c-400f-a2e7-895a230ca64b" />
+<img width="1440" height="813" alt="Gemini-Deep-Research-Open-Source-08-19-2025_08_39_PM" src="https://github.com/user-attachments/assets/ddb8dd55-8094-4305-9bb1-e6748060654a" />
 
 ### Demo
 
