@@ -17,10 +17,12 @@ import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
-import Markdown from 'react-markdown';
+import Markdown, { defaultUrlTransform } from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import { useTaskStore } from '../../stores/task';
 import { getPrintTemplate } from '../../utils/print-template';
+import { countWords, formatWordCountResults } from '../../utils/word-count';
 
 function ResearchReport() {
   const { finalReport, isGeneratingFinalReport, updateFinalReport } = useTaskStore();
@@ -211,6 +213,7 @@ function ResearchReport() {
                 <div id="report-rendered" className="prose prose-sm max-w-none text-gray-700">
                   <Markdown
                     remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeRaw]}
                     components={{
                       h1: ({ children }) => (
                         <h1 className="mb-4 border-b border-gray-200 pb-2 text-2xl font-bold text-gray-800">
@@ -242,7 +245,13 @@ function ResearchReport() {
                           {children}
                         </pre>
                       ),
+                      img: data => (
+                        <img src={data.src} alt={data.alt} className="my-4 max-w-full rounded-lg" />
+                      ),
                     }}
+                    urlTransform={(url: string) =>
+                      url.startsWith('data:') ? url : defaultUrlTransform(url)
+                    }
                   >
                     {finalReport}
                   </Markdown>
@@ -262,8 +271,7 @@ function ResearchReport() {
             {isCompleted && finalReport.length > 1000 && (
               <div className="rounded-b-lg border-t border-gray-200 bg-gray-50 px-6 py-3">
                 <Typography variant="caption" className="text-gray-500">
-                  {Math.ceil(finalReport.length / 4)} words •{' '}
-                  {Math.ceil(finalReport.split('\n').length / 10)} minute read
+                  {formatWordCountResults(countWords(finalReport))}
                 </Typography>
               </div>
             )}

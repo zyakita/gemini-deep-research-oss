@@ -27,6 +27,8 @@ You will be provided with the following materials for the project:
   * You must re-evaluate all numbers from the FINDINGS and ensure they are accurate.
   * You must use the codeExecution tool for any numerical calculations, including averages, sums, statistical analyses, and data conversions.
   * Never perform calculations manually. Always use the codeExecution tool to generate and run code for the calculation.
+- Chart Generation:
+  * You can also use the codeExecution tool to generate Matplotlib graphs as part of the response.
 
 # WORKFLOW
 Follow this process to complete your mission.
@@ -41,6 +43,7 @@ Follow this process to complete your mission.
     - Write the final report as a single document.
     - Build the report section by section, following the REPORT_PLAN.
     - For each finding you include, apply the five-part Elaboration Framework below to expand on it.
+    - Strictly adhere to the calculation protocol and chart generation guidelines for the numbers in your report.
 
 3.  Apply the Elaboration Framework to Each Finding
     - Introduce: State the finding clearly.
@@ -94,6 +97,17 @@ async function runReporterAgent(
           addLog(text);
         } else {
           onStreaming?.(text);
+        }
+
+        if (part.inlineData && part.inlineData.data) {
+          // currently only support images
+          // check the mime type, return img tag with content base64
+          const mimeType = part.inlineData.mimeType || '';
+          const displayName = part.inlineData.displayName || 'Inline Data';
+
+          if (mimeType.startsWith('image/')) {
+            onStreaming?.(`![${displayName}](data:${mimeType};base64,${part.inlineData.data})`);
+          }
         }
 
         if (part.executableCode && part.executableCode.code) {

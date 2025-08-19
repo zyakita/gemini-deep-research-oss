@@ -14,7 +14,7 @@ https://gemini-deep-research.oss.jqkat.com/
 
 ### Report Example
 
-[Who will win the AI race?](https://github.com/zyakita/gemini-deep-research-oss/blob/main/example/who-will-win-the-ai-race.md)
+[An Investment Memo on Nissan Motor Co. (TSE:7201)](https://github.com/zyakita/gemini-deep-research-oss/blob/main/example/an-investment-memo-on-nissan-motor.pdf)
 
 ## The Core Idea
 
