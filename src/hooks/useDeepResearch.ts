@@ -36,8 +36,8 @@ function useDeepResearch() {
   );
 
   const generateQnAs = useCallback(async () => {
-    if (!settingStore.isApiKeyValid) {
-      taskStore.addLog('!!! API key is invalid');
+    if (!settingStore.isApiKeyValid || settingStore.isApiKeyValidating) {
+      taskStore.addLog('!!! API key is invalid or still validating');
       return;
     }
 
@@ -392,7 +392,10 @@ function useConcurrentTaskProcessor() {
       }
 
       if (errors.length > 0) {
-        throw new AggregateError(errors, 'Some tasks failed');
+        const errorMessage = `Multiple tasks failed: ${errors.map(e => e.message).join('; ')}`;
+        const aggregateError = new Error(errorMessage) as Error & { errors: Error[] };
+        aggregateError.errors = errors;
+        throw aggregateError;
       }
 
       return results;
@@ -464,6 +467,16 @@ function createSmoothStreamingHandler(
       debounceTimeout = null;
     }
     isStreaming = false;
+  };
+
+  // Cleanup function that can be called externally
+  const forceCleanup = () => {
+    cleanup();
+    if (buffer.length > 0) {
+      displayedText += buffer;
+      buffer = '';
+      onUpdate(displayedText);
+    }
   };
 
   const startStreaming = () => {
@@ -552,6 +565,7 @@ function createSmoothStreamingHandler(
     addChunk,
     reset,
     finish,
+    cleanup: forceCleanup,
     getDisplayedText: () => displayedText,
     isBufferEmpty: () => buffer.length === 0,
   };
