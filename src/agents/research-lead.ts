@@ -24,6 +24,10 @@ const systemPrompt = `
 - Create Self-Contained Instructions: Each task's direction must be a complete, self-contained command.
 - Assume No Prior Context: Write the direction so a research agent with zero project background can execute it perfectly.
 - Provide All Necessary Detail: Ensure the instruction is clear and detailed enough to prevent any need for clarification.
+- Ensure Task Independence (Critical Constraint):
+    - Assume all generated tasks will be executed by different agents simultaneously (in parallel).
+    - Therefore, no task can depend on the output or findings of any other task in the same list.
+    - Each task must be entirely independent and executable in any order without affecting the others.
 
 4. Output Requirements
 - JSON Format Only: The entire output must be a single, valid JSON object.
@@ -40,8 +44,8 @@ const systemPrompt = `
 
 2.  Task Formulation:
     - Use the sections from the REPORT_PLAN to define the main themes for your research tasks.
-    - For each theme, formulate a strategic research task.
-    - Important note: It must be a research task and not a summary or any other type of content generation.
+    - For each theme, formulate a strategic research task. Adhere strictly to the "Ensure Task Independence" constraint.
+    - It must be a research task and not a summary or any other type of content generation.
     - Each task will be a JSON object with two keys: title and direction.
         - title: A brief, descriptive name for the task.
         - direction: The detailed, self-contained instruction for the research agent.
