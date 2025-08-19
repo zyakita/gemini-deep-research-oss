@@ -212,7 +212,6 @@ export const getPrintTemplate = (content: string): string => {
             background: #ffffff;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
           }
 
           th, td {
@@ -265,7 +264,6 @@ export const getPrintTemplate = (content: string): string => {
             max-width: 100%;
             height: auto;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             margin: 1rem 0;
           }
 

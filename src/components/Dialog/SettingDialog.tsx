@@ -390,7 +390,7 @@ const SettingDialog = memo(function SettingDialog() {
                 max={10000}
                 step={500}
                 formatLabel={value => value.toLocaleString()}
-                description="The expected length of the report"
+                description="The expected length of the report will be indicated by a system prompt, but the final length may vary."
                 marks={[
                   { value: 1000, label: '1K' },
                   { value: 5000, label: '5K' },
