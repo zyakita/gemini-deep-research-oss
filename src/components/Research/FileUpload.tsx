@@ -121,7 +121,7 @@ function FileUpload({ disabled = false }: FileUploadProps) {
     >
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
-        className="min-h-0 px-0 py-2"
+        className="min-h-0 px-2 py-2"
         sx={{
           '&.Mui-expanded': { minHeight: 0 },
           '& .MuiAccordionSummary-content': { margin: '8px 0' },
