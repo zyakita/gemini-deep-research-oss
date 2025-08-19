@@ -1,38 +1,63 @@
+import type { File } from '@google/genai';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { QnA, ResearchTask } from '../types';
 import { getFinalUrlFromVertexAIsearch } from '../utils/vertexaisearch';
 
 export interface TaskStore {
+  // Core properties
   id: string;
   query: string;
+  currentStep: number;
+  logs: string[];
+
+  // File management
+  files: File[];
+
+  // QnA section
   qna: QnA[];
   isGeneratingQnA: boolean;
   qnaError: string | null;
+
+  // Report Plan section
   reportPlan: string;
+  reportPlanFeedback: string;
   isGeneratingReportPlan: boolean;
   reportPlanError: string | null;
-  reportPlanFeedback: string;
+
+  // Research Tasks section
   researchTasks: ResearchTask[];
+  researchCompletedEarly: boolean;
+  maxTierReached: number;
   isGeneratingResearchTasks: boolean;
   researchTasksError: string | null;
-  researchCompletedEarly: boolean; // New field to track early completion
-  maxTierReached: number; // Track the highest tier that was actually processed
+
+  // Final Report section
   finalReport: string;
   isGeneratingFinalReport: boolean;
   finalReportError: string | null;
+
+  // Sources and processing
   sources: string[];
-  currentStep: number;
   sourceQueue: string[];
   resolvedUrlQueue: string[];
   isProcessingSourceQueue: boolean;
-  logs: string[];
+
+  // Global states
+  isResetting: boolean;
 }
 
 export interface TaskActions {
-  // ID and Query actions
+  // Core actions
   setId: (id: string) => void;
   setQuery: (query: string) => void;
+  setCurrentStep: (step: number) => void;
+  addLog: (log: string) => void;
+
+  // File management actions
+  addFile: (file: File) => void;
+  removeFile: (fileName: string) => void;
+  clearAllFiles: () => void;
 
   // QnA actions
   addQnA: (qna: QnA) => void;
@@ -42,9 +67,9 @@ export interface TaskActions {
 
   // Report Plan actions
   updateReportPlan: (plan: string) => void;
+  updateReportPlanFeedback: (feedback: string) => void;
   setIsGeneratingReportPlan: (isGenerating: boolean) => void;
   setReportPlanError: (error: string | null) => void;
-  updateReportPlanFeedback: (feedback: string) => void;
 
   // Research Tasks actions
   addResearchTask: (task: ResearchTask) => void;
@@ -53,25 +78,26 @@ export interface TaskActions {
   getAllFinishedResearchTasks: () => ResearchTask[];
   getResearchTasksByTier: (tier: number) => ResearchTask[];
   resetResearchTasks: () => void;
-  setIsGeneratingResearchTasks: (isGenerating: boolean) => void;
-  setResearchTasksError: (error: string | null) => void;
   setResearchCompletedEarly: (completed: boolean) => void; // New action
   setMaxTierReached: (tier: number) => void; // New action
+  setIsGeneratingResearchTasks: (isGenerating: boolean) => void;
+  setResearchTasksError: (error: string | null) => void;
 
   // Final Report actions
   updateFinalReport: (report: string) => void;
   setIsGeneratingFinalReport: (isGenerating: boolean) => void;
   setFinalReportError: (error: string | null) => void;
 
-  // Sources and Navigation actions
+  // Sources and processing actions
   addSource: (vertexUri: string) => void;
   processSourceQueue: () => Promise<void>;
-  setCurrentStep: (step: number) => void;
+
+  // Global state actions
+  setIsResetting: (isResetting: boolean) => void;
 
   // Utility actions
   clear: () => void;
   reset: () => void;
-  addLog: (log: string) => void;
 
   // Computed getters
   hasErrors: () => boolean;
@@ -79,29 +105,46 @@ export interface TaskActions {
 }
 
 const defaultValues: TaskStore = {
+  // Core properties
   id: '',
   query: '',
+  currentStep: 0,
+  logs: [],
+
+  // File management
+  files: [],
+
+  // QnA section
   qna: [],
   isGeneratingQnA: false,
   qnaError: null,
+
+  // Report Plan section
   reportPlan: '',
+  reportPlanFeedback: '',
   isGeneratingReportPlan: false,
   reportPlanError: null,
-  reportPlanFeedback: '',
+
+  // Research Tasks section
   researchTasks: [],
-  isGeneratingResearchTasks: false,
-  researchTasksError: null,
   researchCompletedEarly: false,
   maxTierReached: 0,
+  isGeneratingResearchTasks: false,
+  researchTasksError: null,
+
+  // Final Report section
   finalReport: '',
   isGeneratingFinalReport: false,
   finalReportError: null,
+
+  // Sources and processing
   sources: [],
-  currentStep: 0,
   sourceQueue: [],
   resolvedUrlQueue: [],
   isProcessingSourceQueue: false,
-  logs: [],
+
+  // Global states
+  isResetting: false,
 };
 
 export const useTaskStore = create(
@@ -109,9 +152,17 @@ export const useTaskStore = create(
     (set, get) => ({
       ...defaultValues,
 
-      // ID and Query actions
+      // Core actions
       setId: (id: string) => set({ id }),
       setQuery: (query: string) => set({ query }),
+      setCurrentStep: (currentStep: number) => set({ currentStep }),
+      addLog: (log: string) => set(state => ({ logs: [...state.logs, log] })),
+
+      // File management actions
+      addFile: (file: File) => set(state => ({ files: [...state.files, file] })),
+      removeFile: (fileName: string) =>
+        set(state => ({ files: state.files.filter(file => file.name !== fileName) })),
+      clearAllFiles: () => set({ files: [] }),
 
       // QnA actions
       addQnA: (qna: QnA) => set(state => ({ qna: [...state.qna, qna] })),
@@ -124,10 +175,10 @@ export const useTaskStore = create(
 
       // Report Plan actions
       updateReportPlan: (reportPlan: string) => set({ reportPlan }),
+      updateReportPlanFeedback: (reportPlanFeedback: string) => set({ reportPlanFeedback }),
       setIsGeneratingReportPlan: (isGeneratingReportPlan: boolean) =>
         set({ isGeneratingReportPlan }),
       setReportPlanError: (reportPlanError: string | null) => set({ reportPlanError }),
-      updateReportPlanFeedback: (reportPlanFeedback: string) => set({ reportPlanFeedback }),
 
       // Research Tasks actions
       addResearchTask: (task: ResearchTask) =>
@@ -147,12 +198,12 @@ export const useTaskStore = create(
       },
       resetResearchTasks: () =>
         set({ researchTasks: [], researchCompletedEarly: false, maxTierReached: 0 }),
-      setIsGeneratingResearchTasks: (isGeneratingResearchTasks: boolean) =>
-        set({ isGeneratingResearchTasks }),
-      setResearchTasksError: (researchTasksError: string | null) => set({ researchTasksError }),
       setResearchCompletedEarly: (researchCompletedEarly: boolean) =>
         set({ researchCompletedEarly }),
       setMaxTierReached: (maxTierReached: number) => set({ maxTierReached }),
+      setIsGeneratingResearchTasks: (isGeneratingResearchTasks: boolean) =>
+        set({ isGeneratingResearchTasks }),
+      setResearchTasksError: (researchTasksError: string | null) => set({ researchTasksError }),
 
       // Final Report actions
       updateFinalReport: (finalReport: string) => set({ finalReport }),
@@ -160,7 +211,7 @@ export const useTaskStore = create(
         set({ isGeneratingFinalReport }),
       setFinalReportError: (finalReportError: string | null) => set({ finalReportError }),
 
-      // Sources and Navigation actions
+      // Sources and processing actions
       addSource: (vertexUri: string) => {
         // Add to queue if not already present
         const state = get();
@@ -261,12 +312,15 @@ export const useTaskStore = create(
 
         set({ isProcessingSourceQueue: false });
       },
-      setCurrentStep: (currentStep: number) => set({ currentStep }),
+
+      // Global state actions
+      setIsResetting: (isResetting: boolean) => set({ isResetting }),
 
       // Utility actions
       clear: () =>
         set({
           query: '',
+          files: [],
           qna: [],
           reportPlan: '',
           reportPlanFeedback: '',
@@ -291,7 +345,6 @@ export const useTaskStore = create(
           isGeneratingFinalReport: false,
         }),
       reset: () => set(defaultValues),
-      addLog: (log: string) => set(state => ({ logs: [...state.logs, log] })),
 
       // Computed getters
       hasErrors: () => {
@@ -309,7 +362,8 @@ export const useTaskStore = create(
           state.isGeneratingQnA ||
           state.isGeneratingReportPlan ||
           state.isGeneratingResearchTasks ||
-          state.isGeneratingFinalReport
+          state.isGeneratingFinalReport ||
+          state.isResetting
         );
       },
     }),

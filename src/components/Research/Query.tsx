@@ -12,6 +12,7 @@ import useDeepResearch from '../../hooks/useDeepResearch';
 import { useGlobalStore } from '../../stores/global';
 import { useSettingStore } from '../../stores/setting';
 import { useTaskStore } from '../../stores/task';
+import FileUpload from './FileUpload';
 
 function ResearchQuery() {
   const { id, query, setId, setQuery, isGeneratingQnA, qna, setCurrentStep } = useTaskStore();
@@ -81,9 +82,9 @@ function ResearchQuery() {
         <Divider className="mb-4" />
 
         <TextareaAutosize
-          minRows={4}
-          maxRows={8}
-          className={`w-full resize-none rounded-lg border-2 p-4 text-base transition-colors focus:outline-none disabled:bg-gray-50 ${
+          minRows={6}
+          // maxRows={8}
+          className={`w-full rounded-lg border-2 p-4 text-base transition-colors focus:outline-none disabled:bg-gray-50 ${
             isCompleted
               ? 'border-green-200 bg-green-50/50'
               : 'border-gray-200 hover:border-gray-300 focus:border-blue-500'
@@ -99,6 +100,8 @@ function ResearchQuery() {
             {query.length} characters • Press the button below to start research
           </Typography>
         )}
+
+        <FileUpload disabled={isGeneratingQnA || qna.length > 0} />
       </CardContent>
 
       <CardActions className="px-6 pb-4">

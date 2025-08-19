@@ -1,4 +1,4 @@
-import { createUserContent } from '@google/genai';
+import { createPartFromUri, createUserContent } from '@google/genai';
 import type { TaskActions, TaskStore } from '../stores/task';
 
 export function buildUserContent({
@@ -7,6 +7,7 @@ export function buildUserContent({
   includeQnA,
   includePlan,
   includeFindings,
+  includeFiles,
   limitCount,
   limitFor,
 }: {
@@ -15,6 +16,7 @@ export function buildUserContent({
   includeQnA: boolean;
   includePlan: boolean;
   includeFindings: boolean;
+  includeFiles?: boolean;
   limitCount?: number;
   limitFor?: string;
 }) {
@@ -23,6 +25,13 @@ export function buildUserContent({
   // Include user query
   if (includeQuery) {
     userContent.push(`<QUERY>\n${task.query}\n</QUERY>`);
+    if (includeFiles && task.files.length > 0) {
+      task.files.map(file => {
+        if (file.uri && file.mimeType) {
+          userContent.push(createPartFromUri(file.uri, file.mimeType));
+        }
+      });
+    }
   }
 
   // Include QnA

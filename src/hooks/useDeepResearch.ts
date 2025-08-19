@@ -35,6 +35,7 @@ function useDeepResearch() {
     [googleGenAI, settingStore.thinkingBudget, taskStore.addLog]
   );
 
+  // Generate Q&As
   const generateQnAs = useCallback(async () => {
     if (!settingStore.isApiKeyValid || settingStore.isApiKeyValidating) {
       taskStore.addLog('!!! API key is invalid or still validating');
@@ -50,6 +51,7 @@ function useDeepResearch() {
         includeQnA: false,
         includePlan: false,
         includeFindings: false,
+        includeFiles: true,
       });
 
       taskStore.setIsGeneratingQnA(true);
@@ -79,6 +81,7 @@ function useDeepResearch() {
     }
   }, [commonAgentParams, taskStore, settingStore]);
 
+  // Generate report plan
   const generateReportPlan = useCallback(async () => {
     // Create streaming handler with proper cleanup
     let streamingHandler: ReturnType<typeof createSmoothStreamingHandler> | null = null;
@@ -92,6 +95,7 @@ function useDeepResearch() {
         includeQnA: true,
         includePlan: false,
         includeFindings: false,
+        includeFiles: true,
       });
 
       taskStore.updateReportPlan('');
@@ -128,6 +132,7 @@ function useDeepResearch() {
     }
   }, [commonAgentParams, taskStore, settingStore]);
 
+  // Generate research tasks
   const generateResearchTasks = useCallback(
     async (tier: number) => {
       taskStore.addLog(`➜ Starting research task generation for round ${tier}...`);
@@ -142,6 +147,7 @@ function useDeepResearch() {
           includeQnA: true,
           includePlan: true,
           includeFindings: true,
+          includeFiles: true,
           limitCount: settingStore.wide,
           limitFor: 'tasks',
         });
@@ -191,6 +197,7 @@ function useDeepResearch() {
     [commonAgentParams, taskStore, settingStore]
   );
 
+  // Run research tasks
   const runResearchTasks = useCallback(
     async (tier: number) => {
       const maxConcurrency = settingStore.parallelSearch || 1;
@@ -256,6 +263,7 @@ function useDeepResearch() {
     ]
   );
 
+  // Start research tasks
   const startResearchTasks = useCallback(async () => {
     try {
       taskStore.resetResearchTasks();
@@ -286,6 +294,7 @@ function useDeepResearch() {
     }
   }, [taskStore, settingStore.depth, generateResearchTasks, runResearchTasks]);
 
+  // Generate final report
   const generateFinalReport = useCallback(async () => {
     let streamingHandler: ReturnType<typeof createSmoothStreamingHandler> | null = null;
 
@@ -313,6 +322,7 @@ function useDeepResearch() {
         includeQnA: true,
         includePlan: true,
         includeFindings: true,
+        includeFiles: true,
       });
 
       await runReporterAgent(
@@ -338,11 +348,124 @@ function useDeepResearch() {
     }
   }, [commonAgentParams, taskStore, settingStore]);
 
+  // Upload file
+  const uploadFile = useCallback(
+    async (file: globalThis.File) => {
+      if (!settingStore.isApiKeyValid) {
+        taskStore.addLog('!!! API key is invalid');
+        throw new Error('API key is invalid');
+      }
+
+      try {
+        taskStore.addLog(`➜ Uploading file: ${file.name}...`);
+
+        const uploadedFile = await googleGenAI.files.upload({
+          file: file, // File object extends Blob, which is compatible
+          config: {
+            mimeType: file.type,
+            displayName: file.name,
+          },
+        });
+
+        taskStore.addFile(uploadedFile);
+        taskStore.addLog(`✓ File uploaded successfully: ${file.name}`);
+
+        return uploadedFile;
+      } catch (error) {
+        taskStore.addLog(`!!! Failed to upload file: ${file.name}: ${error}`);
+        throw error;
+      }
+    },
+    [googleGenAI, taskStore, settingStore]
+  );
+
+  // Delete file
+  const deleteFile = useCallback(
+    async (fileName: string) => {
+      if (!settingStore.isApiKeyValid) {
+        taskStore.addLog('!!! API key is invalid');
+        throw new Error('API key is invalid');
+      }
+
+      try {
+        taskStore.addLog(`➜ Deleting file: ${fileName}...`);
+
+        await googleGenAI.files.delete({ name: fileName });
+        taskStore.removeFile(fileName);
+        taskStore.addLog(`✓ File deleted successfully: ${fileName}`);
+      } catch (error) {
+        taskStore.addLog(`!!! Failed to delete file: ${fileName}: ${error}`);
+        throw error;
+      }
+    },
+    [googleGenAI, taskStore, settingStore]
+  );
+
+  // Delete all uploaded files
+  const deleteAllFiles = useCallback(async () => {
+    if (!settingStore.isApiKeyValid) {
+      taskStore.addLog('!!! API key is invalid');
+      return;
+    }
+
+    const files = taskStore.files;
+    if (files.length === 0) {
+      return;
+    }
+
+    try {
+      taskStore.addLog(`➜ Deleting ${files.length} uploaded files...`);
+
+      // Delete files concurrently
+      await Promise.allSettled(
+        files.map(async file => {
+          try {
+            if (file.name) {
+              await googleGenAI.files.delete({ name: file.name });
+              taskStore.addLog(`✓ Deleted file: ${file.displayName || file.name}`);
+            }
+          } catch (error) {
+            taskStore.addLog(
+              `!!! Failed to delete file: ${file.displayName || file.name}: ${error}`
+            );
+          }
+        })
+      );
+
+      taskStore.clearAllFiles();
+      taskStore.addLog('=== All files deleted ===');
+    } catch (error) {
+      taskStore.addLog(`!!! Failed to delete files: ${error}`);
+    }
+  }, [googleGenAI, taskStore, settingStore]);
+
+  // Reset tasks and delete all files
+  const resetWithFiles = useCallback(async () => {
+    try {
+      taskStore.setIsResetting(true);
+      taskStore.addLog('➜ Starting reset and file deletion...');
+      await deleteAllFiles();
+      taskStore.reset();
+      taskStore.addLog('=== Reset completed ===');
+    } catch (error) {
+      console.error('Error during reset:', error);
+      taskStore.addLog(`!!! Error during reset: ${error}`);
+      // Reset anyway, even if file deletion fails
+      taskStore.reset();
+    } finally {
+      taskStore.setIsResetting(false);
+    }
+  }, [deleteAllFiles, taskStore]);
+
   return {
     generateQnAs,
     generateReportPlan,
     generateFinalReport,
     startResearchTasks,
+    uploadFile,
+    deleteFile,
+    deleteAllFiles,
+    resetWithFiles,
   };
 }
 
