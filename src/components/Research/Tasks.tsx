@@ -1,6 +1,7 @@
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
+import CancelIcon from '@mui/icons-material/Cancel';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
@@ -19,6 +20,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { researcherRejectMessage } from '../../agents/researcher';
 import useDeepResearch from '../../hooks/useDeepResearch';
 import { useSettingStore } from '../../stores/setting';
 import { useTaskStore } from '../../stores/task';
@@ -310,7 +312,14 @@ function ResearchTasks() {
                                 />
                               )}
                               {isTaskCompleted && (
-                                <DoneAllIcon className="text-green-500" sx={{ fontSize: 20 }} />
+                                <>
+                                  {task.learning.toLocaleLowerCase().trim() !==
+                                  researcherRejectMessage.toLocaleLowerCase().trim() ? (
+                                    <DoneAllIcon className="text-green-500" sx={{ fontSize: 20 }} />
+                                  ) : (
+                                    <CancelIcon className="text-red-500" sx={{ fontSize: 20 }} />
+                                  )}
+                                </>
                               )}
                               <Typography className="font-medium text-gray-800">
                                 Task {index + 1}: {task.title}
@@ -359,13 +368,31 @@ function ResearchTasks() {
                             {task.learning && (
                               <div>
                                 <div className="mb-2 flex items-center gap-2">
-                                  <DoneAllIcon className="text-green-500" sx={{ fontSize: 16 }} />
-                                  <Typography
-                                    variant="subtitle2"
-                                    className="font-semibold text-gray-800"
-                                  >
-                                    Research Results
-                                  </Typography>
+                                  {task.learning.toLocaleLowerCase().trim() !==
+                                  researcherRejectMessage.toLocaleLowerCase().trim() ? (
+                                    <>
+                                      <DoneAllIcon
+                                        className="text-green-500"
+                                        sx={{ fontSize: 16 }}
+                                      />
+                                      <Typography
+                                        variant="subtitle2"
+                                        className="font-semibold text-gray-800"
+                                      >
+                                        Research Results
+                                      </Typography>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <CancelIcon className="text-red-500" sx={{ fontSize: 16 }} />
+                                      <Typography
+                                        variant="subtitle2"
+                                        className="font-semibold text-gray-800"
+                                      >
+                                        Rejected Task, it will be excluded from final report
+                                      </Typography>
+                                    </>
+                                  )}
                                 </div>
                                 <div className="max-h-96 overflow-y-auto rounded-lg border border-gray-200 bg-white p-4">
                                   <div className="prose prose-sm max-w-none text-gray-700">
