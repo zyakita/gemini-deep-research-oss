@@ -256,6 +256,7 @@ const SettingDialog = memo(function SettingDialog() {
                 margin="dense"
                 type={showApiKey ? 'text' : 'password'}
                 placeholder="Enter your API key"
+                autoComplete='off'
                 value={apiKey}
                 onChange={handleApiKeyChange}
                 error={apiKey.trim() !== '' && !isApiKeyValid && !isApiKeyValidating}
