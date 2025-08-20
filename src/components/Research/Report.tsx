@@ -3,6 +3,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import DescriptionIcon from '@mui/icons-material/Description';
 import DownloadIcon from '@mui/icons-material/Download';
 import EditIcon from '@mui/icons-material/Edit';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SaveIcon from '@mui/icons-material/Save';
@@ -23,17 +24,14 @@ import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
-import Markdown, { defaultUrlTransform } from 'react-markdown';
-import rehypeRaw from 'rehype-raw';
-import remarkGfm from 'remark-gfm';
 import useDeepResearch from '../../hooks/useDeepResearch';
 import { useTaskStore } from '../../stores/task';
-import { getPrintTemplate } from '../../utils/print-template';
 import { countWords, formatWordCountResults } from '../../utils/word-count';
+import ReportRender from './ReportRender';
 
 function ResearchReport() {
   const { generateFinalReport } = useDeepResearch();
-  const { finalReport, isGeneratingFinalReport, updateFinalReport } = useTaskStore();
+  const { id: taskID, finalReport, isGeneratingFinalReport, updateFinalReport } = useTaskStore();
   const [isEditing, setIsEditing] = useState(false);
   const [editedReport, setEditedReport] = useState('');
   const [downloadMenuAnchor, setDownloadMenuAnchor] = useState<null | HTMLElement>(null);
@@ -42,7 +40,7 @@ function ResearchReport() {
   const isCompleted = finalReport && finalReport.length > 0 && !isGeneratingFinalReport;
   const isLoading = isGeneratingFinalReport;
 
-  const handleDownload = () => {
+  const handleDownloadMD = () => {
     if (!finalReport) return;
 
     const blob = new Blob([finalReport], { type: 'text/markdown' });
@@ -61,21 +59,20 @@ function ResearchReport() {
     if (!finalReport) return;
 
     // Create a new window with just the report content for printing
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open(`/report/${taskID}`, '_blank');
     if (printWindow) {
-      // Get the rendered HTML content from the current report
-      const reportElement = document.querySelector('#report-rendered');
-      const htmlContent = reportElement ? reportElement.innerHTML : finalReport;
-
-      printWindow.document.write(getPrintTemplate(htmlContent));
-      printWindow.document.close();
-
       // Wait a bit for content to load, then print
       setTimeout(() => {
         printWindow.print();
         printWindow.close();
       }, 500);
     }
+    setDownloadMenuAnchor(null);
+  };
+
+  const handleOpenReportInNewWindow = () => {
+    window.open(`/report/${taskID}`, '_blank');
+
     setDownloadMenuAnchor(null);
   };
 
@@ -242,52 +239,7 @@ function ResearchReport() {
               </div>
             ) : (
               <div className="max-h-96 overflow-y-auto p-6">
-                <div id="report-rendered" className="prose prose-sm max-w-none text-gray-700">
-                  <Markdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw]}
-                    components={{
-                      h1: ({ children }) => (
-                        <h1 className="mb-4 border-b border-gray-200 pb-2 text-2xl font-bold text-gray-800">
-                          {children}
-                        </h1>
-                      ),
-                      h2: ({ children }) => (
-                        <h2 className="mt-6 mb-3 text-xl font-semibold text-gray-800">
-                          {children}
-                        </h2>
-                      ),
-                      h3: ({ children }) => (
-                        <h3 className="mt-4 mb-2 text-lg font-medium text-gray-800">{children}</h3>
-                      ),
-                      p: ({ children }) => <p className="mb-4 leading-relaxed">{children}</p>,
-                      ul: ({ children }) => <ul className="mb-4 space-y-2 pl-6">{children}</ul>,
-                      ol: ({ children }) => <ol className="mb-4 space-y-2 pl-6">{children}</ol>,
-                      li: ({ children }) => <li className="text-gray-700">{children}</li>,
-                      blockquote: ({ children }) => (
-                        <blockquote className="my-4 border-l-4 border-blue-200 bg-blue-50 py-2 pl-4 text-gray-600 italic">
-                          {children}
-                        </blockquote>
-                      ),
-                      code: ({ children }) => (
-                        <code className="rounded bg-gray-100 px-2 py-1 text-sm">{children}</code>
-                      ),
-                      pre: ({ children }) => (
-                        <pre className="mb-4 overflow-x-auto rounded-lg bg-gray-100 p-4">
-                          {children}
-                        </pre>
-                      ),
-                      img: data => (
-                        <img src={data.src} alt={data.alt} className="my-4 max-w-full rounded-lg" />
-                      ),
-                    }}
-                    urlTransform={(url: string) =>
-                      url.startsWith('data:') ? url : defaultUrlTransform(url)
-                    }
-                  >
-                    {finalReport}
-                  </Markdown>
-                </div>
+                <ReportRender finalReport={finalReport} />
               </div>
             )}
 
@@ -340,13 +292,17 @@ function ResearchReport() {
                   horizontal: 'center',
                 }}
               >
-                <MenuItem onClick={handleDownload}>
+                <MenuItem onClick={handleDownloadMD}>
                   <ArticleIcon className="mr-2" fontSize="small" />
-                  Download as Markdown
+                  Download as MD
                 </MenuItem>
                 <MenuItem onClick={handleDownloadPDF}>
                   <PictureAsPdfIcon className="mr-2" fontSize="small" />
                   Download as PDF
+                </MenuItem>
+                <MenuItem onClick={handleOpenReportInNewWindow}>
+                  <OpenInNewIcon className="mr-2" fontSize="small" />
+                  Open in New Window
                 </MenuItem>
               </Menu>
             </div>
