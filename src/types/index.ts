@@ -14,6 +14,7 @@ export interface ResearchTask {
   learning: string;
   processing?: boolean;
   groundingChunks?: GroundingChunk[];
+  webSearchQueries?: string[];
 }
 
 export interface Source {

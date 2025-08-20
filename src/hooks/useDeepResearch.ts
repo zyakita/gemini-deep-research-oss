@@ -217,7 +217,7 @@ function useDeepResearch() {
             taskStore.updateResearchTask({ ...task, processing: true });
 
             try {
-              const { learning, groundingChunks } = await runResearcherAgent({
+              const { learning, groundingChunks, webSearchQueries } = await runResearcherAgent({
                 direction: task.direction,
                 googleGenAI,
                 model: settingStore.taskModel,
@@ -229,6 +229,7 @@ function useDeepResearch() {
                 processing: false,
                 learning,
                 groundingChunks,
+                webSearchQueries,
               });
 
               // Add sources to the task store if we have resolver

@@ -394,7 +394,7 @@ function ResearchTasks() {
                                     </>
                                   )}
                                 </div>
-                                <div className="max-h-96 overflow-y-auto rounded-lg border border-gray-200 bg-white p-4">
+                                <div className="max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white p-4">
                                   <div className="prose prose-sm max-w-none text-gray-700">
                                     <Markdown
                                       remarkPlugins={[remarkGfm]}
@@ -432,17 +432,22 @@ function ResearchTasks() {
                                     </Markdown>
                                   </div>
                                 </div>
-                                {task.groundingChunks && (
+                                {task.groundingChunks?.length && (
                                   <>
-                                    <div className="mt-2 flex items-center gap-2">
+                                    <div className="mt-3 flex items-center gap-2">
                                       <Typography
                                         variant="subtitle2"
                                         className="font-semibold text-gray-800"
                                       >
-                                        Grounding Results
+                                        Grounding
                                       </Typography>
                                     </div>
                                     <div className="max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-white p-4">
+                                      {task.webSearchQueries?.length && (
+                                        <Typography className="mb-2 text-xs text-gray-700">
+                                          Queries: {task.webSearchQueries.join(' | ')}
+                                        </Typography>
+                                      )}
                                       {task.groundingChunks.map((chunk, index) => (
                                         <div key={index} className="mb-2">
                                           <Typography className="line-clamp-1 text-xs text-gray-700">
@@ -554,7 +559,7 @@ function ResearchTasks() {
               size="medium"
               startIcon={<AssignmentTurnedInIcon />}
               loading={isLoading}
-              // disabled={!allTasksCompleted || isCompleted}
+              disabled={!allTasksCompleted || isCompleted}
               onClick={handleGenerateFinalReport}
               className="px-6 py-2"
             >
