@@ -24,7 +24,7 @@ import { memo, useEffect, useMemo, useState } from 'react';
 import { useGlobalStore } from '../../stores/global';
 import { useQueryLibraryStore } from '../../stores/queryLibrary';
 import { useTaskStore } from '../../stores/task';
-import { builtInTemplates } from '../../templates/builtInTemplates';
+import { builtInTemplates } from '../../templates/templateLoader';
 import QueryTemplateDialog from './QueryTemplateDialog';
 
 const QueryLibraryDialog = memo(function QueryLibraryDialog() {
