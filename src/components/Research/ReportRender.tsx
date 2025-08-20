@@ -1,13 +1,15 @@
 import Markdown, { defaultUrlTransform } from 'react-markdown';
+import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 
 function ReportRender({ finalReport }: { finalReport: string }) {
   return (
     <div id="report-rendered" className="prose prose-sm max-w-none text-gray-700">
       <Markdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw]}
+        remarkPlugins={[remarkGfm, remarkMath]}
+        rehypePlugins={[rehypeRaw, rehypeKatex]}
         components={{
           h1: ({ children }) => (
             <h1 className="mb-4 border-b border-gray-200 pb-2 text-2xl font-bold text-gray-800">

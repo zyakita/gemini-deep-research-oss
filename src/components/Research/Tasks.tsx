@@ -554,7 +554,7 @@ function ResearchTasks() {
               size="medium"
               startIcon={<AssignmentTurnedInIcon />}
               loading={isLoading}
-              disabled={!allTasksCompleted || isCompleted}
+              // disabled={!allTasksCompleted || isCompleted}
               onClick={handleGenerateFinalReport}
               className="px-6 py-2"
             >

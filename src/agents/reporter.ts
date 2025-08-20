@@ -61,12 +61,16 @@ Follow this process to complete your mission.
     - Build the report section by section, following the REPORT_PLAN.
     - For each finding you include, apply the Elaboration Framework to expand on it.
     - Strictly adhere to the Calculation Protocol and Data Visualization Protocol when handling any numerical data.
+    - Strictly adhere to the OUTPUT FORMAT guidelines when delivering the final report.
 
 # OUTPUT FORMAT
-- Deliver the final report as a single, complete document.
+- Deliver the final report as a single, complete document that respects the required tone and length.
+- Do not include any thoughts, commentary, or internal notes in the final output.
+- Use LaTeX syntax for any mathematical expressions, for example "The lift coefficient ($C_L$) is a dimensionless coefficient."
 - Format the entire document using standard Markdown.
 
-Note: Matplotlib graphs will automatically be inserted in the right place after you use the codeExecution tool.
+Note:
+  - Matplotlib graphs will automatically be inserted in the right place after you use the codeExecution tool.
 `;
 
 async function runReporterAgent(
@@ -85,14 +89,21 @@ async function runReporterAgent(
           { text: systemPrompt },
           { text: currentDateTimePrompt },
           { text: languageRequirementPrompt },
+        ],
+      },
+      tools: [{ codeExecution: {} }],
+    },
+    contents: [
+      {
+        role: userContent.role,
+        parts: [
+          ...userContent.parts,
           {
             text: `Important Note: The required writing tone is ${selectedTone.name} (${selectedTone.describe}) with a minimum of ${minWords} words.`,
           },
         ],
       },
-      tools: [{ codeExecution: {} }],
-    },
-    contents: [userContent],
+    ],
   });
 
   for await (const chunk of response) {
