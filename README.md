@@ -4,17 +4,13 @@
 [![Gemini](https://img.shields.io/badge/Gemini-8E75B2?style=flat&logo=googlegemini&logoColor=white)](https://ai.google.dev/)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=Vite&logoColor=white)](https://vite.dev/)
 
-This open-source tool is my attempt to build a better research automation tool by going all-in on Google's Gemini models. Instead of the usual single-pass search, it uses a team of AI agents to perform a multi-step, iterative research process. The idea is to start broad, then systematically drill down into the details to produce a comprehensive report.
+This open-source tool is an attempt to build a better research automation tool with Google's Gemini models. Instead of the usual single-pass search, it uses a team of AI agents to perform a multi-step, iterative research process. The idea is to start broad, then systematically drill down into the details to produce a comprehensive report.
 
-<img width="1440" height="813" alt="Gemini-Deep-Research-Open-Source-08-19-2025_08_39_PM" src="https://github.com/user-attachments/assets/ddb8dd55-8094-4305-9bb1-e6748060654a" />
+<img width="1542" height="991" alt="frame_safari_light" src="https://github.com/user-attachments/assets/dc056665-4559-40f5-b4d6-fbf68d9be4da" />
 
 ### Demo
 
 https://gemini-deep-research.oss.jqkat.com/
-
-### Report Example
-
-[An Investment Memo on Nissan Motor Co. (TSE:7201)](https://github.com/zyakita/gemini-deep-research-oss/blob/main/example/an-investment-memo-on-nissan-motor.pdf)
 
 ## The Core Idea
 
