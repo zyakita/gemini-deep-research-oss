@@ -97,7 +97,7 @@ async function runReporterAgent(
       {
         role: userContent.role,
         parts: [
-          ...userContent.parts,
+          ...(userContent.parts || []),
           {
             text: `Important Note: The required writing tone is ${selectedTone.name} (${selectedTone.describe}) with a minimum of ${minWords} words.`,
           },
