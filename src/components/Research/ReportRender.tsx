@@ -8,8 +8,25 @@ function ReportRender({ finalReport }: { finalReport: string }) {
   return (
     <div id="report-rendered" className="prose prose-sm max-w-none text-gray-700">
       <Markdown
-        remarkPlugins={[remarkGfm, remarkMath]}
-        rehypePlugins={[rehypeRaw, rehypeKatex]}
+        remarkPlugins={[
+          remarkGfm,
+          [
+            remarkMath,
+            {
+              singleDollarTextMath: false,
+            },
+          ],
+        ]}
+        rehypePlugins={[
+          rehypeRaw,
+          [
+            rehypeKatex,
+            {
+              throwOnError: false,
+              errorColor: '#cc0000',
+            },
+          ],
+        ]}
         components={{
           img: data => <img src={data.src} alt={data.alt} className="my-4 max-w-full rounded-lg" />,
         }}
