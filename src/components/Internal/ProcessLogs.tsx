@@ -151,7 +151,7 @@ function ProcessLogs() {
       {/* Content - Scrollable Area */}
       <Box
         ref={scrollRef}
-        className="max-h-[540px] flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-2"
+        className="max-h-[540px] flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-2 font-mono"
         onWheel={e => {
           e.stopPropagation();
         }}
