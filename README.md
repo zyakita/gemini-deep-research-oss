@@ -4,7 +4,7 @@
 [![Gemini](https://img.shields.io/badge/Gemini-8E75B2?style=flat&logo=googlegemini&logoColor=white)](https://ai.google.dev/)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=Vite&logoColor=white)](https://vite.dev/)
 
-This open-source tool is designed for in-depth research using Google's Gemini models. It is specifically designed to leverage the large context window and built-in search capabilities of models like Gemini Pro.
+This open-source tool is my attempt to build a better research automation tool by going all-in on Google's Gemini models. Instead of the usual single-pass search, it uses a team of AI agents to perform a multi-step, iterative research process. The idea is to start broad, then systematically drill down into the details to produce a comprehensive report.
 
 <img width="1440" height="813" alt="Gemini-Deep-Research-Open-Source-08-19-2025_08_39_PM" src="https://github.com/user-attachments/assets/ddb8dd55-8094-4305-9bb1-e6748060654a" />
 
@@ -18,22 +18,22 @@ https://gemini-deep-research.oss.jqkat.com/
 
 ## The Core Idea
 
-I use Gemini models every day. Their ability to handle large amounts of context and utilize Google Search makes them ideal for research purposes.
+Most research tools just do a single-pass search, which often misses the good stuff. I wanted to build something that mirrors how a human research team works: exploring a topic from multiple angles, identifying gaps, and then digging deeper.
 
-I've noticed that many open-source research tools support multiple AI providers. While that's a great goal, it often compromises the workflow. This project does the opposite. It focuses solely on the Gemini API to see how far it can be pushed.
+I've also noticed that many open-source research tools support multiple AI providers. While that's a great goal, it often compromises the workflow. This project does the opposite. It focuses solely on the Gemini API to see how far it can be pushed.
 
-Here are the key design choices:
+### The Multi-Agent Research Pipeline
 
-#### A Multiple-Step Research Pipeline
+The whole process is broken down into specialized tasks, with a dedicated agent for each step:
 
-- **QNA:** Clarifies research scope by questioning query ambiguities.
-- **Report Plan:** Outlines a logical report structure based on initial inputs.
-- **Research Lead:** Deconstructs the primary objective into core research tasks.
-- **Research Deep:** Identifies and targets missing information with new research tasks.
-- **Researcher:** Executes tasks by searching the web and summarizing the results.
-- **Reporter:** Synthesizes all data into a complete, detailed final report.
+- **1. QNA Agent:** First, it questions the user's query to find ambiguities and refine the research scope.
+- **2. Research Lead Agent:** Breaks down the main goal into broad, foundational research tasks.
+- **3. Report Plan Agent:** Structures the output by creating a logical blueprint for the final report.
+- **4. Research Deep Agent:** Performs a gap analysis by comparing findings against the report plan, then creates new tasks to fill in the blanks. This is the core of the "deep dive."
+- **5. Researcher Agent:** Executes the research tasks by hitting the web to find and document facts.
+- **6. Reporter Agent:** Transforms all the raw data into a final, coherent report. It also fact-checks numbers to make sure the output is accurate.
 
-#### Serious Prompt Engineering
+### Serious Prompt Engineering
 
 I've noticed that some research tools use relatively short prompts. Here, the prompts are long and detailed by design. The goal is to provide research agents with comprehensive instructions to produce better, more structured output.
 
@@ -43,10 +43,11 @@ I've noticed that some research tools use relatively short prompts. Here, the pr
 
 ## Features
 
+- **Iterative Research Pipeline:** Starts with broad research, then iteratively deepens the focus by performing gap analysis to ensure nothing important is missed.
+- **Data-Verified Reports:** A final reporting agent synthesizes all findings and fact-checks numerical data for better accuracy.
+- **Structured Output:** Generates well-organized reports guided by a dynamic plan.
 - **Gemini-Native:** Built from the ground up for the Gemini API. No compromises for other providers.
-- **Research Pipeline:** First, go broad. Then, go deep.
-- **Detailed Prompting:** Uses extensive prompt engineering for high-quality results.
-- **Customizable Reports:** Control the tone (e.g., 'academic', 'casual') and length/depth of the final report through simple setting.
+- **Customizable Tone & Depth:** Control the tone (e.g., 'academic', 'casual') and length of the final report.
 
 ## Getting Started
 
