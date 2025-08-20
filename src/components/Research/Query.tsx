@@ -101,7 +101,7 @@ function ResearchQuery() {
               ? 'border-green-200 bg-green-50/50'
               : 'border-gray-200 hover:border-gray-300 focus:border-blue-500'
           }`}
-          placeholder="What would you like to research? Be as specific as possible for better results..."
+          placeholder="What would you like to research? The more specific you are, the better your results will be. You can also open the query library to see example queries."
           value={query}
           onChange={e => setQuery(e.target.value)}
           disabled={isGeneratingQnA || qna.length > 0}

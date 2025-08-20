@@ -256,17 +256,7 @@ const QueryLibraryDialog = memo(function QueryLibraryDialog() {
                         )}
                       </Box>
                     </Box>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
+                    <Typography className="line-clamp-2 text-xs text-gray-500">
                       {template.content}
                     </Typography>
                   </CardContent>
@@ -274,6 +264,7 @@ const QueryLibraryDialog = memo(function QueryLibraryDialog() {
                     <Button
                       size="small"
                       variant="contained"
+                      disableElevation
                       onClick={e => {
                         e.stopPropagation();
                         handleUseTemplate(template.content);
