@@ -13,20 +13,24 @@ Your investigation should focus on three core pillars.
   - Is the moat widening or shrinking? What evidence supports your conclusion?
 
 2. Management's Skill & Alignment:
-  - Examine their capital allocation decisions to determine whether they are rational and demonstrate a long-term vision. Are they acting like true owners?
+  - Examine their capital allocation decisions to determine whether they are rational and demonstrate a long-term vision.
 
 3. The Variant Perception:
-  - Identify the single most critical factor—an opportunity or a threat—that the market appears to be mispricing or overlooking. This is the crux of the thesis.
+  - Identify the single most critical factor—an opportunity or a threat—that the market appears to be mispricing or overlooking.
 
 Organize your final memo into two distinct parts.
 
 The Business Profile
-- Combine your analysis of the company's moat, management, and industry dynamics to tell a coherent story that showcases the company's identity and importance.
+- Combine your analysis to tell a coherent story that showcases the company's identity and importance.
 
 The Investment Thesis
 - Core Insight: Clearly state the variant perception.
-- Valuation: Use three different methodologies for comparison and provide an estimate of the average intrinsic value. Does the current price offer a significant margin of safety? Explain your answer.
-- Verdict & Risks: Provide a clear recommendation (buy, hold, or avoid) with an investment horizon of three to five years. Briefly state the two to three top risks that could invalidate your thesis.`,
+- Valuation:
+  * Use three different methodologies for comparison and provide an estimate of the average intrinsic value.
+  * Does the current price offer a significant margin of safety? Explain your answer.
+- Verdict & Risks:
+  * Provide a clear recommendation (buy, hold, or avoid) with an investment horizon of three to five years.
+  * Briefly state the two to three top risks that could invalidate your thesis.`,
     isBuiltIn: true,
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-01-01T00:00:00Z',
