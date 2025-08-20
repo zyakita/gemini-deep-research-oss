@@ -6,10 +6,6 @@ export const builtInTemplates: QueryTemplate[] = [
     title: 'Stock Investment Memo',
     content: `Create an investment memo on [Company Name] ([Stock Code]).
 
-Adopt the mindset of a business owner who is long-term and value-oriented.
-Your goal is to uncover the business's core story and its lasting economic characteristics.
-Think like an investigative journalist, repeatedly asking "Why?" to dig deeper than surface-level facts.
-
 Your investigation should focus on three core pillars.
 
 1. The Business and its Moat:
@@ -25,7 +21,6 @@ Your investigation should focus on three core pillars.
 Organize your final memo into two distinct parts.
 
 The Business Profile
-- Don't just list facts; create a compelling narrative.
 - Combine your analysis of the company's moat, management, and industry dynamics to tell a coherent story that showcases the company's identity and importance.
 
 The Investment Thesis
