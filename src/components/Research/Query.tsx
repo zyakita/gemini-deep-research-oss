@@ -1,3 +1,4 @@
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import SearchIcon from '@mui/icons-material/Search';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -17,7 +18,7 @@ import FileUpload from './FileUpload';
 function ResearchQuery() {
   const { id, query, setId, setQuery, isGeneratingQnA, qna, setCurrentStep } = useTaskStore();
   const { generateQnAs } = useDeepResearch();
-  const { setOpenSetting } = useGlobalStore();
+  const { setOpenSetting, setOpenQueryLibrary } = useGlobalStore();
   const { isApiKeyValid } = useSettingStore();
 
   const handleSubmit = () => {
@@ -70,9 +71,20 @@ function ResearchQuery() {
               Research Query
             </Typography>
           </div>
-          {isCompleted && (
-            <Chip label="Completed" size="small" color="success" variant="outlined" />
-          )}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<LibraryBooksIcon />}
+              onClick={() => setOpenQueryLibrary(true)}
+              disabled={isGeneratingQnA}
+            >
+              Library
+            </Button>
+            {isCompleted && (
+              <Chip label="Completed" size="small" color="success" variant="outlined" />
+            )}
+          </div>
         </div>
 
         <Typography variant="body2" className="mb-4 text-gray-600">

@@ -1,5 +1,6 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import QueryLibraryDialog from './components/Dialog/QueryLibraryDialog';
 import SettingDialog from './components/Dialog/SettingDialog';
 import Header from './components/Internal/Header';
 import ProcessLogs from './components/Internal/ProcessLogs';
@@ -43,6 +44,7 @@ function App() {
 
         {/* Dialogs */}
         <SettingDialog />
+        <QueryLibraryDialog />
 
         {/* Process Logs */}
         <ProcessLogs />
