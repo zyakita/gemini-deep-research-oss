@@ -1,15 +1,17 @@
 import type { File } from '@google/genai';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { QnA, ResearchTask } from '../types';
+import type { LogEntry, LogLevel, LogMetadata, LogType, QnA, ResearchTask } from '../types';
 import { getFinalUrlFromVertexAIsearch } from '../utils/vertexaisearch';
+
+export type { LogEntry, LogLevel, LogMetadata, LogType } from '../types';
 
 export interface TaskStore {
   // Core properties
   id: string;
   query: string;
   currentStep: number;
-  logs: string[];
+  logs: LogEntry[];
 
   // File management
   files: File[];
@@ -52,7 +54,8 @@ export interface TaskActions {
   setId: (id: string) => void;
   setQuery: (query: string) => void;
   setCurrentStep: (step: number) => void;
-  addLog: (log: string) => void;
+  addLog: (log: string, type?: LogType, level?: LogLevel, metadata?: LogMetadata) => void;
+  clearLogs: () => void;
 
   // File management actions
   addFile: (file: File) => void;
@@ -105,7 +108,7 @@ export interface TaskActions {
 }
 
 const defaultValues: TaskStore = {
-  // Core properties
+  // Core values
   id: '',
   query: '',
   currentStep: 0,
@@ -156,7 +159,25 @@ export const useTaskStore = create(
       setId: (id: string) => set({ id }),
       setQuery: (query: string) => set({ query }),
       setCurrentStep: (currentStep: number) => set({ currentStep }),
-      addLog: (log: string) => set(state => ({ logs: [...state.logs, log] })),
+      addLog: (
+        message: string,
+        type: LogType = 'info',
+        level: LogLevel = 'medium',
+        metadata?: LogMetadata
+      ) => {
+        const logEntry: LogEntry = {
+          id: crypto.randomUUID(),
+          timestamp: Date.now(),
+          type,
+          level,
+          message: message.trim(),
+          agent: metadata?.agent,
+          phase: metadata?.phase,
+          metadata,
+        };
+        set(state => ({ logs: [...state.logs, logEntry] }));
+      },
+      clearLogs: () => set({ logs: [] }),
 
       // File management actions
       addFile: (file: File) => set(state => ({ files: [...state.files, file] })),

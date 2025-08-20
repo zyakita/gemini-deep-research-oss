@@ -104,7 +104,7 @@ async function runResearchLeadAgent({
     const isThought = chunk?.candidates?.[0].content?.parts?.[0]?.thought || false;
 
     if (isThought) {
-      addLog(text);
+      addLog(text, 'research-lead-agent');
     } else {
       jsonContent += text;
     }

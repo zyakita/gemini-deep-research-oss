@@ -93,7 +93,7 @@ async function runQuestionAndAnswerAgent({
     const isThought = chunk?.candidates?.[0].content?.parts?.[0]?.thought || false;
 
     if (isThought) {
-      addLog(text);
+      addLog(text, 'qna-agent');
     } else {
       jsonContent += text;
     }

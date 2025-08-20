@@ -8,13 +8,53 @@ import runResearchLeadAgent from '../agents/research-lead';
 import runResearcherAgent from '../agents/researcher';
 import { useSettingStore } from '../stores/setting';
 import { useTaskStore } from '../stores/task';
-import type { ResearchTask } from '../types';
+import type { LogFunction, ResearchTask } from '../types';
 import { buildUserContent } from '../utils/user-contents';
+
+// Logging helper functions for better consistency
+const createLogHelper = (addLog: LogFunction) => ({
+  info: (message: string, agent?: string, phase?: string) =>
+    addLog(message, 'info', 'medium', { agent, phase }),
+  success: (message: string, agent?: string, phase?: string) =>
+    addLog(message, 'success', 'medium', { agent, phase }),
+  error: (message: string, agent?: string, phase?: string) =>
+    addLog(message, 'error', 'high', { agent, phase }),
+  warning: (message: string, agent?: string, phase?: string) =>
+    addLog(message, 'warning', 'medium', { agent, phase }),
+  process: (message: string, agent?: string, phase?: string) =>
+    addLog(message, 'process', 'medium', { agent, phase }),
+  research: (message: string, agent?: string, phase?: string) =>
+    addLog(message, 'research', 'medium', { agent, phase }),
+  agent: (message: string, agent?: string, phase?: string) =>
+    addLog(message, 'agent', 'low', { agent, phase }),
+  system: (message: string, agent?: string, phase?: string) =>
+    addLog(message, 'system', 'medium', { agent, phase }),
+
+  // Phase-specific helpers
+  startPhase: (phase: string) => addLog(`Starting ${phase}`, 'system', 'high', { phase }),
+  endPhase: (phase: string, count?: number) => {
+    const countText = count ? ` (${count} items)` : '';
+    addLog(`Completed ${phase}${countText}`, 'system', 'high', { phase, count });
+  },
+
+  // Research-specific helpers
+  startResearch: (title: string) =>
+    addLog(`Starting: ${title}`, 'research', 'medium', { phase: 'research' }),
+  completeResearch: (title: string) =>
+    addLog(`Completed: ${title}`, 'success', 'medium', { phase: 'research' }),
+
+  // Agent thought logging
+  thought: (message: string, agent: string) =>
+    addLog(message, 'agent', 'low', { agent, phase: 'thinking' }),
+});
 
 function useDeepResearch() {
   const taskStore = useTaskStore();
   const settingStore = useSettingStore();
   const processConcurrent = useConcurrentTaskProcessor();
+
+  // Create logging helpers
+  const log = useMemo(() => createLogHelper(taskStore.addLog), [taskStore.addLog]);
 
   // Memoize GoogleGenAI instance
   const googleGenAI = useMemo(
@@ -28,22 +68,22 @@ function useDeepResearch() {
   // Memoize common agent parameters
   const commonAgentParams = useMemo(
     () => ({
-      addLog: taskStore.addLog,
+      addLog: (message: string, agent?: string) => log.agent(message, agent),
       googleGenAI,
       thinkingBudget: settingStore.thinkingBudget,
     }),
-    [googleGenAI, settingStore.thinkingBudget, taskStore.addLog]
+    [googleGenAI, settingStore.thinkingBudget, log]
   );
 
   // Generate Q&As
   const generateQnAs = useCallback(async () => {
     if (!settingStore.isApiKeyValid || settingStore.isApiKeyValidating) {
-      taskStore.addLog('!!! API key is invalid or still validating');
+      log.error('API key is invalid or still validating', 'system', 'validation');
       return;
     }
 
     try {
-      taskStore.addLog('➜ Starting Q&A generation...');
+      log.startPhase('Q&A Generation');
 
       const userContent = buildUserContent({
         task: taskStore,
@@ -70,16 +110,16 @@ function useDeepResearch() {
 
       const qnas = await Promise.all(qnaPromises);
       qnas.forEach(qna => taskStore.addQnA(qna));
-    } catch (error) {
-      taskStore.addLog(`!!! Failed to generate Q&As: ${error}`);
-      taskStore.setIsGeneratingQnA(false);
 
+      log.endPhase('Q&A Generation', qnas.length);
+    } catch (error) {
+      log.error(`Failed to generate Q&As: ${error}`, 'qna-agent', 'generation');
+      taskStore.setIsGeneratingQnA(false);
       throw error;
     } finally {
-      taskStore.addLog('=== Q&A generation completed ===');
       taskStore.setIsGeneratingQnA(false);
     }
-  }, [commonAgentParams, taskStore, settingStore]);
+  }, [commonAgentParams, taskStore, settingStore, log]);
 
   // Generate report plan
   const generateReportPlan = useCallback(async () => {
@@ -87,7 +127,7 @@ function useDeepResearch() {
     let streamingHandler: ReturnType<typeof createSmoothStreamingHandler> | null = null;
 
     try {
-      taskStore.addLog('➜ Starting report plan generation...');
+      log.startPhase('Report Plan Generation');
 
       const userContent = buildUserContent({
         task: taskStore,
@@ -119,23 +159,26 @@ function useDeepResearch() {
         userContent,
         onStreaming: chunk => streamingHandler?.addChunk(chunk),
       });
-    } catch (error) {
-      taskStore.addLog(`!!! Failed to generate report plan: ${error}`);
-      taskStore.setIsGeneratingReportPlan(false);
 
+      log.endPhase('Report Plan Generation');
+    } catch (error) {
+      log.error(`Failed to generate report plan: ${error}`, 'report-plan-agent', 'generation');
+      taskStore.setIsGeneratingReportPlan(false);
       throw error;
     } finally {
       streamingHandler?.finish();
-
-      taskStore.addLog('=== Report plan generation completed ===');
       taskStore.setIsGeneratingReportPlan(false);
     }
-  }, [commonAgentParams, taskStore, settingStore]);
+  }, [commonAgentParams, taskStore, settingStore, log]);
 
   // Generate research tasks
   const generateResearchTasks = useCallback(
     async (tier: number) => {
-      taskStore.addLog(`➜ Starting research task generation for round ${tier}...`);
+      log.process(
+        `Starting research task generation for round ${tier}`,
+        'system',
+        'task-generation'
+      );
 
       const existingTasks = taskStore.getResearchTasksByTier(tier);
       if (existingTasks.length > 0) return;
@@ -152,6 +195,7 @@ function useDeepResearch() {
           limitFor: 'tasks',
         });
 
+        const agentName = tier === 1 ? 'research-lead-agent' : 'research-deep-agent';
         const { tasks } =
           tier === 1
             ? await runResearchLeadAgent({
@@ -181,20 +225,32 @@ function useDeepResearch() {
         researchTasks.forEach(task => taskStore.addResearchTask(task));
 
         if (researchTasks.length === 0) {
-          taskStore.addLog(
-            `=== No additional research tasks needed for round ${tier} - agent determined current findings are sufficient ===`
+          log.info(
+            `No additional research tasks needed for round ${tier} - sufficient findings available`,
+            agentName,
+            'task-generation'
           );
         } else {
-          taskStore.addLog(
-            `=== ${researchTasks.length} research tasks generated for round ${tier} ===`
+          log.success(
+            `Generated ${researchTasks.length} research tasks for round ${tier}`,
+            agentName,
+            'task-generation'
+          );
+          // Log each task title for better visibility
+          researchTasks.forEach(task =>
+            log.info(`Task: ${task.title}`, agentName, 'task-generation')
           );
         }
       } catch (error) {
-        taskStore.addLog(`!!! Failed to generate research tasks for round ${tier}: ${error}`);
+        log.error(
+          `Failed to generate research tasks for round ${tier}: ${error}`,
+          'system',
+          'task-generation'
+        );
         throw error;
       }
     },
-    [commonAgentParams, taskStore, settingStore]
+    [commonAgentParams, taskStore, settingStore, log]
   );
 
   // Run research tasks
@@ -206,14 +262,18 @@ function useDeepResearch() {
 
       if (tasksToRun.length === 0) return;
 
-      taskStore.addLog(`➜ Starting research tasks for round ${tier}.`);
-      taskStore.addLog(`${maxConcurrency} concurrent tasks allowed.`);
+      log.process(
+        `Executing ${tasksToRun.length} research tasks for round ${tier}`,
+        'system',
+        'research-execution'
+      );
+      log.info(`Parallel execution: ${maxConcurrency} tasks`, 'system', 'research-execution');
 
       try {
         await processConcurrent(
           tasksToRun,
           async (task: ResearchTask) => {
-            taskStore.addLog(`⌕ researching: ${task.title}`);
+            log.startResearch(task.title);
             taskStore.updateResearchTask({ ...task, processing: true });
 
             try {
@@ -239,18 +299,32 @@ function useDeepResearch() {
                 }
               }
 
-              taskStore.addLog(`✓ completed: ${task.title}`);
+              log.completeResearch(task.title);
               return { taskId: task.id, success: true };
             } catch (error) {
               taskStore.updateResearchTask({ ...task, processing: false });
-              taskStore.addLog(`!!! Failed to run research task: ${task.title}: ${error}`);
+              log.error(
+                `Failed research task: ${task.title}: ${error}`,
+                'researcher-agent',
+                'research-execution'
+              );
               throw error;
             }
           },
           maxConcurrency
         );
+
+        log.success(
+          `Completed all ${tasksToRun.length} research tasks for round ${tier}`,
+          'system',
+          'research-execution'
+        );
       } catch (error) {
-        taskStore.addLog(`!!! Failed to run research tasks for round ${tier}: ${error}`);
+        log.error(
+          `Failed to run research tasks for round ${tier}: ${error}`,
+          'system',
+          'research-execution'
+        );
         throw error;
       }
     },
@@ -261,6 +335,7 @@ function useDeepResearch() {
       settingStore.thinkingBudget,
       googleGenAI,
       processConcurrent,
+      log,
     ]
   );
 
@@ -270,14 +345,25 @@ function useDeepResearch() {
       taskStore.resetResearchTasks();
       taskStore.setIsGeneratingResearchTasks(true);
 
+      log.startPhase('Research Task Execution');
+      log.info(`Research depth: ${settingStore.depth} rounds`, 'system', 'research-planning');
+
       for (let tier = 1; tier <= settingStore.depth; tier++) {
+        log.process(
+          `Processing round ${tier} of ${settingStore.depth}`,
+          'system',
+          'research-planning'
+        );
+
         await generateResearchTasks(tier);
 
-        // Check if any tasks were actually generated for this tier
+        // Check if any tasks were actually generated for this round
         const tierTasks = taskStore.getResearchTasksByTier(tier);
         if (tierTasks.length === 0) {
-          taskStore.addLog(
-            `➜ Research completion detected at round ${tier} - proceeding to final report`
+          log.success(
+            `Research completion detected at round ${tier} - proceeding to final report`,
+            'system',
+            'research-planning'
           );
           taskStore.setResearchCompletedEarly(true);
           taskStore.setMaxTierReached(tier - 1); // Previous tier was the last one with tasks
@@ -287,20 +373,23 @@ function useDeepResearch() {
         taskStore.setMaxTierReached(tier);
         await runResearchTasks(tier);
       }
+
+      log.endPhase('Research Task Execution');
     } catch (error) {
+      log.error(`Failed research task execution: ${error}`, 'system', 'research-planning');
       taskStore.setIsGeneratingResearchTasks(false);
       throw error;
     } finally {
       taskStore.setIsGeneratingResearchTasks(false);
     }
-  }, [taskStore, settingStore.depth, generateResearchTasks, runResearchTasks]);
+  }, [taskStore, settingStore.depth, generateResearchTasks, runResearchTasks, log]);
 
   // Generate final report
   const generateFinalReport = useCallback(async () => {
     let streamingHandler: ReturnType<typeof createSmoothStreamingHandler> | null = null;
 
     try {
-      taskStore.addLog('➜ Starting final report generation...');
+      log.startPhase('Final Report Generation');
 
       taskStore.updateFinalReport('');
       taskStore.setIsGeneratingFinalReport(true);
@@ -338,27 +427,27 @@ function useDeepResearch() {
           minWords: settingStore.minWords,
         }
       );
+
+      log.endPhase('Final Report Generation');
     } catch (error) {
-      console.error('!!! Failed to generate final report:', error);
+      log.error(`Failed to generate final report: ${error}`, 'reporter-agent', 'generation');
       throw error;
     } finally {
       streamingHandler?.finish();
-
-      taskStore.addLog('=== Final report generation completed ===');
       taskStore.setIsGeneratingFinalReport(false);
     }
-  }, [commonAgentParams, taskStore, settingStore]);
+  }, [commonAgentParams, taskStore, settingStore, log]);
 
   // Upload file
   const uploadFile = useCallback(
     async (file: globalThis.File) => {
       if (!settingStore.isApiKeyValid) {
-        taskStore.addLog('!!! API key is invalid');
+        log.error('API key is invalid', 'system', 'file-upload');
         throw new Error('API key is invalid');
       }
 
       try {
-        taskStore.addLog(`➜ Uploading file: ${file.name}...`);
+        log.process(`Uploading file: ${file.name}`, 'system', 'file-upload');
 
         const uploadedFile = await googleGenAI.files.upload({
           file: file, // File object extends Blob, which is compatible
@@ -369,43 +458,43 @@ function useDeepResearch() {
         });
 
         taskStore.addFile(uploadedFile);
-        taskStore.addLog(`✓ File uploaded successfully: ${file.name}`);
+        log.success(`File uploaded: ${file.name}`, 'system', 'file-upload');
 
         return uploadedFile;
       } catch (error) {
-        taskStore.addLog(`!!! Failed to upload file: ${file.name}: ${error}`);
+        log.error(`Failed to upload file ${file.name}: ${error}`, 'system', 'file-upload');
         throw error;
       }
     },
-    [googleGenAI, taskStore, settingStore]
+    [googleGenAI, taskStore, settingStore, log]
   );
 
   // Delete file
   const deleteFile = useCallback(
     async (fileName: string) => {
       if (!settingStore.isApiKeyValid) {
-        taskStore.addLog('!!! API key is invalid');
+        log.error('API key is invalid', 'system', 'file-management');
         throw new Error('API key is invalid');
       }
 
       try {
-        taskStore.addLog(`➜ Deleting file: ${fileName}...`);
+        log.process(`Deleting file: ${fileName}`, 'system', 'file-management');
 
         await googleGenAI.files.delete({ name: fileName });
         taskStore.removeFile(fileName);
-        taskStore.addLog(`✓ File deleted successfully: ${fileName}`);
+        log.success(`File deleted: ${fileName}`, 'system', 'file-management');
       } catch (error) {
-        taskStore.addLog(`!!! Failed to delete file: ${fileName}: ${error}`);
+        log.error(`Failed to delete file ${fileName}: ${error}`, 'system', 'file-management');
         throw error;
       }
     },
-    [googleGenAI, taskStore, settingStore]
+    [googleGenAI, taskStore, settingStore, log]
   );
 
   // Delete all uploaded files
   const deleteAllFiles = useCallback(async () => {
     if (!settingStore.isApiKeyValid) {
-      taskStore.addLog('!!! API key is invalid');
+      log.error('API key is invalid', 'system', 'file-management');
       return;
     }
 
@@ -415,7 +504,7 @@ function useDeepResearch() {
     }
 
     try {
-      taskStore.addLog(`➜ Deleting ${files.length} uploaded files...`);
+      log.process(`Deleting ${files.length} uploaded files`, 'system', 'file-management');
 
       // Delete files concurrently
       await Promise.allSettled(
@@ -423,40 +512,43 @@ function useDeepResearch() {
           try {
             if (file.name) {
               await googleGenAI.files.delete({ name: file.name });
-              taskStore.addLog(`✓ Deleted file: ${file.displayName || file.name}`);
+              log.success(`Deleted: ${file.displayName || file.name}`, 'system', 'file-management');
             }
           } catch (error) {
-            taskStore.addLog(
-              `!!! Failed to delete file: ${file.displayName || file.name}: ${error}`
+            log.error(
+              `Failed to delete ${file.displayName || file.name}: ${error}`,
+              'system',
+              'file-management'
             );
           }
         })
       );
 
       taskStore.clearAllFiles();
-      taskStore.addLog('=== All files deleted ===');
+      log.success('All files deleted', 'system', 'file-management');
     } catch (error) {
-      taskStore.addLog(`!!! Failed to delete files: ${error}`);
+      log.error(`Failed to delete files: ${error}`, 'system', 'file-management');
     }
-  }, [googleGenAI, taskStore, settingStore]);
+  }, [googleGenAI, taskStore, settingStore, log]);
 
   // Reset tasks and delete all files
   const resetWithFiles = useCallback(async () => {
     try {
       taskStore.setIsResetting(true);
-      taskStore.addLog('➜ Starting reset and file deletion...');
+      log.system('Starting system reset', 'system', 'reset');
+
       await deleteAllFiles();
       taskStore.reset();
-      // taskStore.addLog('=== Reset completed ===');
+
+      // log.system('Reset completed', 'system', 'reset');
     } catch (error) {
-      console.error('Error during reset:', error);
-      taskStore.addLog(`!!! Error during reset: ${error}`);
+      log.error(`Error during reset: ${error}`, 'system', 'reset');
       // Reset anyway, even if file deletion fails
       taskStore.reset();
     } finally {
       taskStore.setIsResetting(false);
     }
-  }, [deleteAllFiles, taskStore]);
+  }, [deleteAllFiles, taskStore, log]);
 
   return {
     generateQnAs,

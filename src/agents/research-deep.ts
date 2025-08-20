@@ -109,7 +109,7 @@ async function runResearchDeepAgent({
     const isThought = chunk?.candidates?.[0].content?.parts?.[0]?.thought || false;
 
     if (isThought) {
-      addLog(text);
+      addLog(text, 'research-deep-agent');
     } else {
       jsonContent += text;
     }

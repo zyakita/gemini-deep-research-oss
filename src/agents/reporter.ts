@@ -127,7 +127,7 @@ async function runReporterAgent(
         const isThought = part.thought || false;
 
         if (isThought) {
-          addLog(text);
+          addLog(text, 'reporter-agent');
         } else {
           onStreaming?.(text);
         }
@@ -144,20 +144,16 @@ async function runReporterAgent(
         }
 
         if (part.executableCode && part.executableCode.code) {
-          addLog(
-            '#### The agent executed the following code to perform a calculation or generate a visualization:'
-          );
+          addLog('The agent will run the following code to perform calculations or visualizations.', 'reporter-agent');
 
           if (!part.executableCode.code.startsWith('```')) {
-            addLog(`\`\`\` \n${part.executableCode.code}\n\`\`\``);
+            addLog(`\`\`\`\n${part.executableCode.code}\n\`\`\``, 'reporter-agent');
           }
         }
 
         if (part.codeExecutionResult && part.codeExecutionResult.output) {
-          addLog('#### Result of the executed code:');
-
           if (!part.codeExecutionResult.output.startsWith('```')) {
-            addLog(`\`\`\` \n${part.codeExecutionResult.output}\n\`\`\``);
+            addLog(`\`\`\`\n${part.codeExecutionResult.output}\n\`\`\``, 'reporter-agent');
           }
         }
       }

@@ -77,7 +77,7 @@ async function runReportPlanAgent({
         const isThought = part.thought || false;
 
         if (isThought) {
-          addLog(text);
+          addLog(text, 'report-plan-agent');
         } else {
           onStreaming?.(text);
         }
