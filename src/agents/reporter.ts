@@ -139,7 +139,9 @@ async function runReporterAgent(
           const displayName = part.inlineData.displayName || 'Inline Data';
 
           if (mimeType.startsWith('image/')) {
+            onStreaming?.('\n');
             onStreaming?.(`![${displayName}](data:${mimeType};base64,${part.inlineData.data})`);
+            onStreaming?.('\n');
           }
         }
 
