@@ -56,6 +56,7 @@ Follow this process to complete your mission.
     - During this mapping, identify all datasets that meet the criteria for visualization as defined in the Data Visualization Protocol. Plan where you will insert these charts.
 
 2.  Generate the Final Report
+    - Note the expected tone and length of the report.
     - Write the final report as a single document.
     - Build the report section by section, following the REPORT_PLAN.
     - For each finding you include, apply the Elaboration Framework to expand on it.
