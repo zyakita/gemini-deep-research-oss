@@ -103,7 +103,7 @@ const QueryTemplateDialog = memo(function QueryTemplateDialog({
           placeholder="Enter a descriptive title for your template"
         />
 
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 2, mb: 1 }}>
+        <Typography variant="body2" color="text.secondary" className="mt-2 mb-1">
           Template Content
         </Typography>
 
@@ -121,12 +121,12 @@ const QueryTemplateDialog = memo(function QueryTemplateDialog({
         />
 
         {errors.content && (
-          <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
+          <Typography variant="caption" color="error" className="mt-1 block">
             {errors.content}
           </Typography>
         )}
 
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+        <Typography variant="caption" color="text.secondary" className="mt-1 block">
           {content.length} characters • Use square brackets like [Company Name] for placeholders
         </Typography>
       </DialogContent>

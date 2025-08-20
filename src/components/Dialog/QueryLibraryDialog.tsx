@@ -122,7 +122,7 @@ const QueryLibraryDialog = memo(function QueryLibraryDialog() {
         maxWidth="md"
         fullWidth
         PaperProps={{
-          sx: { minHeight: '70vh' },
+          className: 'min-h-[70vh]',
         }}
       >
         <DialogTitle>
@@ -163,120 +163,113 @@ const QueryLibraryDialog = memo(function QueryLibraryDialog() {
               }
               label="Show built-in templates"
             />
-          </Box>
 
-          <Divider sx={{ mb: 2 }} />
+            <Divider className="mb-2" />
 
-          {filteredTemplates.length === 0 ? (
-            <Box textAlign="center" py={4}>
-              <Typography variant="body1" color="text.secondary">
-                {searchTerm ? 'No templates match your search.' : 'No templates available.'}
-              </Typography>
-            </Box>
-          ) : (
-            <Box display="flex" flexDirection="column" gap={2}>
-              {filteredTemplates.map(template => (
-                <Card
-                  key={template.id}
-                  variant="outlined"
-                  sx={{
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      boxShadow: 2,
-                      borderColor: 'primary.main',
-                    },
-                    ...(selectedTemplate === template.id && {
-                      borderColor: 'primary.main',
-                      boxShadow: 2,
-                    }),
-                  }}
-                  onClick={() => setSelectedTemplate(template.id)}
-                >
-                  <CardContent>
-                    <Box
-                      display="flex"
-                      justifyContent="space-between"
-                      alignItems="flex-start"
-                      mb={1}
-                    >
-                      <Box>
-                        <Typography variant="h6" component="div" gutterBottom>
-                          {template.title}
-                        </Typography>
-                        <Box display="flex" gap={1} alignItems="center">
-                          {template.isBuiltIn && (
-                            <Chip
-                              label="Built-in"
-                              size="small"
-                              color="primary"
-                              variant="outlined"
-                            />
-                          )}
-                          <Typography variant="caption" color="text.secondary">
-                            {new Date(template.createdAt).toLocaleDateString()}
+            {filteredTemplates.length === 0 ? (
+              <Box textAlign="center" py={4}>
+                <Typography variant="body1" color="text.secondary">
+                  {searchTerm ? 'No templates match your search.' : 'No templates available.'}
+                </Typography>
+              </Box>
+            ) : (
+              <Box display="flex" flexDirection="column" gap={2}>
+                {filteredTemplates.map(template => (
+                  <Card
+                    key={template.id}
+                    variant="outlined"
+                    className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                      selectedTemplate === template.id
+                        ? 'border-blue-500 shadow-md'
+                        : 'hover:border-blue-500'
+                    }`}
+                    onClick={() => setSelectedTemplate(template.id)}
+                  >
+                    <CardContent>
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="flex-start"
+                        mb={1}
+                      >
+                        <Box>
+                          <Typography variant="h6" component="div" gutterBottom>
+                            {template.title}
                           </Typography>
+                          <Box display="flex" gap={1} alignItems="center">
+                            {template.isBuiltIn && (
+                              <Chip
+                                label="Built-in"
+                                size="small"
+                                color="primary"
+                                variant="outlined"
+                              />
+                            )}
+                            <Typography variant="caption" color="text.secondary">
+                              {new Date(template.createdAt).toLocaleDateString()}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Box display="flex" gap={0.5}>
+                          <IconButton
+                            size="small"
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleCopyTemplate(template.content);
+                            }}
+                            title="Copy content"
+                          >
+                            <ContentCopyIcon fontSize="small" />
+                          </IconButton>
+                          {!template.isBuiltIn && (
+                            <>
+                              <IconButton
+                                size="small"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleEdit(template);
+                                }}
+                                title="Edit template"
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleDelete(template.id);
+                                }}
+                                title="Delete template"
+                                color="error"
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </>
+                          )}
                         </Box>
                       </Box>
-                      <Box display="flex" gap={0.5}>
-                        <IconButton
-                          size="small"
-                          onClick={e => {
-                            e.stopPropagation();
-                            handleCopyTemplate(template.content);
-                          }}
-                          title="Copy content"
-                        >
-                          <ContentCopyIcon fontSize="small" />
-                        </IconButton>
-                        {!template.isBuiltIn && (
-                          <>
-                            <IconButton
-                              size="small"
-                              onClick={e => {
-                                e.stopPropagation();
-                                handleEdit(template);
-                              }}
-                              title="Edit template"
-                            >
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                            <IconButton
-                              size="small"
-                              onClick={e => {
-                                e.stopPropagation();
-                                handleDelete(template.id);
-                              }}
-                              title="Delete template"
-                              color="error"
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </>
-                        )}
-                      </Box>
-                    </Box>
-                    <Typography className="line-clamp-2 text-xs text-gray-500">
-                      {template.content}
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button
-                      size="small"
-                      variant="contained"
-                      disableElevation
-                      onClick={e => {
-                        e.stopPropagation();
-                        handleUseTemplate(template.content);
-                      }}
-                    >
-                      Use Template
-                    </Button>
-                  </CardActions>
-                </Card>
-              ))}
-            </Box>
-          )}
+                      <Typography className="line-clamp-2 text-xs text-gray-500">
+                        {template.content}
+                      </Typography>
+                    </CardContent>
+                    <CardActions>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        disableElevation
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleUseTemplate(template.content);
+                        }}
+                      >
+                        Use Template
+                      </Button>
+                    </CardActions>
+                  </Card>
+                ))}
+              </Box>
+            )}
+          </Box>
         </DialogContent>
 
         <DialogActions>

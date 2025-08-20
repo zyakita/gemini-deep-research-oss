@@ -126,7 +126,7 @@ function ResearchReportPlan() {
 
         {!hasPlan && (
           <Box className="py-8 text-center">
-            <AssignmentIcon className="mb-2 text-gray-400" sx={{ fontSize: 48 }} />
+            <AssignmentIcon className="mb-2 text-5xl text-gray-400" />
             <Typography className="text-gray-500">
               Waiting for clarification questions to be answered...
             </Typography>
@@ -155,25 +155,7 @@ function ResearchReportPlan() {
               />
             ) : (
               <div className="prose prose-sm max-w-none text-gray-700">
-                <Markdown
-                  components={{
-                    h1: ({ children }) => (
-                      <h1 className="mb-3 text-xl font-bold text-gray-800">{children}</h1>
-                    ),
-                    h2: ({ children }) => (
-                      <h2 className="mb-2 text-lg font-semibold text-gray-800">{children}</h2>
-                    ),
-                    h3: ({ children }) => (
-                      <h3 className="mb-2 text-base font-medium text-gray-800">{children}</h3>
-                    ),
-                    p: ({ children }) => <p className="mb-3 leading-relaxed">{children}</p>,
-                    ul: ({ children }) => <ul className="mb-3 space-y-1 pl-6">{children}</ul>,
-                    ol: ({ children }) => <ol className="mb-3 space-y-1 pl-6">{children}</ol>,
-                    li: ({ children }) => <li className="text-gray-700">{children}</li>,
-                  }}
-                >
-                  {reportPlan}
-                </Markdown>
+                <Markdown>{reportPlan}</Markdown>
               </div>
             )}
           </div>

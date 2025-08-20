@@ -129,7 +129,7 @@ function ResearchReferences() {
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-sm font-medium text-white">
-              <BookmarkIcon sx={{ fontSize: 18 }} />
+              <BookmarkIcon className="text-lg" />
             </div>
             <Typography variant="h6" className="font-semibold text-gray-800">
               References & Sources
@@ -172,7 +172,7 @@ function ResearchReferences() {
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />} className="px-0 py-2">
             <div className="flex items-center gap-2">
-              <LinkIcon className="text-blue-600" sx={{ fontSize: 20 }} />
+              <LinkIcon className="text-xl text-blue-600" />
               <Typography className="font-medium text-gray-800">
                 View All Sources ({totalSites} domains)
               </Typography>
@@ -223,7 +223,7 @@ function ResearchReferences() {
                         />
                         <Tooltip title="Open in new tab">
                           <IconButton size="small" className="text-gray-500">
-                            <OpenInNewIcon sx={{ fontSize: 16 }} />
+                            <OpenInNewIcon className="text-sm" />
                           </IconButton>
                         </Tooltip>
                       </ListItemButton>

@@ -144,7 +144,10 @@ async function runReporterAgent(
         }
 
         if (part.executableCode && part.executableCode.code) {
-          addLog('The agent will run the following code to perform calculations or visualizations.', 'reporter-agent');
+          addLog(
+            'The agent will run the following code to perform calculations or visualizations.',
+            'reporter-agent'
+          );
 
           if (!part.executableCode.code.startsWith('```')) {
             addLog(`\`\`\`\n${part.executableCode.code}\n\`\`\``, 'reporter-agent');

@@ -104,22 +104,13 @@ function ProcessLogs() {
   // Get summary counts
   const totalLogs = logs.length;
   const errorCount = logs.filter(log => log.type === 'error').length;
-  const successCount = logs.filter(log => log.type === 'success').length;
 
   if (!openProcessLogs) {
     // Minimized bar in bottom left corner with status indicators
     return (
       <Paper
-        className="fixed bottom-4 left-4 z-50 cursor-pointer shadow-md transition-shadow hover:shadow-lg print:hidden"
+        className="fixed bottom-4 left-4 z-50 cursor-pointer rounded-lg bg-blue-700 text-white shadow-md transition-shadow hover:bg-blue-800 hover:shadow-lg print:hidden"
         onClick={handleToggle}
-        sx={{
-          borderRadius: 2,
-          backgroundColor: '#1976d2',
-          color: 'white',
-          '&:hover': {
-            backgroundColor: '#1565c0',
-          },
-        }}
       >
         <Box className="flex items-center gap-2 px-3 py-2">
           <TerminalIcon fontSize="small" />
@@ -132,26 +123,7 @@ function ProcessLogs() {
               size="small"
               color="error"
               variant="outlined"
-              sx={{
-                color: 'white',
-                borderColor: 'rgba(255,255,255,0.5)',
-                fontSize: '0.7rem',
-                height: '20px',
-              }}
-            />
-          )}
-          {successCount > 0 && (
-            <Chip
-              label={`${successCount} completed`}
-              size="small"
-              color="success"
-              variant="outlined"
-              sx={{
-                color: 'white',
-                borderColor: 'rgba(255,255,255,0.5)',
-                fontSize: '0.7rem',
-                height: '20px',
-              }}
+              className="h-5 border-white/50 text-xs text-white"
             />
           )}
         </Box>
@@ -161,35 +133,17 @@ function ProcessLogs() {
 
   // Expanded chat-box size window
   return (
-    <Paper
-      className="fixed bottom-4 left-4 z-50 shadow-lg print:hidden"
-      sx={{
-        width: 500,
-        height: 600,
-        borderRadius: 2,
-        backgroundColor: 'white',
-        border: '1px solid #e0e0e0',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
+    <Paper className="fixed bottom-4 left-4 z-50 flex h-[600px] w-[500px] flex-col rounded-lg border border-gray-300 bg-white shadow-lg print:hidden">
       {/* Header */}
-      <Box
-        className="flex items-center justify-between border-b border-gray-200 px-4 py-3"
-        sx={{
-          backgroundColor: '#f5f5f5',
-          flexShrink: 0,
-        }}
-      >
+      <Box className="flex flex-shrink-0 items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3">
         <Box className="flex items-center gap-2">
           <TerminalIcon fontSize="small" color="primary" />
           <Typography variant="h6" className="font-medium">
             Process Logs ({totalLogs})
           </Typography>
           {errorCount > 0 && <Chip label={errorCount} size="small" color="error" />}
-          {successCount > 0 && <Chip label={successCount} size="small" color="success" />}
         </Box>
-        <IconButton size="small" onClick={handleMinimize} sx={{ color: 'gray' }}>
+        <IconButton size="small" onClick={handleMinimize} className="text-gray-500">
           <CloseIcon fontSize="small" />
         </IconButton>
       </Box>
@@ -197,14 +151,7 @@ function ProcessLogs() {
       {/* Content - Scrollable Area */}
       <Box
         ref={scrollRef}
-        className="p-2"
-        sx={{
-          flex: 1,
-          backgroundColor: '#fafafa',
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          maxHeight: 'calc(600px - 60px)',
-        }}
+        className="max-h-[540px] flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-2"
         onWheel={e => {
           e.stopPropagation();
         }}
@@ -228,16 +175,15 @@ function ProcessLogs() {
                 <Paper
                   key={log.id}
                   elevation={0}
-                  sx={{
-                    p: 1.5,
+                  className="rounded p-6"
+                  style={{
                     backgroundColor: colors.bg,
                     border: `${colors.borderWidth} solid ${colors.border}`,
-                    borderRadius: 1,
                     fontWeight: colors.fontWeight,
                   }}
                 >
                   <Box className="flex items-start gap-2">
-                    <Typography component="span" sx={{ fontSize: '0.8rem' }}>
+                    <Typography component="span" className="text-xs">
                       {icon}
                     </Typography>
                     <Box className="min-w-0 flex-1">
@@ -246,25 +192,16 @@ function ProcessLogs() {
                           <Chip
                             label={log.type}
                             size="small"
-                            sx={{
+                            className="h-4 text-xs font-semibold text-white"
+                            style={{
                               backgroundColor: colors.border,
-                              color: 'white',
-                              fontSize: '0.6rem',
-                              height: '16px',
-                              fontWeight: 600,
                             }}
                           />
                           {log.level === 'high' && (
                             <Chip
                               label="HIGH"
                               size="small"
-                              sx={{
-                                backgroundColor: '#ff5722',
-                                color: 'white',
-                                fontSize: '0.5rem',
-                                height: '14px',
-                                fontWeight: 700,
-                              }}
+                              className="h-3.5 bg-red-600 text-xs font-bold text-white"
                             />
                           )}
                           {log.level === 'low' && (
@@ -272,12 +209,10 @@ function ProcessLogs() {
                               label="LOW"
                               size="small"
                               variant="outlined"
-                              sx={{
+                              className="h-3.5 text-xs opacity-70"
+                              style={{
                                 borderColor: colors.border,
                                 color: colors.text,
-                                fontSize: '0.5rem',
-                                height: '14px',
-                                opacity: 0.7,
                               }}
                             />
                           )}
@@ -286,13 +221,7 @@ function ProcessLogs() {
                               label={log.phase}
                               size="small"
                               variant="outlined"
-                              sx={{
-                                borderColor: '#9e9e9e',
-                                color: '#616161',
-                                fontSize: '0.5rem',
-                                height: '14px',
-                                opacity: 0.8,
-                              }}
+                              className="h-3.5 border-gray-400 text-xs text-gray-600 opacity-80"
                             />
                           )}
                           {log.agent && (
@@ -300,69 +229,25 @@ function ProcessLogs() {
                               label={log.agent}
                               size="small"
                               variant="outlined"
-                              sx={{
+                              className="h-4 text-xs"
+                              style={{
                                 borderColor: colors.border,
                                 color: colors.text,
-                                fontSize: '0.6rem',
-                                height: '16px',
                               }}
                             />
                           )}
                         </Box>
                         <Typography
                           variant="caption"
-                          sx={{
+                          className="font-mono text-xs"
+                          style={{
                             color: colors.text,
-                            fontSize: '0.6rem',
-                            fontFamily: 'monospace',
                           }}
                         >
                           {formatTimestamp(log.timestamp)}
                         </Typography>
                       </Box>
-                      <Box
-                        className="prose prose-xs max-h-48 overflow-y-auto text-xs"
-                        sx={{
-                          fontSize:
-                            log.level === 'high'
-                              ? '0.8rem'
-                              : log.level === 'low'
-                                ? '0.7rem'
-                                : '0.75rem',
-                          color: colors.text,
-                          fontWeight: colors.fontWeight,
-                          opacity: log.level === 'low' ? 0.8 : 1,
-                          '& *': { color: 'inherit' },
-                          '& h1, & h2, & h3': {
-                            fontSize: log.level === 'high' ? '0.85rem' : '0.8rem',
-                            marginTop: '0.5rem',
-                            marginBottom: '0.25rem',
-                            fontWeight: log.level === 'high' ? 700 : 600,
-                          },
-                          '& p': {
-                            margin: '0.25rem 0',
-                            lineHeight: 1.4,
-                          },
-                          '& ul, & ol': {
-                            margin: '0.25rem 0',
-                            paddingLeft: '1rem',
-                          },
-                          '& code': {
-                            backgroundColor: 'rgba(0,0,0,0.1)',
-                            padding: '0.1rem 0.2rem',
-                            borderRadius: '0.2rem',
-                            fontSize: log.level === 'high' ? '0.75rem' : '0.7rem',
-                          },
-                          '& pre': {
-                            backgroundColor: 'rgba(0,0,0,0.05)',
-                            padding: '0.5rem',
-                            borderRadius: '0.25rem',
-                            fontSize: log.level === 'high' ? '0.75rem' : '0.7rem',
-                            overflow: 'auto',
-                            margin: '0.25rem 0',
-                          },
-                        }}
-                      >
+                      <Box className="prose prose-xs mt-2 max-h-48 overflow-y-auto text-xs">
                         <Markdown remarkPlugins={[remarkGfm]}>{log.message}</Markdown>
                       </Box>
                     </Box>

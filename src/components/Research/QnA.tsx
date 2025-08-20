@@ -80,7 +80,7 @@ function ResearchQnA() {
 
         {!hasQuestions && (
           <Box className="py-8 text-center">
-            <HelpOutlineIcon className="mb-2 text-gray-400" sx={{ fontSize: 48 }} />
+            <HelpOutlineIcon className="mb-2 text-5xl text-gray-400" />
             <Typography className="text-gray-500">
               Waiting for query to be analyzed and questions to be generated...
             </Typography>

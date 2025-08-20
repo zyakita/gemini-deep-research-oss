@@ -31,15 +31,15 @@ const SliderSetting = memo(function SliderSetting({
   const displayValue = formatLabel ? formatLabel(value) : value;
 
   return (
-    <Box sx={{ px: 2 }}>
-      <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
+    <Box className="px-2">
+      <Typography variant="subtitle1" className="mb-1 font-medium">
         {label} ({displayValue})
       </Typography>
       {(description || descriptionNode) && (
         <Typography
           variant="caption"
           color="text.secondary"
-          sx={{ mb: { xs: 1, sm: 2 }, display: { xs: 'none', sm: 'block' } }}
+          className="mb-1 hidden sm:mb-2 sm:block"
         >
           {descriptionNode || description}
         </Typography>
@@ -52,8 +52,8 @@ const SliderSetting = memo(function SliderSetting({
         step={step}
         valueLabelDisplay="auto"
         size="small"
+        className="mx-0.5 sm:mx-1"
         sx={{
-          mx: { xs: 0.5, sm: 1 },
           '& .MuiSlider-markLabel': {
             fontSize: '0.75rem',
             '&[data-index="0"]': {

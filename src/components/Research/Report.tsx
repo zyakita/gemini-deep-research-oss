@@ -194,7 +194,7 @@ function ResearchReport() {
 
         {!finalReport && !isLoading && (
           <Box className="py-8 text-center">
-            <DescriptionIcon className="mb-2 text-gray-400" sx={{ fontSize: 48 }} />
+            <DescriptionIcon className="mb-2 text-5xl text-gray-400" />
             <Typography className="text-gray-500">
               Waiting for final report to be generated...
             </Typography>
@@ -204,7 +204,7 @@ function ResearchReport() {
         {isLoading && (
           <Box className="py-8 text-center">
             <div className="animate-pulse">
-              <DescriptionIcon className="mb-2 text-blue-500" sx={{ fontSize: 48 }} />
+              <DescriptionIcon className="mb-2 text-5xl text-blue-500" />
               <Typography className="font-medium text-blue-600">
                 Generating comprehensive report...
               </Typography>
@@ -273,6 +273,15 @@ function ResearchReport() {
               <Button
                 variant="outlined"
                 size="medium"
+                startIcon={<OpenInNewIcon />}
+                onClick={handleOpenReportInNewWindow}
+                className="px-4 py-2"
+              >
+                Open in New Window
+              </Button>
+              <Button
+                variant="outlined"
+                size="medium"
                 startIcon={<DownloadIcon />}
                 onClick={handleDownloadClick}
                 className="px-4 py-2"
@@ -300,10 +309,10 @@ function ResearchReport() {
                   <PictureAsPdfIcon className="mr-2" fontSize="small" />
                   Download as PDF
                 </MenuItem>
-                <MenuItem onClick={handleOpenReportInNewWindow}>
+                {/* <MenuItem onClick={handleOpenReportInNewWindow}>
                   <OpenInNewIcon className="mr-2" fontSize="small" />
                   Open in New Window
-                </MenuItem>
+                </MenuItem> */}
               </Menu>
             </div>
           </div>

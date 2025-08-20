@@ -213,7 +213,7 @@ function ResearchTasks() {
 
         {!hasTasks && !isGeneratingTasks && (
           <Box className="py-8 text-center">
-            <AssignmentTurnedInIcon className="mb-2 text-gray-400" sx={{ fontSize: 48 }} />
+            <AssignmentTurnedInIcon className="mb-2 text-5xl text-gray-400" />
             <Typography className="text-gray-500">
               Waiting for research tasks to be generated...
             </Typography>
@@ -301,16 +301,13 @@ function ResearchTasks() {
                           <Stack direction="row" alignItems="center" spacing={2} className="w-full">
                             <div className="flex flex-1 items-center gap-3">
                               {isTaskPending && (
-                                <AccessTimeIcon className="text-gray-500" sx={{ fontSize: 20 }} />
+                                <AccessTimeIcon className="text-xl text-gray-500" />
                               )}
                               {isTaskProcessing && (
-                                <AutorenewIcon
-                                  className="animate-spin text-blue-500"
-                                  sx={{ fontSize: 20 }}
-                                />
+                                <AutorenewIcon className="animate-spin text-xl text-blue-500" />
                               )}
                               {isTaskCompleted && (
-                                <DoneAllIcon className="text-green-500" sx={{ fontSize: 20 }} />
+                                <DoneAllIcon className="text-xl text-green-500" />
                               )}
                               <Typography className="font-medium text-gray-800">
                                 Task {index + 1}: {task.title}
@@ -340,7 +337,7 @@ function ResearchTasks() {
                           <div className="space-y-4">
                             <div>
                               <div className="mb-2 flex items-center gap-2">
-                                <InfoIcon className="text-blue-500" sx={{ fontSize: 16 }} />
+                                <InfoIcon className="text-sm text-blue-500" />
                                 <Typography
                                   variant="subtitle2"
                                   className="font-semibold text-gray-800"
@@ -359,7 +356,7 @@ function ResearchTasks() {
                             {task.learning && (
                               <div>
                                 <div className="mb-2 flex items-center gap-2">
-                                  <DoneAllIcon className="text-green-500" sx={{ fontSize: 16 }} />
+                                  <DoneAllIcon className="text-sm text-green-500" />
                                   <Typography
                                     variant="subtitle2"
                                     className="font-semibold text-gray-800"

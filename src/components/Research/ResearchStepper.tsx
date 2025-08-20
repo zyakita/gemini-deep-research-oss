@@ -167,7 +167,7 @@ function ResearchStepper() {
                             : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
                       }`}
                     >
-                      <IconComponent sx={{ fontSize: isCompact ? 16 : 20 }} />
+                      <IconComponent className={isCompact ? 'text-sm' : 'text-xl'} />
                     </div>
                   )}
                 >
