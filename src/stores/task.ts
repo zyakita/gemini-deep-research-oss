@@ -1,7 +1,6 @@
 import type { File } from '@google/genai';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { researcherRejectMessage } from '../agents/researcher';
 import type { QnA, ResearchTask } from '../types';
 import { getFinalUrlFromVertexAIsearch } from '../utils/vertexaisearch';
 
@@ -191,12 +190,7 @@ export const useTaskStore = create(
       getAllResearchTasks: () => get().researchTasks,
       getAllFinishedResearchTasks: () => {
         const tasks = get().researchTasks;
-        return tasks.filter(
-          task =>
-            task.learning.trim() !== '' &&
-            task.learning.toLocaleLowerCase().trim() !==
-              researcherRejectMessage.toLocaleLowerCase().trim()
-        );
+        return tasks.filter(task => task.learning.trim() !== '');
       },
       getResearchTasksByTier: (tier: number) => {
         const tasks = get().researchTasks;
