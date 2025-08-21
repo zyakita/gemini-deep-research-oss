@@ -35,7 +35,7 @@ The whole process is broken down into specialized tasks, with a dedicated agent 
 
 I've noticed that some research tools use relatively short prompts. Here, the prompts are long and detailed by design. The goal is to provide research agents with comprehensive instructions to produce better, more structured output.
 
-#### How It Works
+### How It Works
 
 <img alt="flow" src="https://github.com/user-attachments/assets/beb16e8b-928c-49ff-b8e9-ce2bf94132b0" />
 
@@ -46,6 +46,12 @@ I've noticed that some research tools use relatively short prompts. Here, the pr
 - **Structured Output:** Generates well-organized reports guided by a dynamic plan.
 - **Gemini-Native:** Built from the ground up for the Gemini API. No compromises for other providers.
 - **Customizable Tone & Depth:** Control the tone (e.g., 'academic', 'casual') and length of the final report.
+
+### Limitations
+
+The model is forced to use the `code execution` tool for every number in the report, sometimes it cannot maintain the tone of the report or suddenly stops.
+
+This issue is also noted in the [Gemini documentation](https://ai.google.dev/gemini-api/docs/code-execution#limitations), currently I have not thought of a way to ensure the quality of the calculations so I accept it as a problem for the future.
 
 ## Getting Started
 
