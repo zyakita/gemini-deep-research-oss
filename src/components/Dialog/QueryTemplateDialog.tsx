@@ -87,7 +87,7 @@ const QueryTemplateDialog = memo(function QueryTemplateDialog({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>{editingTemplate ? 'Edit Template' : 'Add New Template'}</DialogTitle>
 
       <DialogContent>
@@ -132,10 +132,12 @@ const QueryTemplateDialog = memo(function QueryTemplateDialog({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
+        <Button className="text-gray-300" onClick={handleClose}>
+          Cancel
+        </Button>
         <Button
           onClick={handleSave}
-          variant="contained"
+          // variant="contained"
           disabled={!title.trim() || !content.trim()}
         >
           {editingTemplate ? 'Update' : 'Save'} Template

@@ -20,6 +20,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import moment from 'moment';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { useGlobalStore } from '../../stores/global';
 import { useQueryLibraryStore } from '../../stores/queryLibrary';
@@ -205,8 +206,12 @@ const QueryLibraryDialog = memo(function QueryLibraryDialog() {
                                 variant="outlined"
                               />
                             )}
-                            <Typography variant="caption" color="text.secondary">
-                              {new Date(template.createdAt).toLocaleDateString()}
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              className="text-xs"
+                            >
+                              {moment(template.createdAt).format('ll')}
                             </Typography>
                           </Box>
                         </Box>

@@ -2,8 +2,8 @@
 id: builtin-startup-analysis
 title: Startup Investment Analysis
 isBuiltIn: true
-createdAt: 2025-01-01T00:00:00Z
-updatedAt: 2025-01-01T00:00:00Z
+createdAt: 2025-08-20T00:00:00Z
+updatedAt: 2025-08-20T00:00:00Z
 ---
 
 Evaluate [Startup Name] as a potential investment opportunity:

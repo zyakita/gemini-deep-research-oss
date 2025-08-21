@@ -2,13 +2,13 @@
 id: builtin-stock-investment-thesis
 title: Stock Investment Thesis & Valuation
 isBuiltIn: true
-createdAt: 2025-01-03T00:00:00Z
-updatedAt: 2025-01-03T00:00:00Z
+createdAt: 2025-08-20T02:00:00Z
+updatedAt: 2025-08-20T01:00:00Z
 ---
 
 Create a comprehensive investment thesis for [Company Name] ([Stock Code]).
 
-Core Thesis (Variant Perception):
+Core Thesis:
 
 - Articulate the single most important factor—either an opportunity or a threat—that the market consensus appears to be mispricing or overlooking.
 

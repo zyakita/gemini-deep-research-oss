@@ -2,8 +2,8 @@
 id: builtin-stock-business-management-profile
 title: Stock Business & Management Profile
 isBuiltIn: true
-createdAt: 2025-01-02T00:00:00Z
-updatedAt: 2025-01-02T00:00:00Z
+createdAt: 2025-08-20T01:00:00Z
+updatedAt: 2025-08-20T01:00:00Z
 ---
 
 Create a detailed business and management profile for [Company Name] ([Stock Code]).

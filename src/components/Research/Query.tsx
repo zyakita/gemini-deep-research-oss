@@ -77,7 +77,7 @@ function ResearchQuery() {
               size="small"
               startIcon={<LibraryBooksIcon />}
               onClick={() => setOpenQueryLibrary(true)}
-              disabled={isGeneratingQnA}
+              disabled={isGeneratingQnA || isCompleted}
             >
               Library
             </Button>

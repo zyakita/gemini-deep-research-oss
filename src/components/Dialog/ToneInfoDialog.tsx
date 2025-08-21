@@ -19,7 +19,7 @@ function ToneInfoDialog({ open, onClose }: ToneInfoDialogProps) {
   const selectedTone = tones.find(tone => tone.slug === reportTone);
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle
         sx={{ m: 0, p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
       >
@@ -36,7 +36,7 @@ function ToneInfoDialog({ open, onClose }: ToneInfoDialogProps) {
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      <DialogContent dividers sx={{ p: 3 }}>
+      <DialogContent dividers className="max-h-96 overflow-y-auto">
         <div className="space-y-4">
           {tones.map(tone => (
             <Paper
@@ -53,20 +53,20 @@ function ToneInfoDialog({ open, onClose }: ToneInfoDialogProps) {
                 transition: 'all 0.2s ease-in-out',
               }}
             >
-              <Typography variant="h6" color="primary" gutterBottom>
+              <Typography variant="body1" className="font-medium" color="primary" gutterBottom>
                 {tone.name}
                 {selectedTone?.slug === tone.slug && (
                   <Chip label="Selected" size="small" color="primary" sx={{ ml: 1 }} />
                 )}
               </Typography>
-              <Typography variant="body1" paragraph sx={{ mb: 2 }}>
+              <Typography variant="body2" paragraph sx={{ mb: 2 }}>
                 {tone.describe}
               </Typography>
               <div>
-                <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 600 }}>
+                <Typography variant="subtitle2" color="text.secondary">
                   Best used for:
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="caption" color="text.secondary">
                   {tone.usage}
                 </Typography>
               </div>
