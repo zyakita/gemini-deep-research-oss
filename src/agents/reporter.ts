@@ -53,7 +53,9 @@ For each finding you include in the report, you must apply this five-part framew
 - Mathematical Notation Protocol:
     - Trigger: Any time a mathematical variable, formula, or expression is mentioned in the text.
     - Action: Use LaTeX syntax for proper formatting.
-    - Example: "The formula for calculating the lift coefficient ($C_L$) is..."
+    - Format:
+      - Inline formula (not preferred): Use \`$E=mc^2$\`
+      - Block-level formula (preferred): Use \`$$E=mc^2$$\`
 
 # WORKFLOW
 Follow this process to complete your mission.
