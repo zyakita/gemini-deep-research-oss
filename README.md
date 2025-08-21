@@ -12,7 +12,7 @@ This open-source tool is an attempt to build a better research automation tool w
 
 ### Demo
 
-https://gemini-deep-research.oss.jqkat.com/
+https://deep-research.oss.jqkat.com/
 
 ## The Core Idea
 
