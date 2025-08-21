@@ -261,7 +261,7 @@ function ResearchReport() {
                 />
               </div>
             ) : (
-              <div className="max-h-96 overflow-y-auto p-6">
+              <div className="relative max-h-96 overflow-y-auto p-6">
                 <ReportRender finalReport={finalReport} />
               </div>
             )}
