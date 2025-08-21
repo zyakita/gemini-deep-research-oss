@@ -4,6 +4,8 @@
 [![Gemini](https://img.shields.io/badge/Gemini-8E75B2?style=flat&logo=googlegemini&logoColor=white)](https://ai.google.dev/)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=Vite&logoColor=white)](https://vite.dev/)
 
+> This project is an independent, open-source initiative and is not affiliated with, endorsed by, or sponsored by Google or the Google Gemini team. It is built by the community for the community.
+
 This open-source tool is an attempt to build a better research automation tool with Google's Gemini models. Instead of the usual single-pass search, it uses a team of AI agents to perform a multi-step, iterative research process. The idea is to start broad, then systematically drill down into the details to produce a comprehensive report.
 
 <img width="1542" height="991" alt="frame_safari_light" src="https://github.com/user-attachments/assets/dc056665-4559-40f5-b4d6-fbf68d9be4da" />
