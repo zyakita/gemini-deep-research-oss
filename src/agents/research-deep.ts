@@ -62,13 +62,15 @@ type researchDeepAgentResponse = {
   }[];
 };
 
-async function runResearchDeepAgent({
-  googleGenAI,
-  model,
-  thinkingBudget,
-  userContent,
-  addLog,
-}: AgentInput) {
+async function runResearchDeepAgent(
+  { googleGenAI, model, thinkingBudget, userContent, addLog }: AgentInput,
+  abortController?: AbortController | null
+) {
+  // Check if operation was cancelled before starting
+  if (abortController?.signal.aborted) {
+    throw new Error('AbortError');
+  }
+
   let jsonContent = '';
 
   const response = await googleGenAI.models.generateContentStream({
@@ -100,11 +102,17 @@ async function runResearchDeepAgent({
         },
         required: ['tasks'],
       },
+      abortSignal: abortController?.signal,
     },
     contents: [userContent],
   });
 
   for await (const chunk of response) {
+    // Check if operation was cancelled during streaming
+    if (abortController?.signal.aborted) {
+      throw new Error('AbortError');
+    }
+
     const text = chunk?.candidates?.[0].content?.parts?.[0].text || '';
     const isThought = chunk?.candidates?.[0].content?.parts?.[0]?.thought || false;
 
@@ -113,6 +121,11 @@ async function runResearchDeepAgent({
     } else {
       jsonContent += text;
     }
+  }
+
+  // Check if operation was cancelled after generation
+  if (abortController?.signal.aborted) {
+    throw new Error('AbortError');
   }
 
   return JSON.parse(jsonContent || '') as researchDeepAgentResponse;

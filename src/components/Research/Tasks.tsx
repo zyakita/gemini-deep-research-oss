@@ -4,6 +4,7 @@ import AutorenewIcon from '@mui/icons-material/Autorenew';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
+import StopIcon from '@mui/icons-material/Stop';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -33,9 +34,10 @@ function ResearchTasks() {
     researchCompletedEarly,
     maxTierReached,
     setCurrentStep,
+    isCancelling,
   } = useTaskStore();
   const { depth, wide } = useSettingStore();
-  const { generateFinalReport } = useDeepResearch();
+  const { generateFinalReport, cancelResearchTasks } = useDeepResearch();
 
   const isCompleted: boolean = finalReport.length > 0;
   const isLoading: boolean = isGeneratingFinalReport;
@@ -85,6 +87,10 @@ function ResearchTasks() {
     // Update stepper to final step when starting report generation
     setCurrentStep(4);
     generateFinalReport();
+  };
+
+  const handleStopResearchTasks = () => {
+    cancelResearchTasks();
   };
 
   return (
@@ -366,40 +372,7 @@ function ResearchTasks() {
                                 </div>
                                 <div className="max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white p-4">
                                   <div className="prose prose-sm max-w-none text-gray-700">
-                                    <Markdown
-                                      remarkPlugins={[remarkGfm]}
-                                      components={{
-                                        h1: ({ children }) => (
-                                          <h1 className="mb-2 text-lg font-bold text-gray-800">
-                                            {children}
-                                          </h1>
-                                        ),
-                                        h2: ({ children }) => (
-                                          <h2 className="mb-2 text-base font-semibold text-gray-800">
-                                            {children}
-                                          </h2>
-                                        ),
-                                        h3: ({ children }) => (
-                                          <h3 className="mb-1 text-sm font-medium text-gray-800">
-                                            {children}
-                                          </h3>
-                                        ),
-                                        p: ({ children }) => (
-                                          <p className="mb-2 leading-relaxed">{children}</p>
-                                        ),
-                                        ul: ({ children }) => (
-                                          <ul className="mb-2 space-y-1 pl-4">{children}</ul>
-                                        ),
-                                        ol: ({ children }) => (
-                                          <ol className="mb-2 space-y-1 pl-4">{children}</ol>
-                                        ),
-                                        li: ({ children }) => (
-                                          <li className="text-gray-700">{children}</li>
-                                        ),
-                                      }}
-                                    >
-                                      {task.learning}
-                                    </Markdown>
+                                    <Markdown remarkPlugins={[remarkGfm]}>{task.learning}</Markdown>
                                   </div>
                                 </div>
                                 {task.groundingChunks?.length && (
@@ -510,6 +483,27 @@ function ResearchTasks() {
         )}
       </CardContent>
 
+      {!hasTasks && isGeneratingTasks && (
+        <CardActions className="px-6 pb-4">
+          <div className="flex w-full items-center justify-between">
+            <Typography variant="caption" className="text-gray-500">
+              Generating research tasks...
+            </Typography>
+            <Button
+              variant="outlined"
+              size="medium"
+              startIcon={<StopIcon />}
+              onClick={handleStopResearchTasks}
+              disabled={isCancelling}
+              className="px-4 py-2"
+              color="error"
+            >
+              {isCancelling ? 'Stopping...' : 'Stop Research'}
+            </Button>
+          </div>
+        </CardActions>
+      )}
+
       {hasTasks && (
         <CardActions className="px-6 pb-4">
           <div className="flex w-full items-center justify-between">
@@ -524,17 +518,32 @@ function ResearchTasks() {
                     ? `${completedTasks.length} of ${researchTasks.length} generated tasks completed`
                     : `${completedTasks.length} of ${expectedTotalTasks} expected tasks completed (${researchTasks.length} total tasks)`}
             </Typography>
-            <Button
-              variant="contained"
-              size="medium"
-              startIcon={<AssignmentTurnedInIcon />}
-              loading={isLoading}
-              disabled={!allTasksCompleted || isCompleted}
-              onClick={handleGenerateFinalReport}
-              className="px-6 py-2"
-            >
-              {isLoading ? 'Writing Report...' : 'Write Report'}
-            </Button>
+            <div className="flex gap-2">
+              {isGeneratingTasks && (
+                <Button
+                  variant="outlined"
+                  size="medium"
+                  startIcon={<StopIcon />}
+                  onClick={handleStopResearchTasks}
+                  disabled={isCancelling}
+                  className="px-4 py-2"
+                  color="error"
+                >
+                  {isCancelling ? 'Stopping...' : 'Stop Research'}
+                </Button>
+              )}
+              <Button
+                variant="contained"
+                size="medium"
+                startIcon={<AssignmentTurnedInIcon />}
+                loading={isLoading}
+                disabled={!allTasksCompleted || isCompleted}
+                onClick={handleGenerateFinalReport}
+                className="px-6 py-2"
+              >
+                {isLoading ? 'Writing Report...' : 'Write Report'}
+              </Button>
+            </div>
           </div>
         </CardActions>
       )}

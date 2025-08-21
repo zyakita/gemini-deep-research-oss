@@ -81,12 +81,19 @@ Follow this process to complete your mission.
 
 Note:
   - Matplotlib graphs will automatically be inserted in the right place after you use the codeExecution tool.
+  - DO NOT stop until you have completed the report.
 `;
 
 async function runReporterAgent(
   { googleGenAI, model, thinkingBudget, userContent, addLog, onStreaming }: AgentInput,
-  { tone, minWords }: { tone: string; minWords: number }
+  { tone, minWords }: { tone: string; minWords: number },
+  abortController?: AbortController
 ) {
+  // Check if operation was cancelled before starting
+  if (abortController?.signal.aborted) {
+    throw new Error('AbortError');
+  }
+
   // Find the selected tone from the tones list, fallback to 'journalist-tone'
   const selectedTone = tones.find(t => t.slug === tone) || tones[0];
 
@@ -102,6 +109,7 @@ async function runReporterAgent(
         ],
       },
       tools: [{ codeExecution: {} }],
+      abortSignal: abortController?.signal,
     },
     contents: [
       {
@@ -117,6 +125,11 @@ async function runReporterAgent(
   });
 
   for await (const chunk of response) {
+    // Check if operation was cancelled during streaming
+    if (abortController?.signal.aborted) {
+      throw new Error('AbortError');
+    }
+
     if (!chunk?.candidates) continue;
 
     for (const candidate of chunk.candidates) {

@@ -173,7 +173,7 @@ function useDeepResearch() {
 
   // Generate research tasks
   const generateResearchTasks = useCallback(
-    async (tier: number) => {
+    async (tier: number, abortController?: AbortController | null) => {
       log.process(
         `Starting research task generation for round ${tier}`,
         'system',
@@ -182,6 +182,11 @@ function useDeepResearch() {
 
       const existingTasks = taskStore.getResearchTasksByTier(tier);
       if (existingTasks.length > 0) return;
+
+      // Check if operation was cancelled before starting
+      if (abortController?.signal.aborted) {
+        throw new Error('AbortError');
+      }
 
       try {
         const userContent = buildUserContent({
@@ -198,16 +203,27 @@ function useDeepResearch() {
         const agentName = tier === 1 ? 'research-lead-agent' : 'research-deep-agent';
         const { tasks } =
           tier === 1
-            ? await runResearchLeadAgent({
-                ...commonAgentParams,
-                model: settingStore.coreModel,
-                userContent,
-              })
-            : await runResearchDeepAgent({
-                ...commonAgentParams,
-                model: settingStore.coreModel,
-                userContent,
-              });
+            ? await runResearchLeadAgent(
+                {
+                  ...commonAgentParams,
+                  model: settingStore.coreModel,
+                  userContent,
+                },
+                abortController
+              )
+            : await runResearchDeepAgent(
+                {
+                  ...commonAgentParams,
+                  model: settingStore.coreModel,
+                  userContent,
+                },
+                abortController
+              );
+
+        // Check if operation was cancelled after agent call
+        if (abortController?.signal.aborted) {
+          throw new Error('AbortError');
+        }
 
         // Process tasks in parallel
         const taskPromises = tasks.map(async task => {
@@ -255,12 +271,17 @@ function useDeepResearch() {
 
   // Run research tasks
   const runResearchTasks = useCallback(
-    async (tier: number) => {
+    async (tier: number, abortController?: AbortController | null) => {
       const maxConcurrency = settingStore.parallelSearch || 1;
       const existingTasks = taskStore.getResearchTasksByTier(tier);
       const tasksToRun = existingTasks.filter(t => t.learning === '');
 
       if (tasksToRun.length === 0) return;
+
+      // Check if operation was cancelled before starting
+      if (abortController?.signal.aborted) {
+        throw new Error('AbortError');
+      }
 
       log.process(
         `Executing ${tasksToRun.length} research tasks for round ${tier}`,
@@ -273,6 +294,16 @@ function useDeepResearch() {
         await processConcurrent(
           tasksToRun,
           async (task: ResearchTask) => {
+            // Check if operation was cancelled before starting each task
+            if (abortController?.signal.aborted) {
+              log.warning(
+                `Research task cancelled: ${task.title}`,
+                'researcher-agent',
+                'research-execution'
+              );
+              throw new Error('AbortError');
+            }
+
             log.startResearch(task.title);
             taskStore.updateResearchTask({ ...task, processing: true });
 
@@ -282,7 +313,19 @@ function useDeepResearch() {
                 googleGenAI,
                 model: settingStore.taskModel,
                 thinkingBudget: settingStore.thinkingBudget,
+                abortController,
               });
+
+              // Check if cancelled after research completes
+              if (abortController?.signal.aborted) {
+                log.warning(
+                  `Research task cancelled after completion: ${task.title}`,
+                  'researcher-agent',
+                  'research-execution'
+                );
+                taskStore.updateResearchTask({ ...task, processing: false });
+                throw new Error('AbortError');
+              }
 
               taskStore.updateResearchTask({
                 ...task,
@@ -303,6 +346,12 @@ function useDeepResearch() {
               return { taskId: task.id, success: true };
             } catch (error) {
               taskStore.updateResearchTask({ ...task, processing: false });
+
+              // Don't log errors for cancelled operations
+              if (error instanceof Error && error.message === 'AbortError') {
+                throw error;
+              }
+
               log.error(
                 `Failed research task: ${task.title}: ${error}`,
                 'researcher-agent',
@@ -320,6 +369,19 @@ function useDeepResearch() {
           'research-execution'
         );
       } catch (error) {
+        // Check if this was a cancellation
+        if (
+          error instanceof Error &&
+          (error.message === 'AbortError' || error.name === 'AbortError')
+        ) {
+          log.warning(
+            `Research tasks for round ${tier} were cancelled`,
+            'system',
+            'research-execution'
+          );
+          return;
+        }
+
         log.error(
           `Failed to run research tasks for round ${tier}: ${error}`,
           'system',
@@ -341,21 +403,37 @@ function useDeepResearch() {
 
   // Start research tasks
   const startResearchTasks = useCallback(async () => {
+    // Create abort controller for this research session
+    const abortController = new AbortController();
+    taskStore.setResearchTasksAbortController(abortController);
+
     try {
-      taskStore.resetResearchTasks();
+      // taskStore.resetResearchTasks();
       taskStore.setIsGeneratingResearchTasks(true);
 
       log.startPhase('Research Task Execution');
       log.info(`Research depth: ${settingStore.depth} rounds`, 'system', 'research-planning');
 
       for (let tier = 1; tier <= settingStore.depth; tier++) {
+        // Check if operation was cancelled
+        if (abortController.signal.aborted) {
+          log.warning('Research task execution was cancelled', 'system', 'research-planning');
+          return;
+        }
+
         log.process(
           `Processing round ${tier} of ${settingStore.depth}`,
           'system',
           'research-planning'
         );
 
-        await generateResearchTasks(tier);
+        await generateResearchTasks(tier, abortController);
+
+        // Check if operation was cancelled after generating tasks
+        if (abortController.signal.aborted) {
+          log.warning('Research task execution was cancelled', 'system', 'research-planning');
+          return;
+        }
 
         // Check if any tasks were actually generated for this round
         const tierTasks = taskStore.getResearchTasksByTier(tier);
@@ -371,21 +449,38 @@ function useDeepResearch() {
         }
 
         taskStore.setMaxTierReached(tier);
-        await runResearchTasks(tier);
+        await runResearchTasks(tier, abortController);
+
+        // Check if operation was cancelled after running tasks
+        if (abortController.signal.aborted) {
+          log.warning('Research task execution was cancelled', 'system', 'research-planning');
+          return;
+        }
       }
 
       log.endPhase('Research Task Execution');
     } catch (error) {
+      // Check if this is an abort error
+      if (error instanceof Error && error.name === 'AbortError') {
+        log.warning('Research task execution was cancelled by user', 'system', 'research-planning');
+        return;
+      }
+
       log.error(`Failed research task execution: ${error}`, 'system', 'research-planning');
       taskStore.setIsGeneratingResearchTasks(false);
       throw error;
     } finally {
       taskStore.setIsGeneratingResearchTasks(false);
+      taskStore.setResearchTasksAbortController(null);
     }
   }, [taskStore, settingStore.depth, generateResearchTasks, runResearchTasks, log]);
 
   // Generate final report
   const generateFinalReport = useCallback(async () => {
+    // Create abort controller for this report generation
+    const abortController = new AbortController();
+    taskStore.setFinalReportAbortController(abortController);
+
     let streamingHandler: ReturnType<typeof createSmoothStreamingHandler> | null = null;
 
     try {
@@ -397,8 +492,8 @@ function useDeepResearch() {
       streamingHandler = createSmoothStreamingHandler(
         streamedText => taskStore.updateFinalReport(streamedText),
         {
-          baseCharactersPerSecond: 500,
-          maxChunkSize: 300,
+          baseCharactersPerSecond: 1000,
+          maxChunkSize: 600,
           adaptiveSpeed: true,
           debounceMs: 16,
         }
@@ -415,26 +510,56 @@ function useDeepResearch() {
         includeFiles: true,
       });
 
+      // Check if operation was cancelled before starting
+      if (abortController.signal.aborted) {
+        log.warning('Final report generation was cancelled', 'reporter-agent', 'generation');
+        return;
+      }
+
       await runReporterAgent(
         {
           ...commonAgentParams,
           model: settingStore.coreModel,
           userContent,
-          onStreaming: chunk => streamingHandler?.addChunk(chunk),
+          onStreaming: chunk => {
+            // Check if cancelled during streaming
+            if (abortController.signal.aborted) {
+              return;
+            }
+            streamingHandler?.addChunk(chunk);
+          },
         },
         {
           tone: settingStore.reportTone,
           minWords: settingStore.minWords,
-        }
+        },
+        abortController
       );
+
+      // Final check if operation was cancelled
+      if (abortController.signal.aborted) {
+        log.warning('Final report generation was cancelled', 'reporter-agent', 'generation');
+        return;
+      }
 
       log.endPhase('Final Report Generation');
     } catch (error) {
+      // Check if this is an abort error
+      if (error instanceof Error && error.name === 'AbortError') {
+        log.warning(
+          'Final report generation was cancelled by user',
+          'reporter-agent',
+          'generation'
+        );
+        return;
+      }
+
       log.error(`Failed to generate final report: ${error}`, 'reporter-agent', 'generation');
       throw error;
     } finally {
       streamingHandler?.finish();
       taskStore.setIsGeneratingFinalReport(false);
+      taskStore.setFinalReportAbortController(null);
     }
   }, [commonAgentParams, taskStore, settingStore, log]);
 
@@ -559,6 +684,9 @@ function useDeepResearch() {
     deleteFile,
     deleteAllFiles,
     resetWithFiles,
+    // Cancellation methods
+    cancelResearchTasks: taskStore.cancelResearchTasks,
+    cancelFinalReport: taskStore.cancelFinalReport,
   };
 }
 

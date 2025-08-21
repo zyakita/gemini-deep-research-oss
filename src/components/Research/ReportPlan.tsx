@@ -3,6 +3,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import EditDocumentIcon from '@mui/icons-material/EditDocument';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import SaveIcon from '@mui/icons-material/Save';
+import StopIcon from '@mui/icons-material/Stop';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -18,13 +19,20 @@ import useDeepResearch from '../../hooks/useDeepResearch';
 import { useTaskStore } from '../../stores/task';
 
 function ResearchReportPlan() {
-  const { reportPlan, updateReportPlan, isGeneratingResearchTasks, researchTasks, setCurrentStep } =
-    useTaskStore();
-  const { startResearchTasks } = useDeepResearch();
+  const {
+    reportPlan,
+    updateReportPlan,
+    isGeneratingResearchTasks,
+    researchTasks,
+    setCurrentStep,
+    isCancelling,
+  } = useTaskStore();
+  const { startResearchTasks, cancelResearchTasks } = useDeepResearch();
   const [isEditing, setIsEditing] = useState(false);
   const [editedPlan, setEditedPlan] = useState('');
 
-  const isCompleted = researchTasks && researchTasks.length > 0;
+  const hasFailedTasks = researchTasks?.some(task => !task.learning && task?.processing === false);
+  const isCompleted = researchTasks && researchTasks.length > 0 && !hasFailedTasks;
   const isLoading = isGeneratingResearchTasks;
   const hasPlan = reportPlan && reportPlan.length > 0;
 
@@ -47,6 +55,10 @@ function ResearchReportPlan() {
   const handleCancelEdit = () => {
     setEditedPlan('');
     setIsEditing(false);
+  };
+
+  const handleStopResearchTasks = () => {
+    cancelResearchTasks();
   };
 
   return (
@@ -170,17 +182,32 @@ function ResearchReportPlan() {
                 ? 'Research tasks have been generated and are being executed.'
                 : 'Plan is ready. Click to start the research process.'}
             </Typography>
-            <Button
-              variant="contained"
-              size="medium"
-              startIcon={<PlayArrowIcon />}
-              loading={isGeneratingResearchTasks}
-              disabled={!reportPlan || isCompleted}
-              onClick={handleStartResearchTasks}
-              className="px-6 py-2"
-            >
-              {isLoading ? 'Creating Tasks...' : 'Start Research'}
-            </Button>
+            <div className="flex gap-2">
+              {isLoading && (
+                <Button
+                  variant="outlined"
+                  size="medium"
+                  startIcon={<StopIcon />}
+                  onClick={handleStopResearchTasks}
+                  disabled={isCancelling}
+                  className="px-4 py-2"
+                  color="error"
+                >
+                  {isCancelling ? 'Stopping...' : 'Stop Research'}
+                </Button>
+              )}
+              <Button
+                variant="contained"
+                size="medium"
+                startIcon={<PlayArrowIcon />}
+                loading={isLoading}
+                disabled={!reportPlan || isCompleted}
+                onClick={handleStartResearchTasks}
+                className="px-6 py-2"
+              >
+                {hasFailedTasks ? 'Resume Research' : 'Start Research'}
+              </Button>
+            </div>
           </div>
         </CardActions>
       )}

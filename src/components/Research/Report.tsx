@@ -7,6 +7,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SaveIcon from '@mui/icons-material/Save';
+import StopIcon from '@mui/icons-material/Stop';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -30,8 +31,14 @@ import { countWords, formatWordCountResults } from '../../utils/word-count';
 import ReportRender from './ReportRender';
 
 function ResearchReport() {
-  const { generateFinalReport } = useDeepResearch();
-  const { id: taskID, finalReport, isGeneratingFinalReport, updateFinalReport } = useTaskStore();
+  const { generateFinalReport, cancelFinalReport } = useDeepResearch();
+  const {
+    id: taskID,
+    finalReport,
+    isGeneratingFinalReport,
+    updateFinalReport,
+    isCancelling,
+  } = useTaskStore();
   const [isEditing, setIsEditing] = useState(false);
   const [editedReport, setEditedReport] = useState('');
   const [downloadMenuAnchor, setDownloadMenuAnchor] = useState<null | HTMLElement>(null);
@@ -201,7 +208,23 @@ function ResearchReport() {
           </Box>
         )}
 
-        {isLoading && (
+        {isLoading && !finalReport && (
+          <>
+            <Box className="py-8 text-center">
+              <div className="animate-pulse">
+                <DescriptionIcon className="mb-2 text-5xl text-blue-500" />
+                <Typography className="font-medium text-blue-600">
+                  Generating comprehensive report...
+                </Typography>
+                <Typography className="mt-1 text-sm text-gray-500">
+                  This may take a few moments
+                </Typography>
+              </div>
+            </Box>
+          </>
+        )}
+
+        {isLoading && finalReport && (
           <Box className="py-8 text-center">
             <div className="animate-pulse">
               <DescriptionIcon className="mb-2 text-5xl text-blue-500" />
@@ -262,6 +285,27 @@ function ResearchReport() {
           </div>
         )}
       </CardContent>
+
+      {isLoading && !finalReport && (
+        <CardActions className="px-6 pb-4">
+          <div className="flex w-full items-center justify-between">
+            <Typography variant="caption" className="text-blue-600">
+              Report is being generated... Please wait for completion.
+            </Typography>
+            <Button
+              variant="outlined"
+              size="medium"
+              startIcon={<StopIcon />}
+              onClick={() => cancelFinalReport()}
+              disabled={isCancelling}
+              className="px-4 py-2"
+              color="error"
+            >
+              {isCancelling ? 'Stopping...' : 'Stop Report'}
+            </Button>
+          </div>
+        </CardActions>
+      )}
 
       {isCompleted && !isEditing && (
         <CardActions className="px-6 pb-4">
@@ -329,6 +373,17 @@ function ResearchReport() {
               <Button
                 variant="outlined"
                 size="medium"
+                startIcon={<StopIcon />}
+                onClick={() => cancelFinalReport()}
+                disabled={isCancelling}
+                className="px-4 py-2"
+                color="error"
+              >
+                {isCancelling ? 'Stopping...' : 'Stop Report'}
+              </Button>
+              <Button
+                variant="outlined"
+                size="medium"
                 startIcon={<DownloadIcon />}
                 onClick={handleDownloadClick}
                 className="px-4 py-2"
@@ -351,20 +406,15 @@ function ResearchReport() {
         <DialogTitle id="regenerate-dialog-title">Re-generate Report?</DialogTitle>
         <DialogContent>
           <DialogContentText id="regenerate-dialog-description">
-            This will replace the current report with a newly generated one. Any unsaved edits will
-            be lost. Are you sure you want to continue?
+            This will replace the current report with a newly generated one. Are you sure you want
+            to continue?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleRegenerateCancel} color="inherit">
             Cancel
           </Button>
-          <Button
-            onClick={handleRegenerateConfirm}
-            color="primary"
-            variant="contained"
-            startIcon={<RefreshIcon />}
-          >
+          <Button onClick={handleRegenerateConfirm} color="warning">
             Re-generate
           </Button>
         </DialogActions>

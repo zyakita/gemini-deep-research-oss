@@ -47,6 +47,11 @@ export interface TaskStore {
 
   // Global states
   isResetting: boolean;
+
+  // Cancellation states
+  researchTasksAbortController: AbortController | null;
+  finalReportAbortController: AbortController | null;
+  isCancelling: boolean;
 }
 
 export interface TaskActions {
@@ -98,6 +103,13 @@ export interface TaskActions {
   // Global state actions
   setIsResetting: (isResetting: boolean) => void;
 
+  // Cancellation actions
+  setResearchTasksAbortController: (controller: AbortController | null) => void;
+  setFinalReportAbortController: (controller: AbortController | null) => void;
+  setIsCancelling: (isCancelling: boolean) => void;
+  cancelResearchTasks: () => void;
+  cancelFinalReport: () => void;
+
   // Utility actions
   clear: () => void;
   reset: () => void;
@@ -148,6 +160,11 @@ const defaultValues: TaskStore = {
 
   // Global states
   isResetting: false,
+
+  // Cancellation states
+  researchTasksAbortController: null,
+  finalReportAbortController: null,
+  isCancelling: false,
 };
 
 export const useTaskStore = create(
@@ -337,6 +354,39 @@ export const useTaskStore = create(
       // Global state actions
       setIsResetting: (isResetting: boolean) => set({ isResetting }),
 
+      // Cancellation actions
+      setResearchTasksAbortController: (controller: AbortController | null) =>
+        set({ researchTasksAbortController: controller }),
+      setFinalReportAbortController: (controller: AbortController | null) =>
+        set({ finalReportAbortController: controller }),
+      setIsCancelling: (isCancelling: boolean) => set({ isCancelling }),
+      cancelResearchTasks: () => {
+        const state = get();
+        if (state.researchTasksAbortController) {
+          set({ isCancelling: true });
+          state.researchTasksAbortController.abort();
+          set({
+            researchTasksAbortController: null,
+            isGeneratingResearchTasks: false,
+            isCancelling: false,
+            // researchTasks: [],
+            // sources: [],
+          });
+        }
+      },
+      cancelFinalReport: () => {
+        const state = get();
+        if (state.finalReportAbortController) {
+          set({ isCancelling: true });
+          state.finalReportAbortController.abort();
+          set({
+            finalReportAbortController: null,
+            isGeneratingFinalReport: false,
+            isCancelling: false,
+          });
+        }
+      },
+
       // Utility actions
       clear: () =>
         set({
@@ -364,6 +414,10 @@ export const useTaskStore = create(
           isGeneratingReportPlan: false,
           isGeneratingResearchTasks: false,
           isGeneratingFinalReport: false,
+          // Clear cancellation states
+          researchTasksAbortController: null,
+          finalReportAbortController: null,
+          isCancelling: false,
         }),
       reset: () => set(defaultValues),
 

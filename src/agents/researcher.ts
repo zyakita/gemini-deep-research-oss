@@ -56,6 +56,7 @@ type researcherAgentInput = {
   googleGenAI: GoogleGenAI;
   model: string;
   thinkingBudget: number;
+  abortController?: AbortController | null;
 };
 
 async function runResearcherAgent({
@@ -63,7 +64,13 @@ async function runResearcherAgent({
   googleGenAI,
   model,
   thinkingBudget,
+  abortController,
 }: researcherAgentInput) {
+  // Check if operation was cancelled before starting
+  if (abortController?.signal.aborted) {
+    throw new Error('AbortError');
+  }
+
   const response = await googleGenAI.models.generateContent({
     model,
     config: {
@@ -76,6 +83,7 @@ async function runResearcherAgent({
         ],
       },
       tools: [{ googleSearch: {} }],
+      abortSignal: abortController?.signal,
     },
     contents: [
       {
@@ -83,6 +91,11 @@ async function runResearcherAgent({
       },
     ],
   });
+
+  // Check if operation was cancelled after generation
+  if (abortController?.signal.aborted) {
+    throw new Error('AbortError');
+  }
 
   const groundingChunks = [];
   const webSearchQueries = [];
