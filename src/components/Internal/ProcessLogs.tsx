@@ -6,6 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { useEffect, useRef } from 'react';
+import { isMobile } from 'react-device-detect';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useGlobalStore } from '../../stores/global';
@@ -109,7 +110,9 @@ function ProcessLogs() {
     // Minimized bar in bottom left corner with status indicators
     return (
       <Paper
-        className="fixed bottom-4 left-4 z-50 cursor-pointer rounded-lg bg-blue-700 text-white shadow-md transition-shadow hover:bg-blue-800 hover:shadow-lg print:hidden"
+        className={`fixed z-50 cursor-pointer rounded-lg bg-blue-700 text-white shadow-md transition-shadow hover:bg-blue-800 hover:shadow-lg print:hidden ${
+          isMobile ? 'right-4 bottom-4 left-4' : 'bottom-4 left-4'
+        }`}
         onClick={handleToggle}
       >
         <Box className="flex items-center gap-2 px-3 py-2">
@@ -133,9 +136,19 @@ function ProcessLogs() {
 
   // Expanded chat-box size window
   return (
-    <Paper className="fixed bottom-4 left-4 z-50 flex h-[600px] w-[500px] flex-col rounded-lg border border-gray-300 bg-white shadow-lg print:hidden">
+    <Paper
+      className={`fixed z-50 flex flex-col border border-gray-300 bg-white shadow-lg print:hidden ${
+        isMobile
+          ? 'inset-0 h-full w-full rounded-none'
+          : 'bottom-4 left-4 h-[600px] w-[500px] rounded-lg'
+      }`}
+    >
       {/* Header */}
-      <Box className="flex flex-shrink-0 items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3">
+      <Box
+        className={`flex flex-shrink-0 items-center justify-between border-b border-gray-200 bg-gray-50 ${
+          isMobile ? 'px-4 py-4' : 'px-4 py-3'
+        }`}
+      >
         <Box className="flex items-center gap-2">
           <TerminalIcon fontSize="small" color="primary" />
           <Typography variant="h6" className="font-medium">
@@ -143,15 +156,21 @@ function ProcessLogs() {
           </Typography>
           {errorCount > 0 && <Chip label={errorCount} size="small" color="error" />}
         </Box>
-        <IconButton size="small" onClick={handleMinimize} className="text-gray-500">
-          <CloseIcon fontSize="small" />
+        <IconButton
+          size={isMobile ? 'medium' : 'small'}
+          onClick={handleMinimize}
+          className={`text-gray-500 ${isMobile ? 'p-2' : ''}`}
+        >
+          <CloseIcon fontSize={isMobile ? 'medium' : 'small'} />
         </IconButton>
       </Box>
 
       {/* Content - Scrollable Area */}
       <Box
         ref={scrollRef}
-        className="max-h-[540px] flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-2 font-mono"
+        className={`flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 font-mono ${
+          isMobile ? 'max-h-none p-4' : 'max-h-[540px] p-2'
+        }`}
         onWheel={e => {
           e.stopPropagation();
         }}
@@ -175,7 +194,7 @@ function ProcessLogs() {
                 <Paper
                   key={log.id}
                   elevation={0}
-                  className="rounded p-6"
+                  className={`rounded ${isMobile ? 'p-4' : 'p-6'}`}
                   style={{
                     backgroundColor: colors.bg,
                     border: `${colors.borderWidth} solid ${colors.border}`,

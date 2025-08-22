@@ -11,6 +11,7 @@ import Stepper from '@mui/material/Stepper';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import { useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
 import { useTaskStore } from '../../stores/task';
 
 // Custom styled connector
@@ -67,8 +68,8 @@ function ResearchStepper() {
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      const shouldBeSticky = scrollY > 100; // Start sticky after 100px scroll
-      const shouldBeCompact = scrollY > 100; // Start compact after 200px scroll
+      const shouldBeSticky = scrollY > (isMobile ? 50 : 100); // Start sticky earlier on mobile
+      const shouldBeCompact = scrollY > (isMobile ? 50 : 100); // Start compact earlier on mobile
 
       setIsSticky(shouldBeSticky);
       setIsCompact(shouldBeCompact);
@@ -112,7 +113,7 @@ function ResearchStepper() {
   const handleStepClick = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      const offset = isSticky ? 100 : 20; // Account for sticky header height
+      const offset = isSticky ? (isMobile ? 80 : 100) : 20; // Adjust offset for mobile sticky header
       const elementPosition = element.offsetTop - offset;
       window.scrollTo({
         top: elementPosition,
@@ -124,17 +125,28 @@ function ResearchStepper() {
   return (
     <>
       {/* Spacer to prevent layout shift when component becomes sticky */}
-      {isSticky && <div className={`transition-all duration-300 ${isCompact ? 'h-20' : 'h-32'}`} />}
+      {isSticky && (
+        <div
+          className={`transition-all duration-300 ${
+            isCompact ? (isMobile ? 'h-16' : 'h-20') : isMobile ? 'h-24' : 'h-32'
+          }`}
+        />
+      )}
 
       <Box
         className={`border border-gray-200 bg-white shadow-sm transition-all duration-300 ${
           isSticky
-            ? 'fixed top-0 right-0 left-0 z-50 mx-auto max-w-full bg-white/95 shadow-lg backdrop-blur-sm'
-            : 'mb-8 rounded-lg'
-        } ${isCompact ? 'p-3' : 'p-6'}`}
+            ? `fixed top-0 right-0 left-0 z-50 mx-auto max-w-full bg-white/95 shadow-lg backdrop-blur-sm ${
+                isMobile ? 'px-2' : ''
+              }`
+            : `mb-8 ${isMobile ? 'mx-2 rounded' : 'rounded-lg'}`
+        } ${isCompact ? (isMobile ? 'p-2' : 'p-3') : isMobile ? 'p-4' : 'p-6'}`}
       >
         {!isCompact && (
-          <Typography variant="h6" className="mb-4 font-semibold text-gray-800">
+          <Typography
+            variant={isMobile ? 'subtitle1' : 'h6'}
+            className={`font-semibold text-gray-800 ${isMobile ? 'mb-3' : 'mb-4'}`}
+          >
             Research Progress
           </Typography>
         )}
@@ -142,9 +154,9 @@ function ResearchStepper() {
         <Stepper
           activeStep={currentStep}
           connector={<CustomConnector />}
-          alternativeLabel={!isCompact}
-          orientation={isCompact ? 'horizontal' : 'horizontal'}
-          className={isCompact ? 'mb-2' : 'mb-4'}
+          alternativeLabel={!isCompact && !isMobile}
+          orientation={isCompact || isMobile ? 'horizontal' : 'horizontal'}
+          className={isCompact ? 'mb-2' : isMobile ? 'mb-3' : 'mb-4'}
         >
           {steps.map((step, index) => {
             const status = getStepStatus(index);
@@ -154,11 +166,17 @@ function ResearchStepper() {
               <Step key={step.label}>
                 <StepLabel
                   onClick={() => handleStepClick(step.sectionId)}
-                  className="cursor-pointer"
+                  className={`cursor-pointer ${isMobile ? 'touch-manipulation' : ''}`}
                   StepIconComponent={() => (
                     <div
-                      className={`flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 ${
-                        isCompact ? 'h-8 w-8' : 'h-12 w-12'
+                      className={`flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 ${
+                        isCompact || isMobile
+                          ? isMobile && isCompact
+                            ? 'h-6 w-6'
+                            : 'h-8 w-8'
+                          : isMobile
+                            ? 'h-10 w-10'
+                            : 'h-12 w-12'
                       } ${
                         status === 'completed'
                           ? 'bg-green-500 text-white hover:bg-green-600'
@@ -167,11 +185,21 @@ function ResearchStepper() {
                             : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
                       }`}
                     >
-                      <IconComponent className={isCompact ? 'text-sm' : 'text-xl'} />
+                      <IconComponent
+                        className={
+                          isCompact || isMobile
+                            ? isMobile && isCompact
+                              ? 'text-xs'
+                              : 'text-sm'
+                            : isMobile
+                              ? 'text-lg'
+                              : 'text-xl'
+                        }
+                      />
                     </div>
                   )}
                 >
-                  {!isCompact && (
+                  {!isCompact && !isMobile && (
                     <>
                       <Typography
                         variant="subtitle2"
@@ -195,16 +223,20 @@ function ResearchStepper() {
                       </Typography> */}
                     </>
                   )}
-                  {isCompact && (
+                  {(isCompact || isMobile) && (
                     <Typography
                       variant="caption"
                       className={`font-medium transition-colors hover:text-blue-600 ${
+                        isMobile ? 'text-xs' : ''
+                      } ${
                         status === 'completed' || status === 'active'
                           ? 'text-gray-800'
                           : 'text-gray-500'
                       }`}
                     >
-                      {step.label}
+                      {isMobile && step.label.length > 8
+                        ? step.label.substring(0, 6) + '...'
+                        : step.label}
                     </Typography>
                   )}
                 </StepLabel>
@@ -214,21 +246,21 @@ function ResearchStepper() {
         </Stepper>
 
         {/* Progress bar */}
-        <Box className="mt-2">
+        <Box className={isMobile ? 'mt-2' : 'mt-2'}>
           <div
             className={`w-full rounded-full bg-gray-200 transition-all duration-300 ${
-              isCompact ? 'h-1' : 'h-2'
+              isCompact ? (isMobile ? 'h-1' : 'h-1') : isMobile ? 'h-1.5' : 'h-2'
             }`}
           >
             <div
               className="rounded-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500 ease-out"
               style={{
                 width: `${Math.min((currentStep / (steps.length - 1)) * 100, 100)}%`,
-                height: isCompact ? '4px' : '8px',
+                height: isCompact ? (isMobile ? '4px' : '4px') : isMobile ? '6px' : '8px',
               }}
             />
           </div>
-          {!isCompact && (
+          {!isCompact && !isMobile && (
             <div className="mt-2 flex justify-between">
               <Typography variant="caption" className="text-gray-500">
                 Step {currentStep} of {steps.length}
@@ -238,11 +270,15 @@ function ResearchStepper() {
               </Typography>
             </div>
           )}
-          {isCompact && (
+          {(isCompact || isMobile) && (
             <div className="mt-1 text-center">
-              <Typography variant="caption" className="text-xs text-gray-500">
+              <Typography
+                variant="caption"
+                className={`text-gray-500 ${isMobile ? 'text-xs' : 'text-xs'}`}
+              >
                 Step {currentStep}/{steps.length} •{' '}
                 {Math.min(Math.round((currentStep / (steps.length - 1)) * 100), 100)}%
+                {isMobile ? '' : ' Complete'}
               </Typography>
             </div>
           )}

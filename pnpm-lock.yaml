@@ -34,6 +34,9 @@ importers:
       react:
         specifier: ^19.1.1 <20.0.0
         version: 19.1.1
+      react-device-detect:
+        specifier: ^2.2.3 <3.0.0
+        version: 2.2.3(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       react-dom:
         specifier: ^19.1.1 <20.0.0
         version: 19.1.1(react@19.1.1)
@@ -3829,6 +3832,15 @@ packages:
       }
     engines: { node: '>=14.18.0' }
 
+  react-device-detect@2.2.3:
+    resolution:
+      {
+        integrity: sha512-buYY3qrCnQVlIFHrC5UcUoAj7iANs/+srdkwsnNjI7anr3Tt7UY6MqNxtMLlr0tMBied0O49UZVK8XKs3ZIiPw==,
+      }
+    peerDependencies:
+      react: '>= 0.14.0'
+      react-dom: '>= 0.14.0'
+
   react-dom@19.1.1:
     resolution:
       {
@@ -4201,6 +4213,13 @@ packages:
         integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==,
       }
     engines: { node: '>=14.17' }
+    hasBin: true
+
+  ua-parser-js@1.0.41:
+    resolution:
+      {
+        integrity: sha512-LbBDqdIC5s8iROCUjMbW1f5dJQTEFB1+KO9ogbvlb3nm9n4YHa5p4KTvFPWvh2Hs8gZMBuiB1/8+pdfe/tDPug==,
+      }
     hasBin: true
 
   ufo@1.6.1:
@@ -6814,6 +6833,12 @@ snapshots:
 
   radash@12.1.1: {}
 
+  react-device-detect@2.2.3(react-dom@19.1.1(react@19.1.1))(react@19.1.1):
+    dependencies:
+      react: 19.1.1
+      react-dom: 19.1.1(react@19.1.1)
+      ua-parser-js: 1.0.41
+
   react-dom@19.1.1(react@19.1.1):
     dependencies:
       react: 19.1.1
@@ -7091,6 +7116,8 @@ snapshots:
       - supports-color
 
   typescript@5.8.3: {}
+
+  ua-parser-js@1.0.41: {}
 
   ufo@1.6.1: {}
 
