@@ -6,16 +6,23 @@ createdAt: 2025-08-20T01:00:00Z
 updatedAt: 2025-08-20T01:00:00Z
 ---
 
-Create a detailed business and management profile for [Company Name] ([Stock Code]).
+Create a comprehensive business and management profile for [Company Name] ([Stock Code]).
 
-Business Model & Economic Moat:
+1. Business Quality & Competitive Position
 
-- Identify the company's primary revenue and profit drivers.
-- Specify the source of its economic moat (competitive advantage).
-- Analyze whether this moat is widening, stable, or shrinking, providing key quantitative or qualitative evidence to support your conclusion.
+- Business Model: Identify primary revenue and profit sources. Describe the key products or services.
+- Industry Landscape: Name the primary competitors. Analyze the key secular trends (tailwinds or headwinds) affecting the industry.
+- Economic Moat:
+  - Source: Specify the source of the competitive advantage (e.g., network effects, cost advantage, intangible assets).
+  - Trajectory: Assess if the moat is widening, stable, or shrinking.
+  - Evidence: Provide quantitative or qualitative data to support the trajectory assessment.
 
-Management Quality & Capital Allocation:
+2. Management & Capital Allocation
 
-- Evaluate the effectiveness and strategic vision of the current leadership team, citing specific actions or results.
-- Analyze the company's capital allocation decisions over the last 3-5 years (including M&A, share buybacks, dividends, and internal reinvestment).
-- Assess if management's actions demonstrate a rational, long-term approach to creating shareholder value.
+- Leadership & Strategy: Evaluate the key executives and their track record. Assess the clarity and execution of the stated strategic vision.
+- Capital Allocation Record (3-5 Years):
+  - Actions: Detail the major capital allocation decisions (M&A, buybacks, dividends, reinvestment).
+  - Analysis: Judge the effectiveness and rationale behind these decisions. Were they value-accretive?
+- Alignment & Incentives:
+  - Ownership: State the level of insider ownership.
+  - Compensation: Examine the executive compensation structure. Does it reward long-term, per-share value creation?

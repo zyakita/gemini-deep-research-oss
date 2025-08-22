@@ -8,18 +8,21 @@ updatedAt: 2025-08-20T01:00:00Z
 
 Create a comprehensive investment thesis for [Company Name] ([Stock Code]).
 
-Core Thesis:
+1. Core Thesis
 
-- Articulate the single most important factor—either an opportunity or a threat—that the market consensus appears to be mispricing or overlooking.
+- Main Argument: State the central investment thesis. What is the single most important driver?
+- Market View: Describe the perspective taken versus the market consensus.
 
-Valuation Analysis:
+2. Valuation
 
-- Provide valuation estimates using three distinct methodologies: one intrinsic (cash-flow based), one relative (market-based), and one based on assets or earnings power.
-- State the resulting average intrinsic value per share.
-- Quantify the margin of safety based on the current market price.
+- Valuation Approach: Select and justify the most appropriate valuation methods for the company.
+- Models & Assumptions: Present the analysis for at least two distinct methods. List key assumptions.
+- Price Target: State the final price target or range. Explain the weighting of the results.
+- Margin of Safety: Calculate the potential upside or downside from the current price.
 
-Recommendation & Key Risks:
+3. Recommendation & Risks
 
-- Verdict: State a clear recommendation: Buy, Hold, or Avoid.
-- Time Horizon: Specify the recommended investment horizon in years.
-- Thesis Breakers: List the top 2-3 specific risks that would fundamentally invalidate your core thesis.
+- Verdict: Provide a clear recommendation: Buy, Hold, or Avoid.
+- Time Horizon: Specify the investment timeline in years.
+- Catalysts: List 1-3 events that could cause the stock to re-rate.
+- Thesis Breakers: Identify 2-3 specific risks that would invalidate the thesis. Include a monitoring plan for each.
