@@ -447,14 +447,14 @@ const SettingDialog = memo(function SettingDialog() {
                 value={depth}
                 onChange={handleDepthChange}
                 min={2}
-                max={5}
+                max={8}
                 step={1}
                 description="What is the ideal number of research rounds to ensure a thorough coverage of a query? First, go broad. Then, go deep."
                 marks={[
                   { value: 2, label: 'Light' },
                   { value: 3, label: 'Medium' },
-                  { value: 4, label: 'Deep' },
-                  { value: 5, label: 'Extensive' },
+                  { value: 5, label: 'Deep' },
+                  { value: 8, label: 'Exhaustive' },
                 ]}
               />
 
