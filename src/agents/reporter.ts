@@ -54,8 +54,8 @@ For each finding you include in the report, you must apply this five-part framew
     - Trigger: Any time a mathematical variable, formula, or expression is mentioned in the text.
     - Action: Use LaTeX syntax for proper formatting.
     - Format:
-      - Inline formula (not preferred): Use \`$E=mc^2$\`
-      - Block-level formula (preferred): Use \`$$E=mc^2$$\`
+      - Inline formula (not preferred, try to avoid): $E=mc^2$
+      - Block-level formula (preferred): $$E=mc^2$$
 
 # WORKFLOW
 Follow this process to complete your mission.
