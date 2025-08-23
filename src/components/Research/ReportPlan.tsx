@@ -23,6 +23,7 @@ function ResearchReportPlan() {
   const {
     reportPlan,
     updateReportPlan,
+    updateFinalReport,
     isGeneratingResearchTasks,
     isGeneratingReportPlan,
     researchTasks,
@@ -70,6 +71,7 @@ function ResearchReportPlan() {
     }
 
     resetResearchTasks();
+    updateFinalReport('');
     startResearchTasks();
   };
 
@@ -208,7 +210,8 @@ function ResearchReportPlan() {
                   {isCancelling ? 'Stopping...' : 'Stop Research'}
                 </Button>
               )}
-              {isCompleted && (
+
+              {isCompleted && !isGeneratingResearchTasks && !hasFailedTasks && (
                 <Button
                   variant="outlined"
                   size="medium"
@@ -221,6 +224,7 @@ function ResearchReportPlan() {
                   Restart Research
                 </Button>
               )}
+
               <Button
                 variant="contained"
                 size="medium"
