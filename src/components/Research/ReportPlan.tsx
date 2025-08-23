@@ -23,6 +23,7 @@ function ResearchReportPlan() {
     reportPlan,
     updateReportPlan,
     isGeneratingResearchTasks,
+    isGeneratingReportPlan,
     researchTasks,
     setCurrentStep,
     isCancelling,
@@ -201,7 +202,7 @@ function ResearchReportPlan() {
                 size="medium"
                 startIcon={<PlayArrowIcon />}
                 loading={isLoading}
-                disabled={!reportPlan || isCompleted}
+                disabled={!reportPlan || isCompleted || isGeneratingReportPlan}
                 onClick={handleStartResearchTasks}
                 className="px-6 py-2"
               >
