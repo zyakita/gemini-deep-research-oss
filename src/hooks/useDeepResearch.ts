@@ -180,6 +180,22 @@ function useDeepResearch() {
         'task-generation'
       );
 
+      // Check if previous rounds have completed
+      if (tier > 1) {
+        const previousTierTasks = taskStore.getResearchTasksByTier(tier - 1);
+        const incompleteTasks = previousTierTasks.filter(t => t.learning === '');
+
+        if (incompleteTasks.length > 0) {
+          // If there are incomplete tasks, we should not proceed with the current round
+          log.info(
+            `Found ${incompleteTasks.length} incomplete tasks from round ${tier - 1}, please complete them before proceeding.`,
+            'system',
+            'task-generation'
+          );
+          return;
+        }
+      }
+
       const existingTasks = taskStore.getResearchTasksByTier(tier);
       if (existingTasks.length > 0) return;
 
