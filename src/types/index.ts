@@ -1,4 +1,4 @@
-import type { Content, GoogleGenAI, GroundingChunk } from '@google/genai';
+import type { Content, GoogleGenAI, GroundingChunk, UrlMetadata } from '@google/genai';
 
 export type LogType =
   | 'info'
@@ -47,6 +47,7 @@ export interface ResearchTask {
   processing?: boolean;
   groundingChunks?: GroundingChunk[];
   webSearchQueries?: string[];
+  urlsMetadata?: UrlMetadata[];
 }
 
 export interface Source {

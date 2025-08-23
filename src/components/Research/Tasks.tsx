@@ -18,12 +18,11 @@ import Divider from '@mui/material/Divider';
 import LinearProgress from '@mui/material/LinearProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import Markdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import useDeepResearch from '../../hooks/useDeepResearch';
 import { useSettingStore } from '../../stores/setting';
 import { useTaskStore } from '../../stores/task';
 import type { ResearchTask } from '../../types';
+import ResearchTasksDetail from './ResearchTaskDetail';
 
 function ResearchTasks() {
   const {
@@ -370,44 +369,7 @@ function ResearchTasks() {
                                     Research Results
                                   </Typography>
                                 </div>
-                                <div className="max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white p-4">
-                                  <div className="prose prose-sm max-w-none text-gray-700">
-                                    <Markdown remarkPlugins={[remarkGfm]}>{task.learning}</Markdown>
-                                  </div>
-                                </div>
-                                {task.groundingChunks?.length && (
-                                  <>
-                                    <div className="mt-3 flex items-center gap-2">
-                                      <Typography
-                                        variant="subtitle2"
-                                        className="font-semibold text-gray-800"
-                                      >
-                                        Grounding
-                                      </Typography>
-                                    </div>
-                                    <div className="max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-white p-4">
-                                      {task.webSearchQueries?.length && (
-                                        <Typography className="mb-2 text-xs text-gray-700">
-                                          Queries: {task.webSearchQueries.join(' | ')}
-                                        </Typography>
-                                      )}
-                                      {task.groundingChunks.map((chunk, index) => (
-                                        <div key={index} className="mb-2">
-                                          <Typography className="line-clamp-1 text-xs text-gray-700">
-                                            {chunk.web?.title || ''} -{' '}
-                                            <a
-                                              href={chunk.web?.uri}
-                                              target="_blank"
-                                              className="text-blue-500 hover:underline"
-                                            >
-                                              {chunk.web?.uri}
-                                            </a>
-                                          </Typography>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </>
-                                )}
+                                <ResearchTasksDetail task={task} />
                               </div>
                             )}
                           </div>

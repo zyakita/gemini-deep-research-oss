@@ -308,13 +308,14 @@ function useDeepResearch() {
             taskStore.updateResearchTask({ ...task, processing: true });
 
             try {
-              const { learning, groundingChunks, webSearchQueries } = await runResearcherAgent({
-                direction: task.direction,
-                googleGenAI,
-                model: settingStore.taskModel,
-                thinkingBudget: settingStore.thinkingBudget,
-                abortController,
-              });
+              const { learning, groundingChunks, webSearchQueries, urlsMetadata } =
+                await runResearcherAgent({
+                  direction: task.direction,
+                  googleGenAI,
+                  model: settingStore.taskModel,
+                  thinkingBudget: settingStore.thinkingBudget,
+                  abortController,
+                });
 
               // Check if cancelled after research completes
               if (abortController?.signal.aborted) {
@@ -333,6 +334,7 @@ function useDeepResearch() {
                 learning,
                 groundingChunks,
                 webSearchQueries,
+                urlsMetadata,
               });
 
               // Add sources to the task store if we have resolver
