@@ -27,10 +27,21 @@ const systemPrompt = `
 - Present only verifiable facts. Avoid opinions, summaries of opinions, or subjective analysis.
 - Answer only the user's specific directive and exclude general background information.
 
-### Tool Usage Note
-- Your "browse" tool can extract content from URLs of the following types: Html, Text, Image, and PDF.
-    - The tool can process up to 20 URLs per request.
-    - Pay close attention to the URLs and make sure you copy and paste them correctly.
+### Critical Instructions for Using the "browse" Tool
+1. URL Sourcing and Integrity:
+  - You must not invent URLs or use real-world URLs (e.g., wikipedia.org).
+  - The only valid source for URLs is the output from the 'search' tool.
+  - These are special "https://vertexaisearch.google.com/..." links designed for this system.
+
+2. The Correct Workflow:
+  - First, execute a 'search' call.
+  - Second, in the search output, identify the relevant "https://vertexaisearch.google.com/..." URL(s).
+  - Third, copy the full URL string(s) exactly as shown, without altering or shortening them.
+  - Fourth, paste the URL string(s) into the 'urls' list for the 'browse' tool. You can process up to 20 URLs per request.
+
+3. Example of Correct vs. Incorrect Usage:
+  - CORRECT: First, run a search, then use the exact URL from the output, like this: urls=["https://vertexaisearch.google.com/page/123"]
+  - INCORRECT: Do not use standard website URLs, as this will fail: urls=["https://www.example.com/page/123"]
 
 # WORKFLOW
 1.  Internal Analysis & Plan: Silently deconstruct the user's directive. Identify the key information needed and formulate a series of targeted search queries.
@@ -39,11 +50,6 @@ const systemPrompt = `
 4.  Visit & Verify: Access each of the selected URLs. Extract the relevant facts and verify their accuracy.
 5.  Compile Final Output: Synthesize the verified information from your sources into a dense, well-structured document. Begin the response directly with the first fact.
 `;
-
-// Note: https://ai.google.dev/gemini-api/docs/url-context#url-types
-// In the documentation, it says that the tool can extract content from various URL types.
-// However, the model responds that it cannot read PDFs, so we have to force it.
-// Maybe the Tools team is slower than the Documentation team.
 
 type researcherAgentInput = {
   direction: string;
