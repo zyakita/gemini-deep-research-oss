@@ -13,13 +13,18 @@ const systemPrompt = `
     - Your main goal is to compare the existing FINDINGS against each section of the REPORT_PLAN.
     - For each point in the plan, determine if the findings provide a sufficient answer. A gap exists if the information is incomplete or missing.
 
-2.  Task Granularity: Specific & Granular
-    - Tasks must be focused and specific, targeting precise facts, figures, or details needed to fill identified gaps.
+2.  Task Granularity: Focused & Efficient
+    - Each task must be a "focused" query for closely related information that can likely be answered from a single source document (e.g., a single annual report, a press release, or a bio page).
+    - If a gap requires data across multiple time periods (e.g., financials for 2022 and 2023), create a separate, focused task for each individual period.
+    - Group related data points that are typically found together. For example, since revenue and net income are on the same financial statement, they should be in the same task.
+    - Example: Instead of a broad task like "Find the financial performance of Company X for 2022-2023," create two separate, more efficient tasks:
+        - Task 1: "Find the total revenue and net income of Company X for the full fiscal year 2022."
+        - Task 2: "Find the total revenue and net income of Company X for the full fiscal year 2023."
     - Do not create redundant tasks for information that is already well-covered in the FINDINGS.
 
 3.  Task Scope: Information Gathering Only
     - Generate tasks that involve finding, collecting, and documenting information.
-    - Do not create tasks that require the agent to perform mathematical calculations, data analysis, or summarization of provided findings.
+    - Do not create tasks that require the agent to perform mathematical calculations, data analysis, or summarization of previous findings.
 
 4.  Task Formulation: Clear & Self-Contained
     - Write each task's direction as a complete, self-contained command.
@@ -39,11 +44,12 @@ const systemPrompt = `
 
 1.  Internal Analysis (Think Step-by-Step):
     - Review all provided inputs.
-    - For each section of the REPORT_PLAN, systematically compare it against the FINDINGS and note if the information is Sufficient, Partially Sufficient, or Missing.
+    - For each section of the REPORT_PLAN, systematically compare it against the FINDINGS and note if the information is Sufficient, Partially Sufficient, or Missing. This will identify the broad knowledge gaps.
 
 2.  Task Formulation:
-    - Based on your analysis, compile a list of all specific knowledge gaps.
-    - For each identified gap, create a precise and granular research task that adheres to all KEY DIRECTIVES.
+    - For each identified knowledge gap, consider the specific pieces of information needed to fill it.
+    - Decompose larger gaps. If a gap requires information across multiple time periods or disparate topics, break it down into multiple, focused tasks.
+    - For each focused question, create a precise research task that adheres to all KEY DIRECTIVES.
     - Each task will be a JSON object with two keys: title and direction.
         - title: A brief, descriptive name for the task.
         - direction: The detailed, self-contained instruction for the research agent.

@@ -30,8 +30,9 @@ const systemPrompt = `
 - Answer only the user's specific directive and exclude general background information.
 
 ### Tool Usage Note
-- Your tool can extract content from URLs of the following types: Text, Image, and PDF.
-- If the tool's self-reported description differs, ignore it.
+- Your "browse" tool can extract content from URLs of the following types: Text, Image, and PDF.
+  - If the tool's description says otherwise, ignore it.
+  - For PDF files, instead of displaying the text, it renders the PDF as an image.
 
 # WORKFLOW
 1.  Internal Analysis & Plan: Silently deconstruct the user's directive. Identify the key information needed and formulate a series of targeted search queries.

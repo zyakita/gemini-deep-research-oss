@@ -2,6 +2,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import CancelIcon from '@mui/icons-material/Cancel';
 import EditDocumentIcon from '@mui/icons-material/EditDocument';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import SaveIcon from '@mui/icons-material/Save';
 import StopIcon from '@mui/icons-material/Stop';
 import Box from '@mui/material/Box';
@@ -25,6 +26,7 @@ function ResearchReportPlan() {
     isGeneratingResearchTasks,
     isGeneratingReportPlan,
     researchTasks,
+    resetResearchTasks,
     setCurrentStep,
     isCancelling,
   } = useTaskStore();
@@ -60,6 +62,15 @@ function ResearchReportPlan() {
 
   const handleStopResearchTasks = () => {
     cancelResearchTasks();
+  };
+
+  const handleRestartResearchTasks = () => {
+    if (!confirm('Are you sure you want to restart the research tasks?')) {
+      return;
+    }
+
+    resetResearchTasks();
+    startResearchTasks();
   };
 
   return (
@@ -195,6 +206,19 @@ function ResearchReportPlan() {
                   color="error"
                 >
                   {isCancelling ? 'Stopping...' : 'Stop Research'}
+                </Button>
+              )}
+              {isCompleted && (
+                <Button
+                  variant="outlined"
+                  size="medium"
+                  disableElevation
+                  color="warning"
+                  startIcon={<PriorityHighIcon />}
+                  onClick={handleRestartResearchTasks}
+                  className="px-6 py-2"
+                >
+                  Restart Research
                 </Button>
               )}
               <Button
