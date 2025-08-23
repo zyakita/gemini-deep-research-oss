@@ -16,13 +16,13 @@ Create a comprehensive investment thesis for [Company Name] ([Stock Code]).
 2. Valuation
 
 - Valuation Approach: Select and justify the most appropriate valuation methods for the company.
-- Models & Assumptions: Present the analysis for at least two distinct methods. List key assumptions.
-- Price Target: State the final price target or range. Explain the weighting of the results.
+- Models & Assumptions: Present an analysis of at least three distinct methods. List the key assumptions.
+- Price Target: State the final price target or range. Then, explain how the results are weighted.
 - Margin of Safety: Calculate the potential upside or downside from the current price.
 
 3. Recommendation & Risks
 
 - Verdict: Provide a clear recommendation: Buy, Hold, or Avoid.
 - Time Horizon: Specify the investment timeline in years.
-- Catalysts: List 1-3 events that could cause the stock to re-rate.
-- Thesis Breakers: Identify 2-3 specific risks that would invalidate the thesis. Include a monitoring plan for each.
+- Catalysts: List events that could cause the stock to be re-priced.
+- Thesis Breakers: Identify the specific risks that could invalidate the thesis. Then, include a monitoring plan for each risk.
