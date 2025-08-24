@@ -105,7 +105,7 @@ function useDeepResearch() {
       // Process questions in parallel
       const qnaPromises = questions.map(async q => {
         const hashedQuestion = await hashStringSHA256(q.question);
-        return { id: hashedQuestion, q: q.question, a: q.predictedAnswer };
+        return { id: hashedQuestion, q: q.question, a: q.suggestedRefinement };
       });
 
       const qnas = await Promise.all(qnaPromises);
