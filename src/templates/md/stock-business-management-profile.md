@@ -9,10 +9,11 @@ updatedAt: 2025-08-20T01:00:00Z
 Create a comprehensive business and management profile for [Company Name] ([Stock Code]).
 
 Note:
-This analysis should focus exclusively on the qualitative aspects of the business and its management.
-Do not include financial metrics, stock valuations, or price-related commentary.
+- This analysis should focus exclusively on the qualitative aspects of the business and its management.
+- Do not include financial metrics, stock valuations, or price-related commentary.
+- Provide a score (on a scale of 10) at the end of each section.
 
-1. Business Profile: To assess the fundamental quality and competitive strength of the company’s business operations.
+1. Business Profile: Evaluate the fundamental quality and competitive strength of the company’s business operations.
 
 - Business Model:
   - Describe the core business. Is it simple and easy to understand?
@@ -28,9 +29,7 @@ Do not include financial metrics, stock valuations, or price-related commentary.
   - Trajectory: Is this advantage widening, remaining stable, or shrinking over time?
   - Evidence: Provide qualitative evidence or strategic examples that support the trajectory assessment.
 
-- Score - Business Profile (on a scale of 10): ...
-
-2. Management Profile: To evaluate the effectiveness, rationality, and alignment of the leadership team.
+2. Management Profile: Evaluate the effectiveness, rationality, and alignment of the leadership team.
 
 - Leadership & Strategic Vision:
   - Evaluate the track record, experience, and tenure of key executives.
@@ -42,7 +41,5 @@ Do not include financial metrics, stock valuations, or price-related commentary.
   - Analyze the strategic rationale behind these moves. Do they strengthen the company's long-term competitive position?
 
 - Alignment & Incentives:
-  - Insider Ownership: Do managers have significant personal ownership in the company, suggesting they think like owners?
-  - Compensation Focus: Does the executive compensation structure appear to reward long-term strategic goals and business-building over short-term targets?
-
-- Score - Management Profile (on a scale of 10): ...
+  - Insider Ownership: Do the managers have a significant personal stake in the company, indicating that they think like owners?
+  - Compensation Focus: Does the executive compensation structure seem to prioritize long-term strategic goals and business development over short-term targets?
