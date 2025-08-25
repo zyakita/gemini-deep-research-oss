@@ -10,37 +10,34 @@ Create a journal-style investigation into the core business and management of [C
 
 Note:
 
-- Style: This is an investigative analysis, not a dry report. Focus on the company's qualitative story and strategic DNA.
-- Scope: The analysis must be strictly qualitative. Exclude all financial metrics, stock valuation, and price commentary.
-- Scoring: Conclude each of the two main sections with a conviction score on a scale of 10.
+- Style:
+  - This is an investigative analysis, not a dry summary.
+  - Focus on the company's qualitative story, strategic DNA, and the story behind the official narrative.
+- Sources:
+  - Prioritize independent and critical sources (news archives, reputable financial journalism).
+  - Avoid relying on the company's own website or marketing materials.
+- Scope:
+  - Strictly qualitative.
+  - Exclude all financial metrics, stock valuation, and price commentary.
 
-1. Business Profile
+1. Business & Identity
 
-- Business Model:
-  - Describe the core business. Is it simple and easy to understand?
-  - What are its primary products or services?
-  - How does the company create value for its customers?
+- Business Model: Essentially, what problem does the company solve, and for whom?
+- Value Proposition & Critiques: How does the company claim to create value? Compare this with the most common criticisms of its business model or products.
 
-- Industry Landscape:
-  - Identify the primary competitors.
-  - What are the key long-term trends (tailwinds or headwinds) affecting the industry?
+2. History & Evolution
 
-- Economic Moat (Competitive Advantage):
-  - Source: Pinpoint the source of its competitive advantage.
-  - Trajectory: Is this advantage widening, remaining stable, or shrinking over time?
-  - Evidence: Provide qualitative evidence or strategic examples that support the trajectory assessment.
+- Origin Story: Describe the company's founding. What was its initial vision, and what market gap did it aim to fill?
+- Pivotal Moments: Document the key events and strategic decisions that shaped the company's trajectory and defined its current identity.
 
-2. Management Profile
+3. Competitive Moat
 
-- Leadership & Strategic Vision:
-  - Evaluate the track record, experience, and tenure of key executives.
-  - Is their stated strategic vision clear, consistent, and well-articulated?
-  - How effectively have they executed on this vision in the past?
+- Sustainable Advantage: Identify its primary source of competitive advantage, or its "moat."
+- Moat Trajectory: Provide narrative evidence to determine whether this advantage is widening, remaining stable, or shrinking over time.
+- Industry Headwinds/Tailwinds: Which long-term trend has had the greatest impact on the industry?
 
-- Strategic Decision-Making (Past 3-5 Years):
-  - Describe major strategic decisions.
-  - Analyze the strategic rationale behind these moves.
+4. Power, Leadership, & Influence
 
-- Alignment & Incentives:
-  - Insider Ownership: Do the managers have a significant personal stake in the company, indicating that they think like owners?
-  - Compensation Focus: Does the executive compensation structure seem to prioritize long-term strategic goals and business development over short-term targets?
+- The Center of Power: Investigate who truly holds influence. Analyze their motivations and their impact on the company's direction.
+- Leadership's Reputation: Based on their track record, what is the reputation of the key executives?
+- Defining Strategic Move: Analyze a major strategic decision made within the past three to five years. Compare the stated rationale with the actual outcome to gain insight into the leadership's decision-making process.
