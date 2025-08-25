@@ -64,27 +64,26 @@ export function buildUserContent({
 
   return createUserContent(userContent);
 }
-
 export const researchScopeDetails = {
   WEB: {
     emoji: '🌐',
     description:
-      'Your search scope is the entire public internet. Focus on news sites, official reports, blogs, and general web content to complete this task.',
+      'The search scope is the public internet. Prioritize authoritative and relevant sources such as news organizations, official reports, and expert publications from across the web.',
   },
   ACADEMIC: {
     emoji: '🎓',
     description:
-      'Your search scope is restricted to academic and scholarly sources. Use databases like Google Scholar, JSTOR, arXiv, and PubMed to find research papers, journals, and theses.',
+      'The search scope is restricted to academic and scholarly sources. Query academic databases, institutional repositories, and scholarly search engines to find research papers, journals, and theses.',
   },
   SOCIAL: {
     emoji: '💬',
     description:
-      'Your search scope is limited to social media and public forums. Focus on platforms like Twitter, Reddit, and industry forums to find discussions, opinions, and public sentiment.',
+      'The search scope is limited to public discussions on social media, forums, and community boards. Focus on identifying relevant conversations, opinions, and public sentiment from a variety of online communities.',
   },
   FILE_UPLOAD: {
     emoji: '📁',
     description:
-      'Your scope is strictly limited to the content of the file(s) provided with this task. Do not perform any external web searches or access any outside information.',
+      'The scope is strictly limited to the content of the file(s) provided. Do not perform any external web searches or access any outside information to complete this task.',
   },
 };
 
