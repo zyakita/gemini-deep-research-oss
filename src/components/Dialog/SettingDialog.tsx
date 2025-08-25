@@ -332,9 +332,9 @@ const SettingDialog = memo(function SettingDialog() {
             <Box sx={{ mb: { xs: 2, sm: 3 } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-                  Report Tone
+                  Writing Style
                 </Typography>
-                <Tooltip title="Click to see all available tones and their descriptions">
+                <Tooltip title="Click to see all available styles and their descriptions">
                   <IconButton size="small" onClick={handleToneInfoOpen} sx={{ ml: 1 }}>
                     <HelpOutlineIcon fontSize="small" />
                   </IconButton>
@@ -381,7 +381,7 @@ const SettingDialog = memo(function SettingDialog() {
             </Box>
 
             {/* Min Words */}
-            <Box sx={{ mb: { xs: 2, sm: 3 } }}>
+            {/* <Box sx={{ mb: { xs: 2, sm: 3 } }}>
               <SliderSetting
                 label="Minimum Words"
                 value={minWords}
@@ -397,7 +397,7 @@ const SettingDialog = memo(function SettingDialog() {
                   { value: 10000, label: '10K' },
                 ]}
               />
-            </Box>
+            </Box> */}
 
             {/* Advanced Parameters - Two Column Layout with Proper Label Containment */}
             <Box

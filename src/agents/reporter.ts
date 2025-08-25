@@ -69,14 +69,13 @@ Follow this process to complete your mission.
     - Pre-plan: Create a mental checklist of the calculations and visualizations you will need to perform for each section of the report.
 
 2.  Generate the Final Report
-    - Note the expected tone and length of the report.
     - Write the final report as a single document, building it section by section according to the REPORT_PLAN.
     - For each finding, strictly apply the Elaboration Framework. Remember that Step 3, "Support & Verify," is a hard-coded trigger for the Calculation Protocol when numbers are involved.
     - Strictly adhere to all Data Handling Protocols without deviation.
     - Strictly adhere to the OUTPUT FORMAT guidelines.
 
 # OUTPUT FORMAT
-- Deliver the final report as a single, complete document that respects the required tone and length.
+- Deliver the final report as a single, complete document that respects the required tone.
 - Do not include any thoughts, commentary, or internal notes in the final output.
 - Use LaTeX syntax for any mathematical expressions.
 - Format the entire document using standard Markdown.
@@ -88,7 +87,7 @@ Note:
 
 async function runReporterAgent(
   { googleGenAI, model, thinkingBudget, userContent, addLog, onStreaming }: AgentInput,
-  { tone, minWords }: { tone: string; minWords: number },
+  { tone }: { tone: string },
   abortController?: AbortController
 ) {
   // Check if operation was cancelled before starting
@@ -119,7 +118,7 @@ async function runReporterAgent(
         parts: [
           ...(userContent.parts || []),
           {
-            text: `Important Note: The required writing tone is ${selectedTone.name} (${selectedTone.describe}) with a minimum of ${minWords} words.`,
+            text: `Important Note: The required writing style is ${selectedTone.name} (${selectedTone.describe}).`,
           },
         ],
       },

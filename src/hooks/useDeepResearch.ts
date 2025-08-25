@@ -556,7 +556,7 @@ function useDeepResearch() {
         },
         {
           tone: settingStore.reportTone,
-          minWords: settingStore.minWords,
+          // minWords: settingStore.minWords,
         },
         abortController
       );
