@@ -1,4 +1,4 @@
-import { type GoogleGenAI } from '@google/genai';
+import type { Content, GoogleGenAI } from '@google/genai';
 import { currentDateTimePrompt, languageRequirementPrompt } from '../utils/system-instructions';
 
 const systemPrompt = `
@@ -52,7 +52,7 @@ const systemPrompt = `
 `;
 
 type researcherAgentInput = {
-  direction: string;
+  userContent: Content;
   googleGenAI: GoogleGenAI;
   model: string;
   thinkingBudget: number;
@@ -63,7 +63,7 @@ type researcherAgentInput = {
 const MAX_RETRY_ATTEMPTS = 3;
 
 async function runResearcherAgent({
-  direction,
+  userContent,
   googleGenAI,
   model,
   thinkingBudget,
@@ -90,11 +90,7 @@ async function runResearcherAgent({
         tools: [{ urlContext: {} }, { googleSearch: {} }],
         abortSignal: abortController?.signal,
       },
-      contents: [
-        {
-          parts: [{ text: `<RESEARCH_DIRECTIVE>\n${direction}\n</RESEARCH_DIRECTIVE>` }],
-        },
-      ],
+      contents: [userContent],
     });
 
     // Check if operation was cancelled after generation
@@ -129,7 +125,7 @@ async function runResearcherAgent({
   } catch (error) {
     if (retryCount < MAX_RETRY_ATTEMPTS) {
       return await runResearcherAgent({
-        direction,
+        userContent,
         googleGenAI,
         model,
         thinkingBudget,

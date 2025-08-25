@@ -24,11 +24,19 @@ const systemPrompt = `
     - Write each task's direction as a complete, self-contained command.
     - Assume the research agent has zero project background. Provide all necessary details to prevent any ambiguity.
 
-5.  Task Independence (Critical Constraint)
+5.  Task Sourcing (Target Assignment)
+    - For each task, you must assign a "target" source from which the information should be gathered.
+    - The "target" must be one of the following four string values:
+        - "WEB": Use for general-purpose searches of the entire internet. This is the default choice if a task is broad or fits multiple categories.
+        - "ACADEMIC": Use for tasks requiring scholarly papers, research, and academic journals.
+        - "SOCIAL": Use for tasks focused on public opinion, discussions, and social media trends.
+        - "FILE_UPLOAD": Use **only** if the user has provided supporting documents and the task is specifically to investigate, analyze, or extract information from those documents.
+
+6.  Task Independence (Critical Constraint)
     - All generated tasks will be executed by different agents in parallel.
     - Therefore, no task can depend on the output or findings of any other task. Each task must be entirely independent.
 
-6.  Output Format: Strict JSON
+7.  Output Format: Strict JSON
     - The entire output must be a single, valid JSON object.
     - The object must contain a single key, "tasks", whose value is an array of task objects.
     - Do not include any introductory text, explanations, or code block specifiers (like json).
@@ -44,6 +52,7 @@ const systemPrompt = `
     - Each task will be a JSON object with two keys: title and direction.
         - title: A brief, descriptive name for the task.
         - direction: The detailed, self-contained instruction for the research agent.
+        - target: The selected information source, chosen according to the rules in Directive #5.
 
 3.  JSON Construction:
     - Assemble all generated task objects into the "tasks" array.
@@ -55,6 +64,7 @@ type researchLeadAgentResponse = {
   tasks: {
     title: string;
     direction: string;
+    target: 'WEB' | 'ACADEMIC' | 'SOCIAL' | 'FILE_UPLOAD';
   }[];
 };
 
@@ -91,8 +101,12 @@ async function runResearchLeadAgent(
               properties: {
                 title: { type: Type.STRING },
                 direction: { type: Type.STRING },
+                target: {
+                  type: Type.STRING,
+                  enum: ['WEB', 'ACADEMIC', 'SOCIAL', 'FILE_UPLOAD'],
+                },
               },
-              required: ['title', 'direction'],
+              required: ['title', 'direction', 'target'],
             },
           },
         },

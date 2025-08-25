@@ -43,6 +43,7 @@ export interface ResearchTask {
   tier: number;
   title: string;
   direction: string;
+  target: 'WEB' | 'ACADEMIC' | 'SOCIAL' | 'FILE_UPLOAD';
   learning: string;
   processing?: boolean;
   groundingChunks?: GroundingChunk[];
@@ -71,4 +72,11 @@ export interface AgentInput {
   userContent: Content;
   addLog: (message: string, agent?: string) => void;
   onStreaming?: (data: string) => void;
+}
+
+export interface ResearcherInput {
+  googleGenAI: GoogleGenAI;
+  model: string;
+  thinkingBudget: number;
+  userContent: Content;
 }

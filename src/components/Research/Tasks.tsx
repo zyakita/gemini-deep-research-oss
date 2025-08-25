@@ -22,6 +22,7 @@ import useDeepResearch from '../../hooks/useDeepResearch';
 import { useSettingStore } from '../../stores/setting';
 import { useTaskStore } from '../../stores/task';
 import type { ResearchTask } from '../../types';
+import { researchScopeDetails } from '../../utils/user-contents';
 import ResearchTasksDetail from './ResearchTaskDetail';
 
 function ResearchTasks() {
@@ -315,7 +316,8 @@ function ResearchTasks() {
                                 <DoneAllIcon className="text-xl text-green-500" />
                               )}
                               <Typography className="font-medium text-gray-800">
-                                Task {index + 1}: {task.title}
+                                {researchScopeDetails[task.target].emoji} Task {index + 1}:{' '}
+                                {task.title}
                               </Typography>
                             </div>
                             <Chip

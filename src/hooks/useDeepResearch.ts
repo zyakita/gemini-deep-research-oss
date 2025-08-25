@@ -9,7 +9,7 @@ import runResearcherAgent from '../agents/researcher';
 import { useSettingStore } from '../stores/setting';
 import { useTaskStore } from '../stores/task';
 import type { LogFunction, ResearchTask } from '../types';
-import { buildUserContent } from '../utils/user-contents';
+import { buildUserContent, buildUserContentForResearcher } from '../utils/user-contents';
 
 // Logging helper functions for better consistency
 const createLogHelper = (addLog: LogFunction) => ({
@@ -244,11 +244,13 @@ function useDeepResearch() {
         // Process tasks in parallel
         const taskPromises = tasks.map(async task => {
           const hashedTask = await hashStringSHA256(task.title + task.direction);
+
           return {
             id: hashedTask,
             tier,
             title: task.title,
             direction: task.direction,
+            target: task.target,
             learning: '',
           };
         });
@@ -324,9 +326,14 @@ function useDeepResearch() {
             taskStore.updateResearchTask({ ...task, processing: true });
 
             try {
+              const researcherUserContent = buildUserContentForResearcher({
+                taskStore: taskStore,
+                researchTask: task,
+              });
+
               const { learning, groundingChunks, webSearchQueries, urlsMetadata } =
                 await runResearcherAgent({
-                  direction: task.direction,
+                  userContent: researcherUserContent,
                   googleGenAI,
                   model: settingStore.taskModel,
                   thinkingBudget: settingStore.thinkingBudget,
