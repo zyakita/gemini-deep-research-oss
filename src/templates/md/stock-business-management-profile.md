@@ -6,14 +6,15 @@ createdAt: 2025-08-20T01:00:00Z
 updatedAt: 2025-08-20T01:00:00Z
 ---
 
-Create a comprehensive business and management profile for [Company Name] ([Stock Code]).
+Create a journal-style investigation into the core business and management of [Company Name] ([Stock Code]).
 
 Note:
-- This analysis should focus exclusively on the qualitative aspects of the business and its management.
-- Do not include financial metrics, stock valuations, or price-related commentary.
-- Provide a score (on a scale of 10) at the end of each section.
 
-1. Business Profile: Evaluate the fundamental quality and competitive strength of the company’s business operations.
+- Style: This is an investigative analysis, not a dry report. Focus on the company's qualitative story and strategic DNA.
+- Scope: The analysis must be strictly qualitative. Exclude all financial metrics, stock valuation, and price commentary.
+- Scoring: Conclude each of the two main sections with a conviction score on a scale of 10.
+
+1. Business Profile
 
 - Business Model:
   - Describe the core business. Is it simple and easy to understand?
@@ -29,7 +30,7 @@ Note:
   - Trajectory: Is this advantage widening, remaining stable, or shrinking over time?
   - Evidence: Provide qualitative evidence or strategic examples that support the trajectory assessment.
 
-2. Management Profile: Evaluate the effectiveness, rationality, and alignment of the leadership team.
+2. Management Profile
 
 - Leadership & Strategic Vision:
   - Evaluate the track record, experience, and tenure of key executives.
@@ -38,7 +39,7 @@ Note:
 
 - Strategic Decision-Making (Past 3-5 Years):
   - Describe major strategic decisions.
-  - Analyze the strategic rationale behind these moves. Do they strengthen the company's long-term competitive position?
+  - Analyze the strategic rationale behind these moves.
 
 - Alignment & Incentives:
   - Insider Ownership: Do the managers have a significant personal stake in the company, indicating that they think like owners?
