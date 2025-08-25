@@ -6,38 +6,18 @@ createdAt: 2025-08-20T01:00:00Z
 updatedAt: 2025-08-20T01:00:00Z
 ---
 
-Create a journal-style investigation into the core business and management of [Company Name] ([Stock Code]).
+Write an investigative feature on [Company Name] ([Stock Code]) in the style of a top-tier business journal.
 
-Note:
+Your mission is to uncover the company's core narrative—the story behind the official one. Make it a compelling read, not a dull summary.
 
-- Style:
-  - This is an investigative analysis, not a dry summary.
-  - Focus on the company's qualitative story, strategic DNA, and the story behind the official narrative.
-- Sources:
-  - Prioritize independent and critical sources (news archives, reputable financial journalism).
-  - Avoid relying on the company's own website or marketing materials.
-- Scope:
-  - Strictly qualitative.
-  - Exclude all financial metrics, stock valuation, and price commentary.
+Focus your investigation on these four areas:
 
-1. Business & Identity
+- Genesis & Evolution: Describe its origin story and the key strategic pivots that have shaped its identity.
+- The Business & Its Critics: Analyze the problem the company solves and its value proposition. Then, contrast this with the sharpest criticisms of its business model or products.
+- The Competitive Moat: Identify its primary competitive advantage. Provide a narrative showing whether this moat is widening, stable, or shrinking amid major industry trends.
+- Leadership & Power: Investigate who holds real power and influence. Evaluate the reputation of the leadership based on their track record. Then, analyze a defining strategic move from the past three to five years by comparing its stated rationale to the actual outcome.
 
-- Business Model: Essentially, what problem does the company solve, and for whom?
-- Value Proposition & Critiques: How does the company claim to create value? Compare this with the most common criticisms of its business model or products.
+Strict Constraints:
 
-2. History & Evolution
-
-- Origin Story: Describe the company's founding. What was its initial vision, and what market gap did it aim to fill?
-- Pivotal Moments: Document the key events and strategic decisions that shaped the company's trajectory and defined its current identity.
-
-3. Competitive Moat
-
-- Sustainable Advantage: Identify its primary source of competitive advantage, or its "moat."
-- Moat Trajectory: Provide narrative evidence to determine whether this advantage is widening, remaining stable, or shrinking over time.
-- Industry Headwinds/Tailwinds: Which long-term trend has had the greatest impact on the industry?
-
-4. Power, Leadership, & Influence
-
-- The Center of Power: Investigate who truly holds influence. Analyze their motivations and their impact on the company's direction.
-- Leadership's Reputation: Based on their track record, what is the reputation of the key executives?
-- Defining Strategic Move: Analyze a major strategic decision made within the past three to five years. Compare the stated rationale with the actual outcome to gain insight into the leadership's decision-making process.
+- Style: Purely qualitative. Exclude all financial metrics, valuations, and price commentary.
+- Sources: Prioritize independent, critical sources over company marketing materials.
