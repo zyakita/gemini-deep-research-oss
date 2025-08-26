@@ -41,7 +41,6 @@ const SettingDialog = memo(function SettingDialog() {
     wide,
     parallelSearch,
     reportTone,
-    minWords,
     modelList,
     isApiKeyValid,
     isApiKeyValidating,
@@ -152,12 +151,12 @@ const SettingDialog = memo(function SettingDialog() {
     [update]
   );
 
-  const handleMinWordsChange = useCallback(
-    (_: Event, newValue: number | number[]) => {
-      update({ minWords: newValue as number });
-    },
-    [update]
-  );
+  // const handleMinWordsChange = useCallback(
+  //   (_: Event, newValue: number | number[]) => {
+  //     update({ minWords: newValue as number });
+  //   },
+  //   [update]
+  // );
 
   const handleThinkingBudgetChange = useCallback(
     (_: Event, newValue: number | number[]) => {
