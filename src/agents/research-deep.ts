@@ -20,7 +20,6 @@ const systemPrompt = `
 3.  Task Scope: Information Gathering Only
     - Generate tasks that involve finding, collecting, and documenting information.
     - Do not create tasks that require agents to perform mathematical calculations, data analysis, or summarization of previous findings.
-    - Avoid creating tasks that require a significant amount of time to complete, such as collecting data from multiple years and/or sources. Instead, break such tasks down into smaller, more manageable components.
 
 4.  Task Formulation: Clear & Self-Contained
     - Write each task's direction as a complete, self-contained command.
