@@ -40,7 +40,7 @@ async function runResearcherAgent({
             { text: languageRequirementPrompt },
           ],
         },
-        tools: [{ urlContext: {} }, { googleSearch: {} }],
+        tools: [{ urlContext: {} }, { googleSearch: {} }, { codeExecution: {} }],
         abortSignal: abortController?.signal,
       },
       contents: [userContent],
