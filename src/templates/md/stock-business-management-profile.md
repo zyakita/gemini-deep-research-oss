@@ -21,3 +21,4 @@ Strict Constraints:
 
 - Style: Purely qualitative. Exclude all financial metrics, valuations, and price commentary.
 - Sources: Prioritize independent, critical sources over company marketing materials.
+- Length: Aim for a reading time of 15-20 minutes (approximately 3,750-5,000 words). This is a guideline, not a rule; the story dictates the final length.
