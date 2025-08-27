@@ -128,19 +128,19 @@ function ResearchStepper() {
       {isSticky && (
         <div
           className={`transition-all duration-300 ${
-            isCompact ? (isMobile ? 'h-16' : 'h-20') : isMobile ? 'h-24' : 'h-32'
+            isCompact ? (isMobile ? 'h-12' : 'h-14') : isMobile ? 'h-16' : 'h-20'
           }`}
         />
       )}
 
       <Box
-        className={`border border-gray-200 bg-white shadow-sm transition-all duration-300 ${
+        className={`border border-gray-200 bg-slate-100 shadow-sm transition-all duration-300 ${
           isSticky
-            ? `fixed top-0 right-0 left-0 z-50 mx-auto max-w-full bg-white/95 shadow-lg backdrop-blur-sm ${
-                isMobile ? 'px-2' : ''
+            ? `fixed top-0 right-0 left-0 z-50 mx-auto max-w-full shadow-lg backdrop-blur-sm ${
+                isMobile ? 'px-2' : 'px-4'
               }`
             : `mb-8 ${isMobile ? 'mx-2 rounded' : 'rounded-lg'}`
-        } ${isCompact ? (isMobile ? 'p-2' : 'p-3') : isMobile ? 'p-4' : 'p-6'}`}
+        } ${isCompact && isSticky ? (isMobile ? 'p-1 py-2' : 'p-2 py-3') : isCompact ? (isMobile ? 'p-2' : 'p-3') : isMobile ? 'p-4' : 'p-6'}`}
       >
         {!isCompact && (
           <Typography
@@ -171,9 +171,13 @@ function ResearchStepper() {
                     <div
                       className={`flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 ${
                         isCompact || isMobile
-                          ? isMobile && isCompact
-                            ? 'h-6 w-6'
-                            : 'h-8 w-8'
+                          ? isMobile && isCompact && isSticky
+                            ? 'h-5 w-5'
+                            : isMobile && isCompact
+                              ? 'h-6 w-6'
+                              : isCompact && isSticky
+                                ? 'h-6 w-6'
+                                : 'h-8 w-8'
                           : isMobile
                             ? 'h-10 w-10'
                             : 'h-12 w-12'
@@ -188,9 +192,13 @@ function ResearchStepper() {
                       <IconComponent
                         className={
                           isCompact || isMobile
-                            ? isMobile && isCompact
+                            ? isMobile && isCompact && isSticky
                               ? 'text-xs'
-                              : 'text-sm'
+                              : isMobile && isCompact
+                                ? 'text-xs'
+                                : isCompact && isSticky
+                                  ? 'text-xs'
+                                  : 'text-sm'
                             : isMobile
                               ? 'text-lg'
                               : 'text-xl'
@@ -246,19 +254,52 @@ function ResearchStepper() {
         </Stepper>
 
         {/* Progress bar */}
-        <Box className={isMobile ? 'mt-2' : 'mt-2'}>
-          <div
-            className={`w-full rounded-full bg-gray-200 transition-all duration-300 ${
-              isCompact ? (isMobile ? 'h-1' : 'h-1') : isMobile ? 'h-1.5' : 'h-2'
-            }`}
-          >
+        <Box
+          className={
+            isSticky && isCompact ? (isMobile ? 'mt-1' : 'mt-1') : isMobile ? 'mt-2' : 'mt-2'
+          }
+        >
+          <div className="relative">
             <div
-              className="rounded-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500 ease-out"
-              style={{
-                width: `${Math.min((currentStep / (steps.length - 1)) * 100, 100)}%`,
-                height: isCompact ? (isMobile ? '4px' : '4px') : isMobile ? '6px' : '8px',
-              }}
-            />
+              className={`w-full rounded-full bg-gray-200 transition-all duration-300 ${
+                isCompact && isSticky
+                  ? isMobile
+                    ? 'h-4'
+                    : 'h-5'
+                  : isCompact
+                    ? isMobile
+                      ? 'h-4'
+                      : 'h-5'
+                    : isMobile
+                      ? 'h-4'
+                      : 'h-6'
+              }`}
+            >
+              <div
+                className="rounded-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500 ease-out"
+                style={{
+                  width: `${Math.min((currentStep / (steps.length - 1)) * 100, 100)}%`,
+                  height: '100%',
+                }}
+              />
+            </div>
+
+            {/* Overlay text on progress bar */}
+            {(isCompact || isMobile) && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Typography
+                  variant="caption"
+                  className={`font-medium text-white drop-shadow-sm text-shadow-sm ${
+                    isSticky && isCompact ? 'text-[10px]' : isMobile ? 'text-xs' : 'text-xs'
+                  }`}
+                  style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                >
+                  Step {currentStep}/{steps.length} •{' '}
+                  {Math.min(Math.round((currentStep / (steps.length - 1)) * 100), 100)}%
+                  {!isMobile && !isSticky ? ' Complete' : ''}
+                </Typography>
+              </div>
+            )}
           </div>
           {!isCompact && !isMobile && (
             <div className="mt-2 flex justify-between">
@@ -267,18 +308,6 @@ function ResearchStepper() {
               </Typography>
               <Typography variant="caption" className="text-gray-500">
                 {Math.min(Math.round((currentStep / (steps.length - 1)) * 100), 100)}% Complete
-              </Typography>
-            </div>
-          )}
-          {(isCompact || isMobile) && (
-            <div className="mt-1 text-center">
-              <Typography
-                variant="caption"
-                className={`text-gray-500 ${isMobile ? 'text-xs' : 'text-xs'}`}
-              >
-                Step {currentStep}/{steps.length} •{' '}
-                {Math.min(Math.round((currentStep / (steps.length - 1)) * 100), 100)}%
-                {isMobile ? '' : ' Complete'}
               </Typography>
             </div>
           )}
