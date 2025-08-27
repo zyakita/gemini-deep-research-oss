@@ -187,17 +187,18 @@ function useDeepResearch() {
 
         if (incompleteTasks.length > 0) {
           // If there are incomplete tasks, we should not proceed with the current round
-          log.info(
+          log.error(
             `Found ${incompleteTasks.length} incomplete tasks from round ${tier - 1}, please complete them before proceeding.`,
             'system',
             'task-generation'
           );
-          return;
+
+          throw new Error('Incomplete tasks found!');
         }
       }
 
       const existingTasks = taskStore.getResearchTasksByTier(tier);
-      if (existingTasks.length > 0) return;
+      if (existingTasks.length > 0) throw new Error('Unexpected existing tasks found!');
 
       // Check if operation was cancelled before starting
       if (abortController?.signal.aborted) {
