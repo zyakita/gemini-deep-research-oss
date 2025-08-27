@@ -20,12 +20,17 @@ Focus your investigation on these four areas:
 
 3.  The Competitive Moat: Identify its primary competitive advantage and assess whether this "moat" is widening or shrinking in the face of industry trends and emerging threats.
 
-4.  Leadership & Strategy:
-    - Influence & Reputation: Profile the key decision-makers (both official and unofficial) and evaluate their strategic track record.
-    - The Defining Decision: Analyze a single, pivotal strategic move from the last 3-5 years—its stated goal versus its actual outcome and unintended consequences.
+4.  Leadership & Power:
+    - The Power Map: Identify who holds real influence, looking beyond official titles to key investors, board members, or indispensable talent.
+    - A Defining Test: Analyze a single, pivotal strategic decision from the last 3-5 years. Evaluate the leadership's rationale against the actual outcome and its impact on the company.
+
+5.  The Strategic Crossroads:
+    - Synthesizing all prior analysis, identify the single most significant challenge or opportunity facing the company.
+    - Frame the future not as a prediction, but as a set of critical questions or divergent paths that will determine its next chapter.
 
 Strict Constraints:
 
 - Qualitative Only: Exclude all financial metrics, stock prices, and valuation commentary. Focus on strategy, culture, and competitive dynamics.
 - Independent Sources: Base the analysis on critical reporting, expert commentary, and accounts from former insiders, not company marketing.
+- Balanced Analysis: Give equal intellectual rigor to both the bull and bear cases.
 - Length: Aim for a 15-20 minute read time (approx. 3,750-5,000 words).
