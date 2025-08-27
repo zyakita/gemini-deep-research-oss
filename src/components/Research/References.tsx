@@ -123,7 +123,7 @@ function ResearchReferences() {
     <Card
       id="research-references"
       elevation={2}
-      className="mb-6 border-l-4 border-l-blue-300 bg-blue-50/50 transition-all duration-300"
+      className="mb-6 border-l-4 border-l-blue-300 bg-blue-50 transition-all duration-300"
     >
       <CardContent className="pb-4">
         <div className="mb-3 flex items-center justify-between">
