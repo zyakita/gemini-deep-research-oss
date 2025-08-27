@@ -4,6 +4,7 @@ import AutorenewIcon from '@mui/icons-material/Autorenew';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
+import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import StopIcon from '@mui/icons-material/Stop';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -37,8 +38,9 @@ function ResearchTasks() {
     isCancelling,
   } = useTaskStore();
   const { depth, wide } = useSettingStore();
-  const { generateFinalReport, cancelResearchTasks } = useDeepResearch();
+  const { generateFinalReport, cancelResearchTasks, getResearchState } = useDeepResearch();
 
+  const researchState = getResearchState();
   const isCompleted: boolean = finalReport.length > 0;
   const isLoading: boolean = isGeneratingFinalReport;
   const isGeneratingTasks: boolean = isGeneratingResearchTasks;
@@ -288,8 +290,12 @@ function ResearchTasks() {
                   </Typography>
                   {tierTasks.map((task: ResearchTask, index: number) => {
                     const isTaskCompleted = task.learning;
-                    const isTaskProcessing = task.processing && !task.learning;
-                    const isTaskPending = !task.processing && !task.learning;
+                    const isTaskProcessing = task.processing === true && !task.learning;
+                    // A task is failed if it was explicitly set to not processing (false) but has no learning
+                    // A task is pending if it was never processed (processing is undefined) and has no learning
+                    const isTaskFailed = task.processing === false && !task.learning;
+                    const isTaskPending =
+                      (task.processing === undefined || task.processing === null) && !task.learning;
 
                     return (
                       <Accordion
@@ -297,17 +303,22 @@ function ResearchTasks() {
                         slotProps={{ transition: { unmountOnExit: true } }}
                         className={`${
                           isTaskCompleted
-                            ? 'bg-green-50'
+                            ? 'border-green-200 bg-green-50'
                             : isTaskProcessing
-                              ? 'bg-blue-50'
-                              : 'bg-gray-50'
-                        } border border-gray-200`}
+                              ? 'border-blue-200 bg-blue-50'
+                              : isTaskFailed
+                                ? 'border-red-200 bg-red-50'
+                                : 'border-gray-200 bg-gray-50'
+                        } border`}
                       >
                         <AccordionSummary expandIcon={<ExpandMoreIcon />} className="px-4 py-2">
                           <Stack direction="row" alignItems="center" spacing={2} className="w-full">
                             <div className="flex flex-1 items-center gap-3">
                               {isTaskPending && (
                                 <AccessTimeIcon className="text-xl text-gray-500" />
+                              )}
+                              {isTaskFailed && (
+                                <PriorityHighIcon className="text-xl text-red-500" />
                               )}
                               {isTaskProcessing && (
                                 <AutorenewIcon className="animate-spin text-xl text-blue-500" />
@@ -326,7 +337,9 @@ function ResearchTasks() {
                                   ? 'Completed'
                                   : isTaskProcessing
                                     ? 'In Progress'
-                                    : 'Pending'
+                                    : isTaskFailed
+                                      ? 'Failed - Ready to Retry'
+                                      : 'Pending'
                               }
                               size="small"
                               color={
@@ -334,7 +347,9 @@ function ResearchTasks() {
                                   ? 'success'
                                   : isTaskProcessing
                                     ? 'primary'
-                                    : 'default'
+                                    : isTaskFailed
+                                      ? 'error'
+                                      : 'default'
                               }
                               variant="outlined"
                             />
@@ -474,13 +489,15 @@ function ResearchTasks() {
             <Typography variant="caption" className="text-gray-500">
               {isCompleted
                 ? 'All tasks completed! Final report has been generated.'
-                : allTasksCompleted
-                  ? researchCompletedEarly
-                    ? 'Research agent determined sufficient information was gathered. Ready to generate final report.'
-                    : 'All expected tasks completed. Ready to generate final report.'
-                  : researchCompletedEarly
-                    ? `${completedTasks.length} of ${researchTasks.length} generated tasks completed`
-                    : `${completedTasks.length} of ${expectedTotalTasks} expected tasks completed (${researchTasks.length} total tasks)`}
+                : researchState.hasFailedTasks
+                  ? `${completedTasks.length} of ${researchTasks.length} tasks completed. Some tasks failed - use Resume Research to retry.`
+                  : allTasksCompleted
+                    ? researchCompletedEarly
+                      ? 'Research agent determined sufficient information was gathered. Ready to generate final report.'
+                      : 'All expected tasks completed. Ready to generate final report.'
+                    : researchCompletedEarly
+                      ? `${completedTasks.length} of ${researchTasks.length} generated tasks completed`
+                      : `${completedTasks.length} of ${expectedTotalTasks} expected tasks completed (${researchTasks.length} total tasks)`}
             </Typography>
             <div className="flex gap-2">
               {isGeneratingTasks && (

@@ -31,11 +31,13 @@ function ResearchReportPlan() {
     setCurrentStep,
     isCancelling,
   } = useTaskStore();
-  const { startResearchTasks, cancelResearchTasks } = useDeepResearch();
+  const { startResearchTasks, cancelResearchTasks, getResearchState } = useDeepResearch();
   const [isEditing, setIsEditing] = useState(false);
   const [editedPlan, setEditedPlan] = useState('');
 
-  const hasFailedTasks = researchTasks?.some(task => !task.learning && task?.processing === false);
+  const researchState = getResearchState();
+  const hasFailedTasks = researchState.hasFailedTasks;
+  const canResume = researchState.canResume;
   const isCompleted = researchTasks && researchTasks.length > 0 && !hasFailedTasks;
   const isLoading = isGeneratingResearchTasks;
   const hasPlan = reportPlan && reportPlan.length > 0;
@@ -194,7 +196,11 @@ function ResearchReportPlan() {
             <Typography variant="caption" className="text-gray-500">
               {isCompleted
                 ? 'Research tasks have been generated and are being executed.'
-                : 'Plan is ready. Click to start the research process.'}
+                : hasFailedTasks && canResume
+                  ? `Failed tasks detected in round ${researchState.nextTierToProcess}. Click Resume to continue from where it left off.`
+                  : canResume && !isLoading
+                    ? `Ready to continue research from round ${researchState.nextTierToProcess}.`
+                    : 'Plan is ready. Click to start the research process.'}
             </Typography>
             <div className="flex gap-2">
               {isLoading && (
@@ -234,7 +240,11 @@ function ResearchReportPlan() {
                 onClick={handleStartResearchTasks}
                 className="px-6 py-2"
               >
-                {hasFailedTasks ? 'Resume Research' : 'Start Research'}
+                {hasFailedTasks && canResume
+                  ? `Resume Research (Round ${researchState.nextTierToProcess})`
+                  : canResume
+                    ? `Continue Research (Round ${researchState.nextTierToProcess})`
+                    : 'Start Research'}
               </Button>
             </div>
           </div>

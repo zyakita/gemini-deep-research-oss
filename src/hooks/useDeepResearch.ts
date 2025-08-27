@@ -427,67 +427,119 @@ function useDeepResearch() {
     ]
   );
 
-  // Start research tasks
+  // Helper function to determine current research state
+  const getResearchState = useCallback(() => {
+    const status = taskStore.getResearchStatus();
+    const maxTierReached = taskStore.maxTierReached || 0;
+    const researchCompletedEarly = taskStore.researchCompletedEarly;
+
+    return {
+      ...status,
+      maxTierReached,
+      researchCompletedEarly,
+    };
+  }, [taskStore]);
+
+  // Process a single tier (generate and run tasks)
+  const processTier = useCallback(
+    async (tier: number, abortController: AbortController) => {
+      log.process(
+        `Processing round ${tier} of ${settingStore.depth}`,
+        'system',
+        'research-planning'
+      );
+
+      // Step 1: Generate tasks for this tier if needed
+      const existingTasks = taskStore.getResearchTasksByTier(tier);
+      if (existingTasks.length === 0) {
+        await generateResearchTasks(tier, abortController);
+
+        if (abortController.signal.aborted) {
+          throw new Error('AbortError');
+        }
+
+        // Check if any tasks were generated
+        const tierTasks = taskStore.getResearchTasksByTier(tier);
+        if (tierTasks.length === 0) {
+          log.success(
+            `Research completion detected at round ${tier} - no more tasks needed`,
+            'system',
+            'research-planning'
+          );
+          taskStore.setResearchCompletedEarly(true);
+          taskStore.setMaxTierReached(tier - 1);
+          return false; // Signal completion
+        }
+      }
+
+      // Step 2: Run any incomplete tasks for this tier
+      taskStore.setMaxTierReached(tier);
+      await runResearchTasks(tier, abortController);
+
+      if (abortController.signal.aborted) {
+        throw new Error('AbortError');
+      }
+
+      return true; // Continue to next tier
+    },
+    [taskStore, settingStore.depth, generateResearchTasks, runResearchTasks, log]
+  );
+
+  // Start or resume research tasks
   const startResearchTasks = useCallback(async () => {
     // Create abort controller for this research session
     const abortController = new AbortController();
     taskStore.setResearchTasksAbortController(abortController);
 
     try {
-      // taskStore.resetResearchTasks();
       taskStore.setIsGeneratingResearchTasks(true);
 
-      log.startPhase('Research Task Execution');
-      log.info(`Research depth: ${settingStore.depth} rounds`, 'system', 'research-planning');
+      const researchState = getResearchState();
 
-      for (let tier = 1; tier <= settingStore.depth; tier++) {
-        // Check if operation was cancelled
-        if (abortController.signal.aborted) {
-          log.warning('Research task execution was cancelled', 'system', 'research-planning');
-          return;
-        }
-
-        log.process(
-          `Processing round ${tier} of ${settingStore.depth}`,
+      if (researchState.canResume && researchState.hasFailedTasks) {
+        log.info('Resuming research from previous failure', 'system', 'research-planning');
+        log.info(
+          `Starting from round ${researchState.nextTierToProcess}`,
           'system',
           'research-planning'
         );
+      } else if (researchState.canResume) {
+        log.info('Continuing research from where it left off', 'system', 'research-planning');
+        log.info(
+          `Continuing from round ${researchState.nextTierToProcess}`,
+          'system',
+          'research-planning'
+        );
+      } else {
+        log.startPhase('Research Task Execution');
+        log.info(
+          `Starting fresh research with depth: ${settingStore.depth} rounds`,
+          'system',
+          'research-planning'
+        );
+      }
 
-        await generateResearchTasks(tier, abortController);
-
-        // Check if operation was cancelled after generating tasks
+      // Process tiers starting from where we left off
+      for (let tier = researchState.nextTierToProcess; tier <= settingStore.depth; tier++) {
         if (abortController.signal.aborted) {
           log.warning('Research task execution was cancelled', 'system', 'research-planning');
           return;
         }
 
-        // Check if any tasks were actually generated for this round
-        const tierTasks = taskStore.getResearchTasksByTier(tier);
-        if (tierTasks.length === 0) {
-          log.success(
-            `Research completion detected at round ${tier} - proceeding to final report`,
-            'system',
-            'research-planning'
-          );
-          taskStore.setResearchCompletedEarly(true);
-          taskStore.setMaxTierReached(tier - 1); // Previous tier was the last one with tasks
-          break; // Exit early if no tasks were generated (agent determined research is complete)
-        }
+        const shouldContinue = await processTier(tier, abortController);
 
-        taskStore.setMaxTierReached(tier);
-        await runResearchTasks(tier, abortController);
-
-        // Check if operation was cancelled after running tasks
-        if (abortController.signal.aborted) {
-          log.warning('Research task execution was cancelled', 'system', 'research-planning');
-          return;
+        if (!shouldContinue) {
+          // Research completed early
+          break;
         }
       }
 
       log.endPhase('Research Task Execution');
     } catch (error) {
-      // Check if this is an abort error
-      if (error instanceof Error && error.name === 'AbortError') {
+      if (
+        error instanceof Error &&
+        (error.name === 'AbortError' || error.message === 'AbortError')
+      ) {
         log.warning('Research task execution was cancelled by user', 'system', 'research-planning');
         return;
       }
@@ -499,7 +551,7 @@ function useDeepResearch() {
       taskStore.setIsGeneratingResearchTasks(false);
       taskStore.setResearchTasksAbortController(null);
     }
-  }, [taskStore, settingStore.depth, generateResearchTasks, runResearchTasks, log]);
+  }, [taskStore, settingStore.depth, getResearchState, processTier, log]);
 
   // Generate final report
   const generateFinalReport = useCallback(async () => {
@@ -706,6 +758,7 @@ function useDeepResearch() {
     generateReportPlan,
     generateFinalReport,
     startResearchTasks,
+    getResearchState,
     uploadFile,
     deleteFile,
     deleteAllFiles,

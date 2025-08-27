@@ -85,6 +85,13 @@ export interface TaskActions {
   getAllResearchTasks: () => ResearchTask[];
   getAllFinishedResearchTasks: () => ResearchTask[];
   getResearchTasksByTier: (tier: number) => ResearchTask[];
+  getResearchStatus: () => {
+    hasFailedTasks: boolean;
+    hasIncompleteTasks: boolean;
+    nextTierToProcess: number;
+    canResume: boolean;
+    tasksByTier: Map<number, ResearchTask[]>;
+  };
   resetResearchTasks: () => void;
   setResearchCompletedEarly: (completed: boolean) => void; // New action
   setMaxTierReached: (tier: number) => void; // New action
@@ -233,6 +240,47 @@ export const useTaskStore = create(
       getResearchTasksByTier: (tier: number) => {
         const tasks = get().researchTasks;
         return tasks.filter(task => task.tier === tier);
+      },
+      getResearchStatus: () => {
+        const state = get();
+        const allTasks = state.researchTasks;
+
+        // Group tasks by tier
+        const tasksByTier = new Map<number, ResearchTask[]>();
+        allTasks.forEach(task => {
+          const tier = task.tier || 1;
+          if (!tasksByTier.has(tier)) {
+            tasksByTier.set(tier, []);
+          }
+          tasksByTier.get(tier)!.push(task);
+        });
+
+        // Analyze task states
+        const hasFailedTasks = allTasks.some(t => t.processing === false && !t.learning);
+        const hasIncompleteTasks = allTasks.some(t => !t.learning);
+
+        // Find next tier to process
+        let nextTierToProcess = 1;
+        const maxPossibleTier = Math.max(...Array.from(tasksByTier.keys()), 0);
+
+        for (let tier = 1; tier <= maxPossibleTier + 1; tier++) {
+          const tierTasks = tasksByTier.get(tier) || [];
+          const incompleteTasks = tierTasks.filter(t => !t.learning);
+
+          // If this tier has no tasks or has incomplete tasks, it's our target
+          if (tierTasks.length === 0 || incompleteTasks.length > 0) {
+            nextTierToProcess = tier;
+            break;
+          }
+        }
+
+        return {
+          hasFailedTasks,
+          hasIncompleteTasks,
+          nextTierToProcess,
+          canResume: allTasks.length > 0,
+          tasksByTier,
+        };
       },
       resetResearchTasks: () =>
         set({ researchTasks: [], researchCompletedEarly: false, maxTierReached: 0 }),
