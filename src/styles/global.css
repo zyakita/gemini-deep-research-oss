@@ -1,2 +1,33 @@
 @import 'tailwindcss';
 @plugin "@tailwindcss/typography";
+
+/* Custom Scrollbar - Gray */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gray-300) var(--color-gray-50, #f9fafb);
+}
+
+/* Webkit Scrollbar Styles */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--color-gray-50, #f9fafb);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--color-gray-300);
+  border-radius: 4px;
+  border: 1px solid var(--color-gray-200, #e5e7eb);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-400);
+}
+
+*::-webkit-scrollbar-corner {
+  background: var(--color-gray-50, #f9fafb);
+}
