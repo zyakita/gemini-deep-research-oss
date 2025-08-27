@@ -15,13 +15,43 @@ import { isMobile } from 'react-device-detect';
 import { useTaskStore } from '../../stores/task';
 
 // Custom styled connector
-const CustomConnector = styled(StepConnector)(() => ({
-  '&.Mui-active .MuiStepConnector-line': {
+const CustomConnector = styled(StepConnector)(({ theme }) => ({
+  '&.MuiStepConnector-alternativeLabel': {
+    top: 24, // Position for desktop icons (h-12 w-12)
+    left: 'calc(-50% + 24px)',
+    right: 'calc(50% + 24px)',
+    [theme.breakpoints.down('md')]: {
+      top: 20, // Position for mobile icons (h-10 w-10)
+      left: 'calc(-50% + 20px)',
+      right: 'calc(50% + 20px)',
+    },
+  },
+  '&.MuiStepConnector-horizontal:not(.MuiStepConnector-alternativeLabel)': {
+    top: 20, // Position for compact horizontal layout
+    left: 'calc(-50% + 16px)',
+    right: 'calc(50% + 16px)',
+  },
+  '& .MuiStepConnector-line': {
+    height: 3,
+    border: 0,
+    background: 'linear-gradient(95deg, #cbd5e1 0%, #94a3b8 100%)', // Default gradient
+    borderRadius: 1,
+  },
+  '&.MuiStepConnector-active .MuiStepConnector-line': {
     background: 'linear-gradient(95deg, #3b82f6 0%, #10b981 100%)',
   },
-  '&.Mui-completed .MuiStepConnector-line': {
+  '&.MuiStepConnector-completed .MuiStepConnector-line': {
     background: 'linear-gradient(95deg, #10b981 0%, #10b981 100%)',
   },
+}));
+
+// Custom step icon wrapper to ensure proper alignment
+const StepIconWrapper = styled('div')(() => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 1,
+  position: 'relative',
 }));
 
 const steps = [
@@ -168,43 +198,49 @@ function ResearchStepper() {
                   onClick={() => handleStepClick(step.sectionId)}
                   className={`cursor-pointer ${isMobile ? 'touch-manipulation' : ''}`}
                   StepIconComponent={() => (
-                    <div
-                      className={`flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 ${
-                        isCompact || isMobile
-                          ? isMobile && isCompact && isSticky
-                            ? 'h-5 w-5'
-                            : isMobile && isCompact
-                              ? 'h-6 w-6'
-                              : isCompact && isSticky
-                                ? 'h-6 w-6'
-                                : 'h-8 w-8'
-                          : isMobile
-                            ? 'h-10 w-10'
-                            : 'h-12 w-12'
-                      } ${
-                        status === 'completed'
-                          ? 'bg-green-500 text-white hover:bg-green-600'
-                          : status === 'active'
-                            ? 'bg-blue-500 text-white hover:bg-blue-600'
-                            : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
-                      }`}
-                    >
-                      <IconComponent
-                        className={
+                    <StepIconWrapper>
+                      <div
+                        className={`flex items-center justify-center rounded-full shadow-sm transition-all duration-300 hover:scale-110 active:scale-95 ${
                           isCompact || isMobile
                             ? isMobile && isCompact && isSticky
-                              ? 'text-xs'
+                              ? 'h-5 w-5'
                               : isMobile && isCompact
-                                ? 'text-xs'
+                                ? 'h-6 w-6'
                                 : isCompact && isSticky
-                                  ? 'text-xs'
-                                  : 'text-sm'
+                                  ? 'h-6 w-6'
+                                  : 'h-8 w-8'
                             : isMobile
-                              ? 'text-lg'
-                              : 'text-xl'
-                        }
-                      />
-                    </div>
+                              ? 'h-10 w-10'
+                              : 'h-12 w-12'
+                        } ${
+                          status === 'completed'
+                            ? 'border-2 border-white bg-green-500 text-white hover:bg-green-600'
+                            : status === 'active'
+                              ? 'border-2 border-white bg-blue-500 text-white hover:bg-blue-600'
+                              : 'border-2 border-white bg-gray-200 text-gray-500 hover:bg-gray-300'
+                        }`}
+                        style={{
+                          position: 'relative',
+                          zIndex: 10,
+                        }}
+                      >
+                        <IconComponent
+                          className={
+                            isCompact || isMobile
+                              ? isMobile && isCompact && isSticky
+                                ? 'text-xs'
+                                : isMobile && isCompact
+                                  ? 'text-xs'
+                                  : isCompact && isSticky
+                                    ? 'text-xs'
+                                    : 'text-sm'
+                              : isMobile
+                                ? 'text-lg'
+                                : 'text-xl'
+                          }
+                        />
+                      </div>
+                    </StepIconWrapper>
                   )}
                 >
                   {!isCompact && !isMobile && (
