@@ -30,7 +30,7 @@ function Header() {
   return (
     <header className="flex items-center justify-between py-6 max-sm:py-4 print:hidden">
       <a href="https://github.com/zyakita/gemini-deep-research-oss" target="_blank">
-        <GitHubIcon className="text-gray-200 hover:text-gray-300" />
+        <GitHubIcon className="text-gray-800 hover:text-gray-600" />
       </a>
 
       {/* <Typography className="font-medium">Gemini Deep Research</Typography> */}

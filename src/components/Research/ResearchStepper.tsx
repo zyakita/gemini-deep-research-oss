@@ -164,7 +164,7 @@ function ResearchStepper() {
       )}
 
       <Box
-        className={`border border-gray-200 bg-slate-100 shadow-sm transition-all duration-300 ${
+        className={`border border-gray-200 bg-gray-100 shadow-sm transition-all duration-300 ${
           isSticky
             ? `fixed top-0 right-0 left-0 z-50 mx-auto max-w-full shadow-lg backdrop-blur-sm ${
                 isMobile ? 'px-2' : 'px-4'

@@ -14,16 +14,16 @@ import ResearchTasks from './components/Research/Tasks';
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-zinc-200">
       <div className="mx-auto max-w-screen-lg px-4 max-lg:max-w-screen-md">
         <Header />
 
         {/* Research Workflow Introduction */}
         <Box className="mt-6 mb-8">
-          <Typography variant="h4" className="mb-2 font-bold text-gray-100">
+          <Typography variant="h4" className="mb-2 font-bold text-gray-800">
             Deep Research Assistant
           </Typography>
-          <Typography variant="body1" className="leading-relaxed text-gray-400">
+          <Typography variant="body1" className="leading-relaxed text-gray-600">
             Follow this structured research process to get comprehensive insights on any topic. Each
             step builds on the previous one to ensure thorough and accurate research.
           </Typography>
