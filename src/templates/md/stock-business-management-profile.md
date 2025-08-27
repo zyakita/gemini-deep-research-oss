@@ -8,17 +8,24 @@ updatedAt: 2025-08-20T01:00:00Z
 
 Write an investigative feature on [Company Name] ([Stock Code]) in the style of a top-tier business journal.
 
-Your mission is to uncover the company's core narrative—the story behind the official one. Make it a compelling read, not a dull summary.
+Your mission is to move beyond the official narrative to produce a definitive, multi-faceted analysis of the company, giving equal weight to its strengths and weaknesses.
 
 Focus your investigation on these four areas:
 
-- Genesis & Evolution: Describe its origin story and the key strategic pivots that have shaped its identity.
-- The Business & Its Critics: Analyze the problem the company solves and its value proposition. Then, contrast this with the sharpest criticisms of its business model or products.
-- The Competitive Moat: Identify its primary competitive advantage. Provide a narrative showing whether this moat is widening, stable, or shrinking amid major industry trends.
-- Leadership & Power: Investigate who holds real power and influence. Evaluate the reputation of the leadership based on their track record. Then, analyze a defining strategic move from the past three to five years by comparing its stated rationale to the actual outcome.
+1.  Genesis & Evolution: Describe its origin story and the key strategic pivots that have shaped its current identity.
+
+2.  The Core Debate:
+    - The Bull Case: Present the most compelling, evidence-based argument for the company's enduring value and market position.
+    - The Bear Case: Present the sharpest, most credible critique of its business model, competitive vulnerabilities, or long-term viability.
+
+3.  The Competitive Moat: Identify its primary competitive advantage and assess whether this "moat" is widening or shrinking in the face of industry trends and emerging threats.
+
+4.  Leadership & Strategy:
+    - Influence & Reputation: Profile the key decision-makers (both official and unofficial) and evaluate their strategic track record.
+    - The Defining Decision: Analyze a single, pivotal strategic move from the last 3-5 years—its stated goal versus its actual outcome and unintended consequences.
 
 Strict Constraints:
 
-- Style: Purely qualitative. Exclude all financial metrics, valuations, and price commentary.
-- Sources: Prioritize independent, critical sources over company marketing materials.
-- Length: Aim for a reading time of 15-20 minutes (approximately 3,750-5,000 words). This is a guideline, not a rule; the story dictates the final length.
+- Qualitative Only: Exclude all financial metrics, stock prices, and valuation commentary. Focus on strategy, culture, and competitive dynamics.
+- Independent Sources: Base the analysis on critical reporting, expert commentary, and accounts from former insiders, not company marketing.
+- Length: Aim for a 15-20 minute read time (approx. 3,750-5,000 words).
