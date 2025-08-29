@@ -33,7 +33,7 @@ The whole process is broken down into specialized tasks, with a dedicated agent 
 
 ### Serious Prompt Engineering
 
-I've noticed that some research tools use relatively short prompts. Here, the prompts are long and detailed by design. The goal is to provide research agents with comprehensive instructions to produce better, more structured output.
+I've noticed that some research tools use relatively short prompts. Here, [the prompts](https://github.com/zyakita/gemini-deep-research-oss/tree/main/src/prompts) are long and detailed by design. The goal is to provide research agents with comprehensive instructions to produce better, more structured output.
 
 ### How It Works
 
