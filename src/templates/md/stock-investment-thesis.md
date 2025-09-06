@@ -6,29 +6,27 @@ createdAt: 2025-08-20T02:00:00Z
 updatedAt: 2025-08-20T01:00:00Z
 ---
 
-Create a comprehensive investment thesis for [Company Name] ([Stock Code]).
+Create a Investment Thesis for [Company Name] ([Stock Code])
 
-1.  Core Thesis
-    - Main Argument: State the central investment thesis. What is the single most important driver?
-    - Market View: Describe the perspective taken versus the market consensus.
+The Main Idea
 
-2.  Valuation
-    - Valuation Approach: Select and justify the most appropriate valuation methods for the company.
-    - Models & Assumptions:
-      - Present an analysis using at least three distinct valuation methods.
-      - For each method, follow the structure below:
-        - [Name of Method]
-          - Assumptions: List the key assumptions and inputs.
-          - Formula: State the formula being used.
-          - Result: State the resulting valuation from this method.
-    - Price Target:
-      - State the final price target or range.
-      - Explain how the results from the different models are weighted.
-    - Margin of Safety:
-      - Calculate the potential upside or downside from the current price.
+- Our Argument: State the main reason for the investment. What is the single most important driver?
+- Our View vs. The Market: Explain how your perspective is different from the general consensus.
 
-3.  Recommendation & Risks
-    - Verdict: Provide a clear recommendation: Buy, Hold, or Avoid.
-    - Time Horizon: Specify the investment timeline in years.
-    - Catalysts: List events that could cause the stock to be re-priced.
-    - Thesis Breakers: Identify specific risks that could invalidate the thesis. Include a monitoring plan for each risk.
+Valuation
+
+- Our Approach: Explain which valuation methods you chose and why they are a good fit for this company.
+- Models: Present your analysis using at least three different valuation methods.
+  - [Name of Method]
+    - Assumptions: List the key inputs and assumptions.
+    - Formula: State the formula used.
+    - Result: State the value this method produced.
+- Price Target: State your final price target or range. Explain how you weighed the results from the different models.
+- Potential Upside/Downside: Calculate the potential gain or loss from the current price.
+
+Recommendation and Risks
+
+- Our Call: State whether to Buy, Hold, or Avoid.
+- Timeframe: Specify the investment timeline in years.
+- Catalysts: List events that could cause the stock price to change.
+- Risks: Identify what could make your thesis wrong. For each risk, explain how you will monitor it.
