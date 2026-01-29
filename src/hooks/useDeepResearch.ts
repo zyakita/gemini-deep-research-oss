@@ -56,12 +56,14 @@ function useDeepResearch() {
   // Create logging helpers
   const log = useMemo(() => createLogHelper(taskStore.addLog), [taskStore.addLog]);
 
-  // Memoize GoogleGenAI instance
+  // Memoize GoogleGenAI instance (only create if API key is set)
   const googleGenAI = useMemo(
     () =>
-      new GoogleGenAI({
-        apiKey: settingStore.apiKey,
-      }),
+      settingStore.apiKey
+        ? new GoogleGenAI({
+            apiKey: settingStore.apiKey,
+          })
+        : null,
     [settingStore.apiKey]
   );
 
